@@ -22,6 +22,8 @@ const patientRoutes = require('./routes/patients');
 app.use('/api/patients', patientRoutes);
 const notificationRoutes = require('./routes/notifications');
 app.use('/api/notifications', notificationRoutes);
+const subscriptionRoutes = require('./routes/subscription');
+app.use('/api/subscription', subscriptionRoutes);
 
 // الاتصال بقاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
