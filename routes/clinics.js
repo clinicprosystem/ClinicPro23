@@ -11,12 +11,25 @@ router.use(clinicOwnerOnly);
 
 // ============= الأطباء =============
 
-// جلب الأطباء
+// جلب الأطباء - فقط لصاحب العيادة
 router.get('/doctors', async (req, res) => {
   try {
-    // جلب الأطباء من نموذج Clinic مباشرة
+    const user = await User.findById(req.userId);
+    if (user.role !== 'clinic_owner') {
+      return res.status(403).json({ error: 'غير مصرح لك' });
+    }
     const clinic = await Clinic.findById(req.clinicId);
     res.json({ success: true, doctors: clinic.doctors || [] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// جلب الخدمات - للجميع (السكرتير يحتاجها لإضافة معالجة)
+router.get('/services', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    res.json({ success: true, services: clinic.services || [] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -71,15 +84,7 @@ router.post('/add-doctor', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// جلب الخدمات
-router.get('/services', async (req, res) => {
-  try {
-    const clinic = await Clinic.findById(req.clinicId);
-    res.json({ success: true, services: clinic.services || [] });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 
 // إضافة خدمة
 router.post('/add-service', async (req, res) => {
