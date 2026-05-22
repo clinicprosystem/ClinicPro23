@@ -19,7 +19,25 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+router.post('/', async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    console.log('User clinicId:', user.clinicId); // للتأكد
+    
+    const patient = new Patient({
+      clinicId: user.clinicId,
+      ...req.body
+    });
+    
+    await patient.save();
+    console.log('Patient saved:', patient); // للتأكد
+    
+    res.json({ success: true, patient });
+  } catch (error) {
+    console.error('Error adding patient:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // إضافة مريض جديد
 router.post('/', async (req, res) => {
   try {
