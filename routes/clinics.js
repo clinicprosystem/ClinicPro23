@@ -14,6 +14,7 @@ router.use(clinicOwnerOnly);
 // جلب الأطباء
 router.get('/doctors', async (req, res) => {
   try {
+    // جلب الأطباء من نموذج Clinic مباشرة
     const clinic = await Clinic.findById(req.clinicId);
     res.json({ success: true, doctors: clinic.doctors || [] });
   } catch (error) {
@@ -44,9 +45,10 @@ router.post('/add-doctor', async (req, res) => {
     });
     await doctorUser.save();
     
+    // إضافة الطبيب إلى قائمة الأطباء في العيادة
     clinic.doctors.push({
       doctorId: doctorUser._id,
-      name,
+      name: name,
       phone: phone || '',
       percentage: percentage || 0,
       isActive: true
@@ -55,11 +57,17 @@ router.post('/add-doctor', async (req, res) => {
     
     res.json({
       success: true,
-      doctor: { id: doctorUser._id, name, percentage },
-      tempPassword
+      doctor: { 
+        _id: doctorUser._id, 
+        name: name, 
+        phone: phone || '',
+        percentage: percentage || 0 
+      },
+      tempPassword: tempPassword
     });
     
   } catch (error) {
+    console.error('Error adding doctor:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -113,13 +121,16 @@ router.post('/add-secretary', async (req, res) => {
   try {
     const { name, phone, password } = req.body;
     
+    // التحقق من عدم وجود الرقم
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
       return res.status(400).json({ error: 'هذا الرقم مستخدم بالفعل' });
     }
     
+    // تشفير كلمة السر
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // إنشاء حساب سكرتير
     const secretary = new User({
       name,
       phone,
@@ -128,6 +139,18 @@ router.post('/add-secretary', async (req, res) => {
       clinicId: req.clinicId
     });
     await secretary.save();
+    
+    // إضافة السكرتير إلى قائمة السكرتيرات في العيادة (اختياري)
+    const clinic = await Clinic.findById(req.clinicId);
+    if (clinic) {
+      clinic.secretaries.push({
+        secretaryId: secretary._id,
+        name: name,
+        phone: phone,
+        isActive: true
+      });
+      await clinic.save();
+    }
     
     res.json({ 
       success: true, 
@@ -140,6 +163,7 @@ router.post('/add-secretary', async (req, res) => {
     });
     
   } catch (error) {
+    console.error('Error adding secretary:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -148,6 +172,14 @@ router.post('/add-secretary', async (req, res) => {
 router.delete('/secretaries/:id', async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
+    
+    // حذف من قائمة السكرتيرات في العيادة
+    const clinic = await Clinic.findById(req.clinicId);
+    if (clinic) {
+      clinic.secretaries = clinic.secretaries.filter(s => s.secretaryId.toString() !== req.params.id);
+      await clinic.save();
+    }
+    
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -167,6 +199,16 @@ router.post('/add-service', async (req, res) => {
     
     res.json({ success: true, service: { name, price, category } });
     
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// جلب الخدمات
+router.get('/services', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    res.json({ success: true, services: clinic.services || [] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
