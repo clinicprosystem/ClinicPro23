@@ -17,7 +17,16 @@ const clinicSchema = new mongoose.Schema({
     doctors: [{
         doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         name: String,
-        percentage: Number,
+        phone: String,
+        percentage: { type: Number, default: 0 },
+        isActive: { type: Boolean, default: true }
+    }],
+    
+    // السكرتيرات (اختياري - للتخزين الإضافي)
+    secretaries: [{
+        secretaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        name: String,
+        phone: String,
         isActive: { type: Boolean, default: true }
     }],
     
