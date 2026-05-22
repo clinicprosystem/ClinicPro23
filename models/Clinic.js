@@ -7,11 +7,11 @@ const clinicSchema = new mongoose.Schema({
     ownerName: { type: String, required: true },
     
     // الاشتراكات
-    trialEndDate: { type: Date, required: true },
-    subscriptionEndDate: { type: Date, default: null },
-    subscriptionType: { type: String, enum: ['trial', 'monthly', 'yearly'], default: 'trial' },
-    isActive: { type: Boolean, default: true },
-    isFrozen: { type: Boolean, default: false },
+    trialEndDate: { type: Date, required: true },  // تاريخ انتهاء التجربة (بعد 7 أيام)
+subscriptionEndDate: { type: Date, default: null },  // تاريخ انتهاء الاشتراك
+subscriptionStatus: { type: String, enum: ['trial', 'active', 'expired', 'frozen'], default: 'trial' },
+isActive: { type: Boolean, default: true },
+isFrozen: { type: Boolean, default: false },
     
     // الأطباء
     doctors: [{
