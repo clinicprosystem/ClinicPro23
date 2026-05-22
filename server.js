@@ -1,15 +1,26 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
+
+// إعدادات CORS المتقدمة
+app.use(cors({
+    origin: '*',  // يسمح لجميع المواقع بالاتصال
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// معالجة طلبات OPTIONS (preflight)
+app.options('*', cors());
+
+app.use(express.json());
+// باقي الكود...
 const patientRoutes = require('./routes/patients');
 app.use('/api/patients', patientRoutes);
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
 
 // الاتصال بقاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
