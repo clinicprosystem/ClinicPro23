@@ -32,11 +32,11 @@ const clinicSchema = new mongoose.Schema({
     
     // الخدمات
     services: [{
-        name: String,
-        price: Number,
-        category: { type: String, enum: ['teeth', 'arch'], default: 'teeth' },
-        isActive: { type: Boolean, default: true }
-    }],
+    name: String,        // "حشو", "خلع", "تقويم", "تبييض"
+    category: String,    // 'teeth' أو 'arch'
+    price: Number,       // السعر الثابت للخدمة
+    isActive: { type: Boolean, default: true }
+}],
     
     createdAt: { type: Date, default: Date.now }
 });
