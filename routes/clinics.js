@@ -81,6 +81,26 @@ router.get('/services', async (req, res) => {
   }
 });
 
+// إضافة خدمة
+router.post('/add-service', async (req, res) => {
+  try {
+    const { name, price, category } = req.body;
+    const clinic = await Clinic.findById(req.clinicId);
+    
+    clinic.services.push({
+      name,
+      price,
+      category,
+      isActive: true
+    });
+    await clinic.save();
+    
+    res.json({ success: true, service: { name, price, category } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // تعديل سعر خدمة
 router.put('/services/:id/price', async (req, res) => {
   try {
@@ -91,6 +111,18 @@ router.put('/services/:id/price', async (req, res) => {
       service.price = price;
       await clinic.save();
     }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// حذف خدمة
+router.delete('/services/:id', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    clinic.services = clinic.services.filter(s => s._id.toString() !== req.params.id);
+    await clinic.save();
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -210,33 +242,7 @@ router.delete('/secretaries/:id', async (req, res) => {
   }
 });
 
-// ============= الخدمات =============
 
-// إضافة خدمة جديدة
-router.post('/add-service', async (req, res) => {
-  try {
-    const { name, price, category } = req.body;
-    
-    const clinic = await Clinic.findById(req.clinicId);
-    clinic.services.push({ name, price, category, isActive: true });
-    await clinic.save();
-    
-    res.json({ success: true, service: { name, price, category } });
-    
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// جلب الخدمات
-router.get('/services', async (req, res) => {
-  try {
-    const clinic = await Clinic.findById(req.clinicId);
-    res.json({ success: true, services: clinic.services || [] });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // ============= بيانات العيادة =============
 
