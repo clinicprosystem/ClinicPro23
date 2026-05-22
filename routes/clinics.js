@@ -71,7 +71,31 @@ router.post('/add-doctor', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// جلب الخدمات
+router.get('/services', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    res.json({ success: true, services: clinic.services || [] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
+// تعديل سعر خدمة
+router.put('/services/:id/price', async (req, res) => {
+  try {
+    const { price } = req.body;
+    const clinic = await Clinic.findById(req.clinicId);
+    const service = clinic.services.id(req.params.id);
+    if (service) {
+      service.price = price;
+      await clinic.save();
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // حذف طبيب
 router.delete('/doctors/:id', async (req, res) => {
   try {
