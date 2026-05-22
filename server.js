@@ -20,7 +20,8 @@ app.use(express.json());
 // باقي الكود...
 const patientRoutes = require('./routes/patients');
 app.use('/api/patients', patientRoutes);
-
+const notificationRoutes = require('./routes/notifications');
+app.use('/api/notifications', notificationRoutes);
 
 // الاتصال بقاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
