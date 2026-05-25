@@ -86,21 +86,22 @@ router.post('/add-doctor', async (req, res) => {
 });
 
 
-// إضافة خدمة
+// إضافة خدمة (تدعم الرئيسية والفرعية)
 router.post('/add-service', async (req, res) => {
   try {
-    const { name, price, category } = req.body;
+    const { name, price, category, parentId } = req.body;
     const clinic = await Clinic.findById(req.clinicId);
     
     clinic.services.push({
       name,
       price,
       category,
+      parentId: parentId || null,
       isActive: true
     });
     await clinic.save();
     
-    res.json({ success: true, service: { name, price, category } });
+    res.json({ success: true, service: clinic.services[clinic.services.length - 1] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
