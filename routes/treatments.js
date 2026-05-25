@@ -25,11 +25,14 @@ router.post('/', async (req, res) => {
         } = req.body;
         
         const clinic = await Clinic.findById(req.clinicId);
-        const doctor = clinic.doctors.find(d => d.doctorId.toString() === doctorId);
-        
-        if (!doctor) {
-            return res.status(404).json({ error: 'الطبيب غير موجود' });
-        }
+        // البحث بالاسم إذا لم يتم العثور بالمعرف
+let doctor = clinic.doctors.find(d => d.doctorId.toString() === doctorId);
+if (!doctor) {
+    doctor = clinic.doctors.find(d => d.name === doctorId);
+}
+if (!doctor) {
+    return res.status(404).json({ error: 'الطبيب غير موجود' });
+}
         
         const finalPrice = originalPrice - (discount || 0);
         const patient = await Patient.findById(patientId);
