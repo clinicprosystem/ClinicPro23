@@ -32,9 +32,10 @@ isFrozen: { type: Boolean, default: false },
     
     // الخدمات
     services: [{
-    name: String,        // "حشو", "خلع", "تقويم", "تبييض"
-    category: String,    // 'teeth' أو 'arch'
-    price: Number,       // السعر الثابت للخدمة
+    name: String,
+    category: String,
+    price: Number,
+    parentId: { type: mongoose.Schema.Types.ObjectId, default: null },  // أضف هذا
     isActive: { type: Boolean, default: true }
 }],
     
