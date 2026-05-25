@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
             serviceName,
             originalPrice,
             discount,
-            treatmentType,
+            treatmentType,  // أي اسم من صاحب العيادة
             teeth,
             archType,
             subType,
@@ -25,13 +25,20 @@ router.post('/', async (req, res) => {
         } = req.body;
         
         const clinic = await Clinic.findById(req.clinicId);
-const doctor = clinic.doctors.find(d => d.doctorId.toString() === doctorId);
-if (!doctor) {
-    return res.status(404).json({ error: 'الطبيب غير موجود' });
-}
+        const doctor = clinic.doctors.find(d => d.doctorId.toString() === doctorId);
+        if (!doctor) {
+            return res.status(404).json({ error: 'الطبيب غير موجود' });
+        }
         
         const finalPrice = originalPrice - (discount || 0);
         const patient = await Patient.findById(patientId);
+        
+        // تحديد ما إذا كانت المعالجة تحتاج أسنان أو فكين بناءً على الاسم أو التصنيف
+        const teethTreatments = ['حشو', 'خلع', 'عصب', 'تلبيس', 'حشو عادي', 'حشو تجميلي', 'خلع ضرس', 'علاج عصب'];
+        const archTreatments = ['تقويم', 'طقم', 'تبييض', 'تصفية', 'تقويم ثابت', 'تقويم متحرك', 'تبييض بالليزر'];
+        
+        const isTeethTreatment = teethTreatments.some(t => treatmentType.includes(t));
+        const isArchTreatment = archTreatments.some(t => treatmentType.includes(t));
         
         const treatment = new Treatment({
             clinicId: req.clinicId,
@@ -44,9 +51,9 @@ if (!doctor) {
             originalPrice,
             discount: discount || 0,
             finalPrice,
-            treatmentType,
-            teeth: treatmentType === 'حشو' || treatmentType === 'عصب' || treatmentType === 'خلع' || treatmentType === 'تلبيس' ? teeth : [],
-            archType: ['تقويم', 'طقم', 'تبييض', 'تصفية'].includes(treatmentType) ? archType : null,
+            treatmentType,  // حفظ الاسم الأصلي
+            teeth: isTeethTreatment ? (teeth || []) : [],
+            archType: isArchTreatment ? (archType || null) : null,
             subType: subType || null,
             notes
         });
@@ -56,6 +63,7 @@ if (!doctor) {
         res.status(201).json({ success: true, treatment });
         
     } catch (error) {
+        console.error('Error adding treatment:', error);
         res.status(500).json({ error: error.message });
     }
 });
