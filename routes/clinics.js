@@ -152,6 +152,144 @@ router.delete('/services/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// ============= الخدمات الرئيسية (جديد) =============
+
+// جلب الخدمات الرئيسية
+router.get('/main-services', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    res.json({ success: true, services: clinic.mainServices || [] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// إضافة خدمة رئيسية
+router.post('/main-services', async (req, res) => {
+  try {
+    const { name, category } = req.body;
+    console.log('📥 إضافة خدمة رئيسية:', { name, category });
+    
+    const clinic = await Clinic.findById(req.clinicId);
+    
+    // التحقق من عدم وجود خدمة مكررة
+    const existingService = clinic.mainServices.find(s => s.name === name);
+    if (existingService) {
+      return res.status(400).json({ error: 'الخدمة موجودة بالفعل' });
+    }
+    
+    clinic.mainServices.push({
+      name,
+      category: category || 'teeth',
+      isActive: true
+    });
+    
+    await clinic.save();
+    const newService = clinic.mainServices[clinic.mainServices.length - 1];
+    console.log('✅ تم حفظ الخدمة الرئيسية:', newService);
+    
+    res.json({ success: true, service: newService });
+  } catch (error) {
+    console.error('❌ خطأ:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// حذف خدمة رئيسية (مع حذف معالجاتها الفرعية)
+router.delete('/main-services/:id', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    
+    // حذف الخدمة الرئيسية
+    clinic.mainServices = clinic.mainServices.filter(s => s._id.toString() !== req.params.id);
+    
+    // حذف جميع المعالجات الفرعية المرتبطة بها
+    clinic.subServices = clinic.subServices.filter(s => s.mainServiceId.toString() !== req.params.id);
+    
+    await clinic.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============= المعالجات الفرعية (جديد) =============
+
+// جلب المعالجات الفرعية
+router.get('/sub-services', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    res.json({ success: true, services: clinic.subServices || [] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// إضافة معالجة فرعية
+router.post('/sub-services', async (req, res) => {
+  try {
+    const { name, price, mainServiceId } = req.body;
+    console.log('📥 إضافة معالجة فرعية:', { name, price, mainServiceId });
+    
+    const clinic = await Clinic.findById(req.clinicId);
+    
+    // التحقق من وجود الخدمة الرئيسية
+    const mainService = clinic.mainServices.id(mainServiceId);
+    if (!mainService) {
+      return res.status(400).json({ error: 'الخدمة الرئيسية غير موجودة' });
+    }
+    
+    // التحقق من عدم وجود معالجة مكررة
+    const existingService = clinic.subServices.find(s => s.name === name && s.mainServiceId.toString() === mainServiceId);
+    if (existingService) {
+      return res.status(400).json({ error: 'المعالجة موجودة بالفعل' });
+    }
+    
+    clinic.subServices.push({
+      name,
+      price,
+      mainServiceId,
+      isActive: true
+    });
+    
+    await clinic.save();
+    const newService = clinic.subServices[clinic.subServices.length - 1];
+    console.log('✅ تم حفظ المعالجة الفرعية:', newService);
+    
+    res.json({ success: true, service: newService });
+  } catch (error) {
+    console.error('❌ خطأ:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// تعديل سعر معالجة فرعية
+router.put('/sub-services/:id/price', async (req, res) => {
+  try {
+    const { price } = req.body;
+    const clinic = await Clinic.findById(req.clinicId);
+    const service = clinic.subServices.id(req.params.id);
+    if (service) {
+      service.price = price;
+      await clinic.save();
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// حذف معالجة فرعية
+router.delete('/sub-services/:id', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    clinic.subServices = clinic.subServices.filter(s => s._id.toString() !== req.params.id);
+    await clinic.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // حذف طبيب
 router.delete('/doctors/:id', async (req, res) => {
   try {
