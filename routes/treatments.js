@@ -14,8 +14,8 @@ router.post('/', async (req, res) => {
     try {
         const {
     patientId,
-    doctorId,           // ✅ أضف هذا
-    doctorName,         // ✅ أضف هذا
+    doctorId,
+    doctorName,
     mainServiceId,
     mainServiceName,
     subServiceId,
@@ -25,7 +25,9 @@ router.post('/', async (req, res) => {
     discountType,
     finalPrice,
     teeth,
+    numberOfTeeth,        // ✅ أضف هذا
     jawDetails,
+    additionalNotes,      // ✅ أضف هذا
     notes
 } = req.body;
         
@@ -61,8 +63,8 @@ router.post('/', async (req, res) => {
     clinicId: req.clinicId,
     patientId,
     patientName: patient.name,
-    doctorId,           // ✅ أضف هذا
-    doctorName,         // ✅ أضف هذا
+    doctorId,
+    doctorName,
     mainServiceId,
     mainServiceName: mainServiceName || (mainService ? mainService.name : null),
     subServiceId,
@@ -72,7 +74,9 @@ router.post('/', async (req, res) => {
     discountType: discountType || 'ريال',
     finalPrice: calculatedFinalPrice,
     teeth: teeth || [],
+    numberOfTeeth: numberOfTeeth || 0,        // ✅ أضف هذا
     jawDetails: jawDetails || null,
+    additionalNotes: additionalNotes || null,  // ✅ أضف هذا
     notes,
     date: new Date()
 });
