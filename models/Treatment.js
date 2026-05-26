@@ -4,18 +4,16 @@ const treatmentSchema = new mongoose.Schema({
     clinicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic', required: true },
     patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
     
-    // ✅ الخدمات الرئيسية والفرعية (جديد)
+    // الخدمات الرئيسية والفرعية
     mainServiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic.mainServices', default: null },
-    mainServiceName: String,
+    mainServiceName: { type: String, default: null },
     subServiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic.subServices', default: null },
-    subServiceName: String,
+    subServiceName: { type: String, default: null },
     
-    // ⚠️ للتوافق مع الإصدارات القديمة
+    // الأطباء
     doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-    doctorName: String,
+    doctorName: { type: String, default: null },
     doctorPercentage: { type: Number, default: 0 },
-    serviceName: String,
-    treatmentType: String,
     
     // الأسعار
     originalPrice: { type: Number, required: true },
@@ -23,24 +21,32 @@ const treatmentSchema = new mongoose.Schema({
     discountType: { type: String, enum: ['ريال', 'نسبة'], default: 'ريال' },
     finalPrice: { type: Number, required: true },
     
-    // ✅ تفاصيل الأسنان (جديد - كـ JSON كامل)
+    // ✅ تفاصيل الأسنان
     teeth: [{
-        jaw: { type: String, enum: ['علوي', 'سفلي'] },
-        side: { type: String, enum: ['يمين', 'يسار', 'وسط'] },
-        number: { type: Number, min: 1, max: 8 }
+        jaw: { type: String, enum: ['علوي', 'سفلي'], default: null },
+        side: { type: String, enum: ['يمين', 'يسار', 'وسط'], default: null },
+        number: { type: Number, min: 1, max: 8, default: null }
     }],
     
-    // ✅ تفاصيل الفكين (جديد - كـ JSON كامل)
+    // ✅ عدد الأسنان (مضاف)
+    numberOfTeeth: { type: Number, default: 0 },
+    
+    // ✅ تفاصيل الفكين
     jawDetails: {
         jawType: { type: String, enum: ['علوي', 'سفلي', 'كلا الفكين'], default: null },
-        treatmentType: String
+        treatmentType: { type: String, default: null }
     },
     
-    // ⚠️ حقول قديمة (للتوافق - يمكن حذفها لاحقاً)
-    archType: { type: String, enum: ['علوي', 'سفلي', 'الفكين معاً'], default: null },
-    subType: String,
+    // ✅ تفاصيل إضافية (مضافة)
+    additionalNotes: { type: String, default: null },
     
-    notes: String,
+    // حقول قديمة (للتوافق)
+    serviceName: { type: String, default: null },
+    treatmentType: { type: String, default: null },
+    archType: { type: String, enum: ['علوي', 'سفلي', 'الفكين معاً'], default: null },
+    subType: { type: String, default: null },
+    notes: { type: String, default: null },
+    
     sharedToWhatsApp: { type: Boolean, default: false },
     date: { type: Date, default: Date.now }
 });
