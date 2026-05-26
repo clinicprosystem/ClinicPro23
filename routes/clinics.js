@@ -90,7 +90,20 @@ router.post('/add-doctor', async (req, res) => {
 router.post('/add-service', async (req, res) => {
   try {
     const { name, price, category, parentId } = req.body;
+    console.log('📥 استلام:', { name, price, category, parentId });
+    
     const clinic = await Clinic.findById(req.clinicId);
+    
+    // التحقق من عدم وجود خدمة مكررة بنفس الاسم و parentId
+    const existingService = clinic.services.find(s => 
+      s.name === name && 
+      (s.parentId === (parentId || null) || (s.parentId === null && parentId === null))
+    );
+    
+    if (existingService) {
+      console.log('⚠️ خدمة مكررة، لن تتم الإضافة');
+      return res.status(400).json({ error: 'الخدمة موجودة بالفعل' });
+    }
     
     clinic.services.push({
       name,
@@ -99,10 +112,15 @@ router.post('/add-service', async (req, res) => {
       parentId: parentId || null,
       isActive: true
     });
+    
     await clinic.save();
     
-    res.json({ success: true, service: clinic.services[clinic.services.length - 1] });
+    const newService = clinic.services[clinic.services.length - 1];
+    console.log('✅ تم الحفظ:', newService);
+    
+    res.json({ success: true, service: newService });
   } catch (error) {
+    console.error('❌ خطأ:', error);
     res.status(500).json({ error: error.message });
   }
 });
