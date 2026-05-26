@@ -26,10 +26,17 @@ router.get('/doctors', async (req, res) => {
 });
 
 // جلب الخدمات - للجميع (السكرتير يحتاجها لإضافة معالجة)
+// ⚠️ مسار الخدمات القديم (للتوافق مع الإصدارات السابقة)
 router.get('/services', async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
-    res.json({ success: true, services: clinic.services || [] });
+    // دمج الخدمات القديمة والجديدة للتوافق
+    const allServices = [
+      ...(clinic.services || []).map(s => ({ ...s.toObject(), isLegacy: true })),
+      ...(clinic.mainServices || []).map(s => ({ ...s.toObject(), type: 'main', parentId: null })),
+      ...(clinic.subServices || []).map(s => ({ ...s.toObject(), type: 'sub' }))
+    ];
+    res.json({ success: true, services: allServices });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
