@@ -7,11 +7,11 @@ const clinicSchema = new mongoose.Schema({
     ownerName: { type: String, required: true },
     
     // الاشتراكات
-    trialEndDate: { type: Date, required: true },  // تاريخ انتهاء التجربة (بعد 7 أيام)
-subscriptionEndDate: { type: Date, default: null },  // تاريخ انتهاء الاشتراك
-subscriptionStatus: { type: String, enum: ['trial', 'active', 'expired', 'frozen'], default: 'trial' },
-isActive: { type: Boolean, default: true },
-isFrozen: { type: Boolean, default: false },
+    trialEndDate: { type: Date, required: true },
+    subscriptionEndDate: { type: Date, default: null },
+    subscriptionStatus: { type: String, enum: ['trial', 'active', 'expired', 'frozen'], default: 'trial' },
+    isActive: { type: Boolean, default: true },
+    isFrozen: { type: Boolean, default: false },
     
     // الأطباء
     doctors: [{
@@ -22,7 +22,7 @@ isFrozen: { type: Boolean, default: false },
         isActive: { type: Boolean, default: true }
     }],
     
-    // السكرتيرات (اختياري - للتخزين الإضافي)
+    // السكرتيرات
     secretaries: [{
         secretaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         name: String,
@@ -30,14 +30,29 @@ isFrozen: { type: Boolean, default: false },
         isActive: { type: Boolean, default: true }
     }],
     
-    // الخدمات
+    // ✅ الخدمات الرئيسية (جديد)
+    mainServices: [{
+        name: { type: String, required: true },
+        category: { type: String, enum: ['teeth', 'arch'], required: true },
+        isActive: { type: Boolean, default: true }
+    }],
+    
+    // ✅ المعالجات الفرعية (جديد)
+    subServices: [{
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
+        mainServiceId: { type: mongoose.Schema.Types.ObjectId, required: true },
+        isActive: { type: Boolean, default: true }
+    }],
+    
+    // ⚠️ الخدمات القديمة (للتوافق مع الإصدارات السابقة - يمكن حذفها لاحقاً)
     services: [{
-    name: String,
-    category: String,
-    price: Number,
-    parentId: { type: mongoose.Schema.Types.ObjectId, default: null },  // أضف هذا
-    isActive: { type: Boolean, default: true }
-}],
+        name: String,
+        category: String,
+        price: Number,
+        parentId: { type: mongoose.Schema.Types.ObjectId, default: null },
+        isActive: { type: Boolean, default: true }
+    }],
     
     createdAt: { type: Date, default: Date.now }
 });
