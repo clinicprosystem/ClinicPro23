@@ -222,6 +222,64 @@ router.delete('/main-services/:id', async (req, res) => {
 
 // ============= المعالجات الفرعية (جديد) =============
 
+
+// ============= المعالجات الفرعية =============
+
+// إضافة معالجة فرعية
+router.post('/sub-services', async (req, res) => {
+  try {
+    const { name, price, mainServiceId } = req.body;
+    console.log('📥 إضافة معالجة فرعية:', { name, price, mainServiceId });
+    
+    const clinic = await Clinic.findById(req.clinicId);
+    if (!clinic) {
+      return res.status(404).json({ error: 'عيادة غير موجودة' });
+    }
+    
+    // التحقق من وجود الخدمة الرئيسية
+    const mainService = clinic.mainServices.id(mainServiceId);
+    if (!mainService) {
+      return res.status(400).json({ error: 'الخدمة الرئيسية غير موجودة' });
+    }
+    
+    // التحقق من عدم وجود معالجة مكررة
+    const existingService = clinic.subServices.find(s => 
+      s.name === name && s.mainServiceId.toString() === mainServiceId
+    );
+    
+    if (existingService) {
+      return res.status(400).json({ error: 'المعالجة موجودة بالفعل' });
+    }
+    
+    // إضافة المعالجة الفرعية
+    clinic.subServices.push({
+      name: name,
+      price: price,
+      mainServiceId: mainServiceId,
+      isActive: true
+    });
+    
+    await clinic.save();
+    
+    const newService = clinic.subServices[clinic.subServices.length - 1];
+    console.log('✅ تم حفظ المعالجة الفرعية:', newService);
+    
+    res.status(201).json({ 
+      success: true, 
+      service: {
+        _id: newService._id,
+        name: newService.name,
+        price: newService.price,
+        mainServiceId: newService.mainServiceId
+      } 
+    });
+    
+  } catch (error) {
+    console.error('❌ خطأ في إضافة معالجة فرعية:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // جلب المعالجات الفرعية
 router.get('/sub-services', async (req, res) => {
   try {
@@ -231,45 +289,6 @@ router.get('/sub-services', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-// إضافة معالجة فرعية
-router.post('/sub-services', async (req, res) => {
-  try {
-    const { name, price, mainServiceId } = req.body;
-    console.log('📥 إضافة معالجة فرعية:', { name, price, mainServiceId });
-    
-    const clinic = await Clinic.findById(req.clinicId);
-    
-    // التحقق من وجود الخدمة الرئيسية
-    const mainService = clinic.mainServices.id(mainServiceId);
-    if (!mainService) {
-      return res.status(400).json({ error: 'الخدمة الرئيسية غير موجودة' });
-    }
-    
-    // التحقق من عدم وجود معالجة مكررة
-    const existingService = clinic.subServices.find(s => s.name === name && s.mainServiceId.toString() === mainServiceId);
-    if (existingService) {
-      return res.status(400).json({ error: 'المعالجة موجودة بالفعل' });
-    }
-    
-    clinic.subServices.push({
-      name,
-      price,
-      mainServiceId,
-      isActive: true
-    });
-    
-    await clinic.save();
-    const newService = clinic.subServices[clinic.subServices.length - 1];
-    console.log('✅ تم حفظ المعالجة الفرعية:', newService);
-    
-    res.json({ success: true, service: newService });
-  } catch (error) {
-    console.error('❌ خطأ:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // تعديل سعر معالجة فرعية
 router.put('/sub-services/:id/price', async (req, res) => {
   try {
