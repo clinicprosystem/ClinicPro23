@@ -9,53 +9,68 @@ router.use(authMiddleware);
 router.use(secretaryOrOwner);
 
 // إضافة معالجة جديدة
+// إضافة معالجة جديدة (متوافقة مع الهيكل الجديد للخدمات)
 router.post('/', async (req, res) => {
     try {
         const {
             patientId,
-            doctorId,
-            serviceName,
+            mainServiceId,
+            mainServiceName,
+            subServiceId,
+            subServiceName,
             originalPrice,
             discount,
-            treatmentType,  // أي اسم من صاحب العيادة
+            discountType,
+            finalPrice,
             teeth,
-            archType,
-            subType,
+            jawDetails,
             notes
         } = req.body;
         
         const clinic = await Clinic.findById(req.clinicId);
-        const doctor = clinic.doctors.find(d => d.doctorId.toString() === doctorId);
-        if (!doctor) {
-            return res.status(404).json({ error: 'الطبيب غير موجود' });
+        
+        // البحث عن الخدمة الرئيسية (اختياري)
+        let mainService = null;
+        if (mainServiceId) {
+            mainService = clinic.mainServices.id(mainServiceId);
         }
         
-        const finalPrice = originalPrice - (discount || 0);
+        // البحث عن المعالجة الفرعية
+        let subService = null;
+        if (subServiceId) {
+            subService = clinic.subServices.id(subServiceId);
+        }
+        
         const patient = await Patient.findById(patientId);
+        if (!patient) {
+            return res.status(404).json({ error: 'المريض غير موجود' });
+        }
         
-        // تحديد ما إذا كانت المعالجة تحتاج أسنان أو فكين بناءً على الاسم أو التصنيف
-        const teethTreatments = ['حشو', 'خلع', 'عصب', 'تلبيس', 'حشو عادي', 'حشو تجميلي', 'خلع ضرس', 'علاج عصب'];
-        const archTreatments = ['تقويم', 'طقم', 'تبييض', 'تصفية', 'تقويم ثابت', 'تقويم متحرك', 'تبييض بالليزر'];
-        
-        const isTeethTreatment = teethTreatments.some(t => treatmentType.includes(t));
-        const isArchTreatment = archTreatments.some(t => treatmentType.includes(t));
+        // حساب السعر النهائي إذا لم يتم إرساله
+        let calculatedFinalPrice = finalPrice;
+        if (!calculatedFinalPrice) {
+            calculatedFinalPrice = originalPrice - (discount || 0);
+            if (discountType === 'نسبة') {
+                calculatedFinalPrice = originalPrice - ((originalPrice * (discount || 0)) / 100);
+            }
+        }
         
         const treatment = new Treatment({
             clinicId: req.clinicId,
             patientId,
-            doctorId,
             patientName: patient.name,
-            doctorName: doctor.name,
-            doctorPercentage: doctor.percentage,
-            serviceName,
+            mainServiceId,
+            mainServiceName: mainServiceName || (mainService ? mainService.name : null),
+            subServiceId,
+            subServiceName: subServiceName || (subService ? subService.name : null),
             originalPrice,
             discount: discount || 0,
-            finalPrice,
-            treatmentType,  // حفظ الاسم الأصلي
-            teeth: isTeethTreatment ? (teeth || []) : [],
-            archType: isArchTreatment ? (archType || null) : null,
-            subType: subType || null,
-            notes
+            discountType: discountType || 'ريال',
+            finalPrice: calculatedFinalPrice,
+            teeth: teeth || [],
+            jawDetails: jawDetails || null,
+            notes,
+            date: new Date()
         });
         
         await treatment.save();
@@ -69,6 +84,7 @@ router.post('/', async (req, res) => {
 });
 
 // جلب معالجات مريض
+// جلب معالجات مريض
 router.get('/patient/:patientId', async (req, res) => {
     try {
         const treatments = await Treatment.find({
@@ -76,7 +92,24 @@ router.get('/patient/:patientId', async (req, res) => {
             patientId: req.params.patientId
         }).sort({ date: -1 });
         
-        res.json({ success: true, treatments });
+        // إضافة معلومات إضافية من الخدمات الرئيسية والفرعية
+        const clinic = await Clinic.findById(req.clinicId);
+        
+        const enrichedTreatments = treatments.map(t => {
+            const treatmentObj = t.toObject();
+            
+            // البحث عن الخدمة الرئيسية للحصول على التصنيف
+            if (treatmentObj.mainServiceId) {
+                const mainService = clinic.mainServices.id(treatmentObj.mainServiceId);
+                if (mainService) {
+                    treatmentObj.category = mainService.category;
+                }
+            }
+            
+            return treatmentObj;
+        });
+        
+        res.json({ success: true, treatments: enrichedTreatments });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
