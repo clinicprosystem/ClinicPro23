@@ -13,19 +13,21 @@ router.use(secretaryOrOwner);
 router.post('/', async (req, res) => {
     try {
         const {
-            patientId,
-            mainServiceId,
-            mainServiceName,
-            subServiceId,
-            subServiceName,
-            originalPrice,
-            discount,
-            discountType,
-            finalPrice,
-            teeth,
-            jawDetails,
-            notes
-        } = req.body;
+    patientId,
+    doctorId,           // ✅ أضف هذا
+    doctorName,         // ✅ أضف هذا
+    mainServiceId,
+    mainServiceName,
+    subServiceId,
+    subServiceName,
+    originalPrice,
+    discount,
+    discountType,
+    finalPrice,
+    teeth,
+    jawDetails,
+    notes
+} = req.body;
         
         const clinic = await Clinic.findById(req.clinicId);
         
@@ -56,22 +58,24 @@ router.post('/', async (req, res) => {
         }
         
         const treatment = new Treatment({
-            clinicId: req.clinicId,
-            patientId,
-            patientName: patient.name,
-            mainServiceId,
-            mainServiceName: mainServiceName || (mainService ? mainService.name : null),
-            subServiceId,
-            subServiceName: subServiceName || (subService ? subService.name : null),
-            originalPrice,
-            discount: discount || 0,
-            discountType: discountType || 'ريال',
-            finalPrice: calculatedFinalPrice,
-            teeth: teeth || [],
-            jawDetails: jawDetails || null,
-            notes,
-            date: new Date()
-        });
+    clinicId: req.clinicId,
+    patientId,
+    patientName: patient.name,
+    doctorId,           // ✅ أضف هذا
+    doctorName,         // ✅ أضف هذا
+    mainServiceId,
+    mainServiceName: mainServiceName || (mainService ? mainService.name : null),
+    subServiceId,
+    subServiceName: subServiceName || (subService ? subService.name : null),
+    originalPrice,
+    discount: discount || 0,
+    discountType: discountType || 'ريال',
+    finalPrice: calculatedFinalPrice,
+    teeth: teeth || [],
+    jawDetails: jawDetails || null,
+    notes,
+    date: new Date()
+});
         
         await treatment.save();
         
