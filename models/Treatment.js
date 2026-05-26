@@ -5,13 +5,13 @@ const treatmentSchema = new mongoose.Schema({
     patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
     
     // الخدمات الرئيسية والفرعية
-    mainServiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic.mainServices', default: null },
+    mainServiceId: { type: String, default: null },
     mainServiceName: { type: String, default: null },
-    subServiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic.subServices', default: null },
+    subServiceId: { type: String, default: null },
     subServiceName: { type: String, default: null },
     
     // الأطباء
-    doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    doctorId: { type: String, default: null },
     doctorName: { type: String, default: null },
     doctorPercentage: { type: Number, default: 0 },
     
@@ -21,29 +21,23 @@ const treatmentSchema = new mongoose.Schema({
     discountType: { type: String, enum: ['ريال', 'نسبة'], default: 'ريال' },
     finalPrice: { type: Number, required: true },
     
-    // ✅ تفاصيل الأسنان
-    teeth: [{
-        jaw: { type: String, enum: ['علوي', 'سفلي'], default: null },
-        side: { type: String, enum: ['يمين', 'يسار', 'وسط'], default: null },
-        number: { type: Number, min: 1, max: 8, default: null }
-    }],
-    
-    // ✅ عدد الأسنان (مضاف)
+    // تفاصيل الأسنان
+    teeth: { type: Array, default: [] },
     numberOfTeeth: { type: Number, default: 0 },
     
-    // ✅ تفاصيل الفكين
+    // ✅ تفاصيل الفكين (اجعلها اختيارية بدون enum إلزامي)
     jawDetails: {
-        jawType: { type: String, enum: ['علوي', 'سفلي', 'كلا الفكين'], default: null },
+        jawType: { type: String, default: null },
         treatmentType: { type: String, default: null }
     },
     
-    // ✅ تفاصيل إضافية (مضافة)
+    // ✅ ملاحظات إضافية
     additionalNotes: { type: String, default: null },
     
-    // حقول قديمة (للتوافق)
+    // حقول قديمة (اختيارية للتوافق)
     serviceName: { type: String, default: null },
     treatmentType: { type: String, default: null },
-    archType: { type: String, enum: ['علوي', 'سفلي', 'الفكين معاً'], default: null },
+    archType: { type: String, default: null },
     subType: { type: String, default: null },
     notes: { type: String, default: null },
     
