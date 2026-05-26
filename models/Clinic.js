@@ -35,7 +35,7 @@ isFrozen: { type: Boolean, default: false },
     name: String,
     category: String,
     price: Number,
-    parentId: { type: mongoose.Schema.Types.ObjectId, default: null },  // أضف هذا
+    type: { type: String, enum: ['teeth', 'arch'], default: 'teeth' },  // أضف هذا
     isActive: { type: Boolean, default: true }
 }],
     
