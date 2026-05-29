@@ -25,16 +25,13 @@ const treatmentSchema = new mongoose.Schema({
     teeth: { type: Array, default: [] },
     numberOfTeeth: { type: Number, default: 0 },
     
-    // ✅ تفاصيل الفكين (اجعلها اختيارية بدون enum إلزامي)
     jawDetails: {
         jawType: { type: String, default: null },
         treatmentType: { type: String, default: null }
     },
     
-    // ✅ ملاحظات إضافية
     additionalNotes: { type: String, default: null },
     
-    // حقول قديمة (اختيارية للتوافق)
     serviceName: { type: String, default: null },
     treatmentType: { type: String, default: null },
     archType: { type: String, default: null },
@@ -44,5 +41,12 @@ const treatmentSchema = new mongoose.Schema({
     sharedToWhatsApp: { type: Boolean, default: false },
     date: { type: Date, default: Date.now }
 });
+
+// ✅ تحويل patientId من String إلى ObjectId عند الاستعلام
+treatmentSchema.statics.findByPatientId = function(patientId) {
+    const ObjectId = mongoose.Types.ObjectId;
+    const id = patientId instanceof ObjectId ? patientId : new ObjectId(patientId);
+    return this.find({ patientId: id });
+};
 
 module.exports = mongoose.model('Treatment', treatmentSchema);
