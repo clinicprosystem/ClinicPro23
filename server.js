@@ -9,17 +9,17 @@ const { google } = require('googleapis');
 const fetch = require('node-fetch');
 
 // بيانات Service Account (ضعها في متغيرات البيئة للأمان)
+// بيانات Service Account (انسخ والصق هذا)
 const serviceAccount = {
   "type": "service_account",
   "project_id": "clinicprosystem-e89de",
-  "private_key_id": "YOUR_PRIVATE_KEY_ID",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n",
-  "client_email": "YOUR_CLIENT_EMAIL",
-  "client_id": "YOUR_CLIENT_ID",
+  "private_key_id": "1d1b369cd4039762a19409b7fbf769bfc40ae4e2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDeORru44SxQ8ZC\nShx8Xz3SionOj0jrFowMWDwWB6AfBC7NyQ9laPfUwRXT+qFttJBRvc8dPb/KFF62\nc/q8syGGEo/fV+RBSwAQ4H4hJ5sUqfZCH0FdbPLuEoUi970I+PLCtto8+tQ0k5mg\nMbyE2Gjl62CLw7LsqEpfNNPnkvVMeCyaOZ7TmuMjx9Bx9ChnH2PflcYrQvRVMKTc\nd04WCwr7RSEWy9pRRXhSWsLhMlRlhGwLlTjPg6iCOaJn8vjyOMqVw4KigZvOk6FM\n/e7rx39Ijh1X1RV5yTigVC35npjGUbwoorOLONHSNANcaTWBOfVSBlfDg3ulLujq\nd3JuOS9LAgMBAAECggEAQiT3OlHoZicJNSQAFJj4utlXqW8GwkrExsvgnqIIbBL/\np2sINSQoWGBckesQ76mGJ356znZZxtmHU4F0CYS8Hr8Zqd3sZ+7eByf7Av1Z8K2i\nSg4pk5hhOrGyhTT+RFRtVb29edcjIL8qQ/9p4JTVrFICO7e1YzG4aVw9ErmwX+D7\nNO+NdFkNsP4tReMCIm3K12tPgdxh1/Cyrj4FnJmEHs3KjHhNc3miD1cgggV9YFaA\ngKoC2h+fuTrONYWDo2m6SHOUlgRQjI9RdGOfjkYj5bHDjbtulzfl0Rgso87sjRPc\nNTU80g3oxYXEbIrPU/ksspDEPzqs9Yi4CbJWlQRtGQKBgQD3+xr/S9As2wsHSX3j\nDo8x89Vvj5BdB52IEaYNi8bJyc2VN9G5mYv+ih6LqOQbq+PXnpuSa+fXxv9w7/U3\nME/ePAuJyV7O0ZlXEreszTLFXRsjo1Fq7jXeoQu4AzGbShdcf8gYFQduymIw3uLl\nidHYgftVROAmi4dJ68bYnpfzDQKBgQDlaMPokGGNj7KqAIYEz96yOf3ZXlILnME1\nCDnjPK3Iy0nilm6tuCtrhGx1rDZYQAAU4FLveNluopnHbTUVWuYUVdy0SIDSuY0J\nY2cHQw4dx0+8TpI6ofU2hkV8OQUjpftJCKZL8U7WlyJcn8l66MssSebUquDaVx3H\nCtZXIDv1twKBgQC+RCBWuWikwfwYPz8js8wS269rxY9SkcFA4amywwhnUzs1vnpg\nGXvcdUUyiwdaY+yRR9S956UfXkQn9zUCf0MIlLGVqrffn9ozgN0E7PyDigiEs46I\nqPUUOCSxr2GkcJi0FCcGszvcudPVA268B57GrBSXPB1v9aZ8BTewhR65EQKBgD8C\nF0y42xJWdWvb2PNZZIDvDJm3HjGyTB6Us9GFyPVtYE2ro5pzCvns1R08v3Bdo6gY\nNK8xMgcBAduUUxAadzb+ni+l+jvmWqZJdvK3qBjltTCzI9aWxRLErjEAODkiTXIx\nvfr9u/mUaQunl176sVLouU2P4VIWu0b/4v7rC4zhAoGBAIShTleCI61cJln5iuLs\nkcHXDWz9dlMKMFjhcKggNdxorIHk9DQIvHM+B69KbVR5qwl/AVi92uSzmQfvOpxu\nxVFiLkeDHT43zISXdhxD3O/9SiIJiG/l9DwJ4HZPNKm72spfLiWB8vLM5Pp5zYj1\nd85vyO/9Lwpy+Ry18uW5ZqRc\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@clinicprosystem-e89de.iam.gserviceaccount.com",
+  "client_id": "104129070156101481784",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
 };
-
 // الحصول على Access Token
 async function getAccessToken() {
   const auth = new google.auth.JWT(
