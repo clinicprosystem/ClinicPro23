@@ -57,7 +57,12 @@ async function sendNotification(fcmToken, title, body) {
   return response.json();
 }
 
-// ✅ أضف هذا المسار الجديد
+
+// معالجة طلبات OPTIONS (preflight)
+app.options('*', cors());
+
+app.use(express.json());
+/ ✅ أضف هذا المسار الجديد
 app.post('/api/send-notification', async (req, res) => {
   const { token, title, body } = req.body;
   
@@ -79,11 +84,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
-
-// معالجة طلبات OPTIONS (preflight)
-app.options('*', cors());
-
-app.use(express.json());
 // باقي الكود...
 const patientRoutes = require('./routes/patients');
 app.use('/api/patients', patientRoutes);
