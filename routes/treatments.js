@@ -93,32 +93,33 @@ router.post('/', async (req, res) => {
 
 // جلب معالجات مريض
 // جلب معالجات مريض
+const mongoose = require('mongoose');
+
 router.get('/patient/:patientId', async (req, res) => {
     try {
+        const ObjectId = mongoose.Types.ObjectId;
+        
+        // ✅ تحويل patientId من String إلى ObjectId
+        let patientObjectId;
+        try {
+            patientObjectId = new ObjectId(req.params.patientId);
+        } catch (e) {
+            return res.status(400).json({ error: 'Invalid patient ID format' });
+        }
+        
+        console.log('📡 patientId (String):', req.params.patientId);
+        console.log('📡 patientId (ObjectId):', patientObjectId);
+        
         const treatments = await Treatment.find({
             clinicId: req.clinicId,
-            patientId: req.params.patientId
+            patientId: patientObjectId
         }).sort({ date: -1 });
         
-        // إضافة معلومات إضافية من الخدمات الرئيسية والفرعية
-        const clinic = await Clinic.findById(req.clinicId);
+        console.log('📡 عدد المعالجات:', treatments.length);
         
-        const enrichedTreatments = treatments.map(t => {
-            const treatmentObj = t.toObject();
-            
-            // البحث عن الخدمة الرئيسية للحصول على التصنيف
-            if (treatmentObj.mainServiceId) {
-                const mainService = clinic.mainServices.id(treatmentObj.mainServiceId);
-                if (mainService) {
-                    treatmentObj.category = mainService.category;
-                }
-            }
-            
-            return treatmentObj;
-        });
-        
-        res.json({ success: true, treatments: enrichedTreatments });
+        res.json({ success: true, treatments: treatments });
     } catch (error) {
+        console.error('❌ خطأ:', error);
         res.status(500).json({ error: error.message });
     }
 });
