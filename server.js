@@ -5,11 +5,11 @@ require('dotenv').config();
 
 const app = express();
 // أضف هذه الـ imports في الأعلى
+
 const { google } = require('googleapis');
 const fetch = require('node-fetch');
 
-// بيانات Service Account (ضعها في متغيرات البيئة للأمان)
-// بيانات Service Account (انسخ والصق هذا)
+// ============= بيانات Service Account (ضعها في متغيرات البيئة للأمان) =============
 const serviceAccount = {
   "type": "service_account",
   "project_id": "clinicprosystem-e89de",
@@ -20,6 +20,7 @@ const serviceAccount = {
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
 };
+
 // الحصول على Access Token
 async function getAccessToken() {
   const auth = new google.auth.JWT(
@@ -28,12 +29,13 @@ async function getAccessToken() {
     serviceAccount.private_key,
     ['https://www.googleapis.com/auth/firebase.messaging']
   );
+  
   const token = await auth.authorize();
   return token.access_token;
 }
 
-// إرسال إشعار
-async function sendNotification(fcmToken, title, body) {
+// إرسال إشعار عبر FCM API V1
+async function sendFCMV1Notification(fcmToken, title, body) {
   const accessToken = await getAccessToken();
   
   const response = await fetch(
@@ -47,8 +49,13 @@ async function sendNotification(fcmToken, title, body) {
       body: JSON.stringify({
         message: {
           token: fcmToken,
-          notification: { title, body },
-          android: { priority: 'high' },
+          notification: {
+            title: title,
+            body: body,
+          },
+          android: {
+            priority: 'high',
+          },
         },
       }),
     }
@@ -63,33 +70,32 @@ app.options('*', cors());
 
 app.use(express.json());
 
+// ============= مسار إرسال الإشعار =============
 app.post('/api/send-notification', async (req, res) => {
+  console.log('📨 استلام طلب إرسال إشعار (API V1)');
+  
   const { token, title, body } = req.body;
   
   if (!token || !title || !body) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ 
+      success: false, 
+      error: 'الرجاء إرسال token, title, body' 
+    });
   }
   
   try {
-    const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'key=BB-ZGLPdjx1gyNdRE7sRAsjGrfZEZcp1LayZfADTkQg9Z-jVDrxTM_NArb5pkYfsSvl-DVS-86hAC6bI_V8QhUM',
-      },
-      body: JSON.stringify({
-        to: token,
-        notification: {
-          title: title,
-          body: body,
-        },
-      }),
-    });
+    const result = await sendFCMV1Notification(token, title, body);
+    console.log('📡 رد Firebase V1:', result);
     
-    const result = await response.json();
-    res.json({ success: true, result });
+    if (result.name) {
+      // النجاح: Firebase يعيد name إذا نجح
+      res.json({ success: true, message: 'تم إرسال الإشعار بنجاح', result });
+    } else {
+      res.json({ success: false, error: result.error?.message || 'فشل الإرسال' });
+    }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ خطأ:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 // إعدادات CORS المتقدمة
