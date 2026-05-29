@@ -62,7 +62,7 @@ async function sendNotification(fcmToken, title, body) {
 app.options('*', cors());
 
 app.use(express.json());
-/ ✅ أضف هذا المسار الجديد
+
 app.post('/api/send-notification', async (req, res) => {
   const { token, title, body } = req.body;
   
