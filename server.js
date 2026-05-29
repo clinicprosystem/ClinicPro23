@@ -71,7 +71,22 @@ app.post('/api/send-notification', async (req, res) => {
   }
   
   try {
-    const result = await sendNotification(token, title, body);
+    const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'key=BB-ZGLPdjx1gyNdRE7sRAsjGrfZEZcp1LayZfADTkQg9Z-jVDrxTM_NArb5pkYfsSvl-DVS-86hAC6bI_V8QhUM',
+      },
+      body: JSON.stringify({
+        to: token,
+        notification: {
+          title: title,
+          body: body,
+        },
+      }),
+    });
+    
+    const result = await response.json();
     res.json({ success: true, result });
   } catch (error) {
     res.status(500).json({ error: error.message });
