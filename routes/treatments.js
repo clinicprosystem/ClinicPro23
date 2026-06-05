@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const Payment = require('../models/Payment');
 const Treatment = require('../models/Treatment');
 const Patient = require('../models/Patient');
 const Clinic = require('../models/Clinic');
@@ -120,6 +121,30 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+// ✅ جلب سجل المدفوعات لمعالجة
+router.get('/:id/payments', async (req, res) => {
+    try {
+        const payments = await Payment.find({
+            treatmentId: req.params.id,
+            clinicId: req.clinicId
+        }).sort({ date: -1 });
+        
+        res.json({ 
+            success: true, 
+            payments: payments.map(p => ({
+                id: p.id,
+                amount: p.amount,
+                type: p.type,
+                note: p.note,
+                date: p.date
+            }))
+        });
+        
+    } catch (error) {
+        console.error('Error getting payments:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // جلب معالجات مريض
 router.get('/patient/:patientId', async (req, res) => {
@@ -152,15 +177,26 @@ router.get('/patient/:patientId', async (req, res) => {
 });
 
 // جلب جميع المعالجات (للتقارير)
+// ✅ جلب جميع المعالجات مع تفاصيل الدفع
 router.get('/', async (req, res) => {
     try {
         const treatments = await Treatment.find({
             clinicId: req.clinicId
-        }).select('id patientId patientName doctorId doctorName mainServiceName subServiceName originalPrice discount discountType finalPrice paid remaining teeth numberOfTeeth archType jawDetails notes date').sort({ date: -1 });
+        }).select('id patientId patientName doctorName mainServiceName subServiceName originalPrice discount discountType finalPrice paid remaining date').sort({ date: -1 });
         
-        console.log('📡 عدد المعالجات الكلي:', treatments.length);
+        // ✅ إضافة سجل المدفوعات لكل معالجة
+        const treatmentsWithPayments = await Promise.all(treatments.map(async (treatment) => {
+            const payments = await Payment.find({
+                treatmentId: treatment._id
+            }).select('amount type note date').sort({ date: -1 });
+            
+            return {
+                ...treatment.toObject(),
+                payments: payments
+            };
+        }));
         
-        res.json({ success: true, treatments: treatments });
+        res.json({ success: true, treatments: treatmentsWithPayments });
     } catch (error) {
         console.error('❌ خطأ:', error);
         res.status(500).json({ error: error.message });
@@ -206,6 +242,8 @@ router.post('/:id/share', async (req, res) => {
     }
 });
 
+
+
 // ✅ إضافة دفعة أو عودة لمعالجة
 router.post('/:id/payment', async (req, res) => {
     try {
@@ -238,6 +276,19 @@ router.post('/:id/payment', async (req, res) => {
             return res.status(400).json({ error: 'المبلغ لا يمكن أن يكون سالباً' });
         }
         
+        // ✅ 1. حفظ سجل الدفعة في جدول Payments
+        const payment = new Payment({
+            id: Date.now().toString(),
+            treatmentId: treatment._id,
+            clinicId: req.clinicId,
+            amount: amount,
+            type: type,
+            note: note || '',
+            date: new Date()
+        });
+        await payment.save();
+        
+        // ✅ 2. تحديث المعالجة
         treatment.paid = newPaid;
         treatment.remaining = treatment.finalPrice - newPaid;
         await treatment.save();
@@ -249,6 +300,13 @@ router.post('/:id/payment', async (req, res) => {
                 paid: treatment.paid,
                 remaining: treatment.remaining,
                 finalPrice: treatment.finalPrice
+            },
+            payment: {
+                id: payment.id,
+                amount: payment.amount,
+                type: payment.type,
+                note: payment.note,
+                date: payment.date
             }
         });
         
