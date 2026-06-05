@@ -29,7 +29,10 @@ router.get('/clinics', async (req, res) => {
                 ...clinic.toObject(),
                 patientsCount,
                 treatmentsCount,
-                totalIncome: totalIncome[0]?.total || 0
+                totalIncome: totalIncome[0]?.total || 0,
+                subscriptionType: clinic.subscriptionType || 'trial',  // ✅ أضف هذا
+                subscriptionStatus: clinic.subscriptionStatus,          // ✅ أضف هذا
+                subscriptionEndDate: clinic.subscriptionEndDate        // ✅ أضف هذا
             };
         }));
         
@@ -38,7 +41,6 @@ router.get('/clinics', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 // 2. تجديد اشتراك عيادة
 router.post('/clinic/:id/renew', async (req, res) => {
     try {
@@ -130,6 +132,57 @@ router.get('/stats', async (req, res) => {
             }
         });
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+// 7. تفعيل باقة طالب جامعي
+router.post('/clinic/:id/university-plan', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.params.id);
+        
+        if (!clinic) {
+            return res.status(404).json({ error: 'عيادة غير موجودة' });
+        }
+        
+        // ✅ تحديث نوع الاشتراك
+        clinic.subscriptionType = 'university_student';
+        clinic.subscriptionStatus = 'active';
+        
+        // ✅ تحديد تاريخ انتهاء (سنة واحدة كحد افتراضي)
+        const newEndDate = new Date();
+        newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+        clinic.subscriptionEndDate = newEndDate;
+        
+        // ✅ إلغاء الفترة التجريبية
+        clinic.trialEndDate = null;
+        clinic.isActive = true;
+        clinic.isFrozen = false;
+        
+        // ✅ حذف الأطباء الموجودين (إن وجدوا)
+        clinic.doctors = [];
+        
+        // ✅ حذف السكرتيرات الموجودين
+        clinic.secretaries = [];
+        
+        // ✅ حذف الخدمات الموجودة (لأن طالب جامعي له خدماته الخاصة)
+        // أو يمكن تركها حسب المتطلبات
+        
+        await clinic.save();
+        
+        console.log(`✅ تم تفعيل باقة طالب جامعي للعيادة: ${clinic.name}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'تم تفعيل باقة طالب جامعي بنجاح',
+            clinic: {
+                id: clinic._id,
+                name: clinic.name,
+                subscriptionType: clinic.subscriptionType,
+                subscriptionEndDate: clinic.subscriptionEndDate
+            }
+        });
+    } catch (error) {
+        console.error('❌ خطأ في تفعيل باقة طالب جامعي:', error);
         res.status(500).json({ error: error.message });
     }
 });
