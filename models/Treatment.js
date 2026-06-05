@@ -21,6 +21,10 @@ const treatmentSchema = new mongoose.Schema({
     discountType: { type: String, enum: ['ريال', 'نسبة'], default: 'ريال' },
     finalPrice: { type: Number, required: true },
     
+    // ✅ المدفوعات (أضف هذه الحقول)
+    paid: { type: Number, default: 0, min: 0 },
+    remaining: { type: Number, default: 0, min: 0 },
+    
     // تفاصيل الأسنان
     teeth: { type: Array, default: [] },
     numberOfTeeth: { type: Number, default: 0 },
