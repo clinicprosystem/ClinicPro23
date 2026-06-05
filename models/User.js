@@ -6,9 +6,10 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { 
         type: String, 
-        enum: ['master_admin', 'clinic_owner', 'doctor', 'secretary', 'university_student'],  // ✅ أضف university_student
+        enum: ['master_admin', 'clinic_owner', 'doctor', 'secretary', 'university_student'],
         default: 'clinic_owner'
     },
+    subscriptionType: { type: String, enum: ['trial', 'monthly', 'yearly', 'university_student'], default: 'trial' },  // ✅ أضف هذا
     clinicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic', default: null },
     isMasterAdmin: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
