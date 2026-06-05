@@ -136,6 +136,7 @@ router.get('/stats', async (req, res) => {
     }
 });
 // 7. تفعيل باقة طالب جامعي
+// 7. تفعيل باقة طالب جامعي
 router.post('/clinic/:id/university-plan', async (req, res) => {
     try {
         const clinic = await Clinic.findById(req.params.id);
@@ -144,30 +145,29 @@ router.post('/clinic/:id/university-plan', async (req, res) => {
             return res.status(404).json({ error: 'عيادة غير موجودة' });
         }
         
-        // ✅ تحديث نوع الاشتراك
+        // ✅ 1. تحديث العيادة
         clinic.subscriptionType = 'university_student';
         clinic.subscriptionStatus = 'active';
         
-        // ✅ تحديد تاريخ انتهاء (سنة واحدة كحد افتراضي)
         const newEndDate = new Date();
 newEndDate.setDate(newEndDate.getDate() + 30);  // 30 يوم
 clinic.subscriptionEndDate = newEndDate;
-        
-        // ✅ إلغاء الفترة التجريبية
-        clinic.trialEndDate = null;
         clinic.isActive = true;
         clinic.isFrozen = false;
         
-        // ✅ حذف الأطباء الموجودين (إن وجدوا)
-        clinic.doctors = [];
-        
-        // ✅ حذف السكرتيرات الموجودين
-        clinic.secretaries = [];
-        
-        // ✅ حذف الخدمات الموجودة (لأن طالب جامعي له خدماته الخاصة)
-        // أو يمكن تركها حسب المتطلبات
-        
         await clinic.save();
+        
+        // ✅ 2. تحديث دور صاحب العيادة
+        const clinicOwner = await User.findOne({ 
+            clinicId: clinic._id, 
+            role: 'clinic_owner' 
+        });
+        
+        if (clinicOwner) {
+            clinicOwner.role = 'university_student';  // ✅ تغيير الدور
+            await clinicOwner.save();
+            console.log(`✅ تم تحديث دور صاحب العيادة من clinic_owner إلى university_student`);
+        }
         
         console.log(`✅ تم تفعيل باقة طالب جامعي للعيادة: ${clinic.name}`);
         
