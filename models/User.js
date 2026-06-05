@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { 
         type: String, 
-        enum: ['master_admin', 'clinic_owner', 'doctor', 'secretary'],
+        enum: ['master_admin', 'clinic_owner', 'doctor', 'secretary', 'university_student'],  // ✅ أضف university_student
         default: 'clinic_owner'
     },
     clinicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Clinic', default: null },
