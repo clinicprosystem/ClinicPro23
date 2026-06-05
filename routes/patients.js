@@ -8,6 +8,37 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(secretaryOrOwner);
 
+// ✅ دالة للتحقق من عدد المرضى في الفترة التجريبية
+async function canAddPatient(clinicId) {
+    try {
+        const Clinic = require('../models/Clinic');
+        const clinic = await Clinic.findById(clinicId);
+        
+        if (clinic.subscriptionStatus !== 'trial') {
+            return { allowed: true };
+        }
+        
+        if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+            return { allowed: false, reason: 'انتهت الفترة التجريبية. يرجى ترقية اشتراكك.' };
+        }
+        
+        const patientsCount = await Patient.countDocuments({ clinicId: clinicId });
+        const maxPatients = 3;
+        
+        if (patientsCount >= maxPatients) {
+            return { 
+                allowed: false, 
+                reason: `لقد تجاوزت الحد المسموح في الفترة التجريبية (${maxPatients} مرضى). يرجى ترقية اشتراكك لإضافة المزيد.` 
+            };
+        }
+        
+        return { allowed: true };
+    } catch (error) {
+        console.error('Error in canAddPatient:', error);
+        return { allowed: true };
+    }
+}
+
 // جلب جميع المرضى
 router.get('/', async (req, res) => {
   try {
@@ -19,29 +50,18 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.post('/', async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    console.log('User clinicId:', user.clinicId); // للتأكد
-    
-    const patient = new Patient({
-      clinicId: user.clinicId,
-      ...req.body
-    });
-    
-    await patient.save();
-    console.log('Patient saved:', patient); // للتأكد
-    
-    res.json({ success: true, patient });
-  } catch (error) {
-    console.error('Error adding patient:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+
 // إضافة مريض جديد
 router.post('/', async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    
+    // ✅ التحقق من حدود الفترة التجريبية
+    const canAdd = await canAddPatient(user.clinicId);
+    if (!canAdd.allowed) {
+      return res.status(403).json({ success: false, error: canAdd.reason });
+    }
+    
     const { name, phone, age, gender, medicalHistory, notes } = req.body;
     
     const patient = new Patient({
