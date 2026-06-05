@@ -57,9 +57,22 @@ router.post('/clinic/:id/renew', async (req, res) => {
         
         clinic.subscriptionEndDate = newEndDate;
         clinic.subscriptionType = type;
+        clinic.subscriptionStatus = 'active';
         clinic.isActive = true;
         clinic.isFrozen = false;
         await clinic.save();
+        
+        // ✅ تغيير role صاحب العيادة إلى clinic_owner
+        const clinicOwner = await User.findOne({ 
+            clinicId: clinic._id, 
+            role: 'university_student'  // ابحث عن المستخدم الذي كان طالب جامعي
+        });
+        
+        if (clinicOwner) {
+            clinicOwner.role = 'clinic_owner';
+            await clinicOwner.save();
+            console.log(`✅ تم تغيير دور صاحب العيادة من university_student إلى clinic_owner`);
+        }
         
         res.json({ 
             success: true, 
@@ -67,6 +80,7 @@ router.post('/clinic/:id/renew', async (req, res) => {
             newEndDate 
         });
     } catch (error) {
+        console.error('❌ خطأ في التجديد:', error);
         res.status(500).json({ error: error.message });
     }
 });
