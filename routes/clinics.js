@@ -9,6 +9,30 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(clinicOwnerOnly);
 
+
+// ✅ دالة لتحديث حالة الاشتراك تلقائياً
+async function updateSubscriptionStatus(clinicId) {
+    const clinic = await Clinic.findById(clinicId);
+    if (!clinic) return;
+    
+    const now = new Date();
+    
+    // إذا كانت فترة تجريبية وانتهت
+    if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now > new Date(clinic.trialEndDate)) {
+        clinic.subscriptionStatus = 'expired';
+        await clinic.save();
+        console.log(`⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`);
+    }
+    
+    // إذا كان اشتراك نشط وانتهى
+    if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now > new Date(clinic.subscriptionEndDate)) {
+        clinic.subscriptionStatus = 'expired';
+        await clinic.save();
+        console.log(`⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`);
+    }
+    
+    return clinic.subscriptionStatus;
+}
 // ============= الأطباء =============
 
 // جلب الأطباء - فقط لصاحب العيادة
