@@ -37,6 +37,50 @@ async function canAddData(clinicId) {
     
     return false;
 }
+// ✅ دالة للتحقق من عدد الأطباء في الفترة التجريبية (حد أقصى 2)
+async function canAddDoctorInTrial(clinicId) {
+    await updateSubscriptionStatus(clinicId);
+    
+    const clinic = await Clinic.findById(clinicId);
+    if (clinic.subscriptionStatus !== 'trial') return true;
+    
+    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+        return false;
+    }
+    
+    const doctorsCount = clinic.doctors?.length || 0;
+    return doctorsCount < 2;  // حد أقصى 2 أطباء
+}
+
+// ✅ دالة للتحقق من عدد السكرتيرات في الفترة التجريبية (حد أقصى 1)
+async function canAddSecretaryInTrial(clinicId) {
+    await updateSubscriptionStatus(clinicId);
+    
+    const clinic = await Clinic.findById(clinicId);
+    if (clinic.subscriptionStatus !== 'trial') return true;
+    
+    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+        return false;
+    }
+    
+    const secretariesCount = clinic.secretaries?.length || 0;
+    return secretariesCount < 1;  // حد أقصى 1 سكرتير
+}
+
+// ✅ دالة للتحقق من عدد الخدمات الرئيسية في الفترة التجريبية (حد أقصى 2)
+async function canAddMainServiceInTrial(clinicId) {
+    await updateSubscriptionStatus(clinicId);
+    
+    const clinic = await Clinic.findById(clinicId);
+    if (clinic.subscriptionStatus !== 'trial') return true;
+    
+    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+        return false;
+    }
+    
+    const servicesCount = clinic.mainServices?.length || 0;
+    return servicesCount < 2;  // حد أقصى 2 خدمات رئيسية
+}
 
 // ✅ دالة للتحقق من عدد المعالجات في الفترة التجريبية
 async function canAddTreatmentInTrial(clinicId) {
