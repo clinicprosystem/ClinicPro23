@@ -10,9 +10,51 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(secretaryOrOwner);
 
+// ✅ دالة للتحقق من عدد المعالجات في الفترة التجريبية
+async function canAddTreatment(clinicId) {
+    try {
+        const clinic = await Clinic.findById(clinicId);
+        
+        // إذا لم يكن في فترة تجريبية، يسمح
+        if (clinic.subscriptionStatus !== 'trial') {
+            return { allowed: true };
+        }
+        
+        // التحقق من تاريخ انتهاء التجربة
+        if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+            return { allowed: false, reason: 'انتهت الفترة التجريبية' };
+        }
+        
+        // حساب عدد المعالجات
+        const treatmentsCount = await Treatment.countDocuments({ clinicId: clinicId });
+        const maxTreatments = 3;
+        
+        if (treatmentsCount >= maxTreatments) {
+            return { 
+                allowed: false, 
+                reason: `لقد تجاوزت الحد المسموح في الفترة التجريبية (${maxTreatments} معالجات). يرجى ترقية اشتراكك.` 
+            };
+        }
+        
+        return { allowed: true };
+    } catch (error) {
+        console.error('Error in canAddTreatment:', error);
+        return { allowed: true }; // في حالة الخطأ، نسمح مؤقتاً
+    }
+}
+
 // إضافة معالجة جديدة
 router.post('/', async (req, res) => {
     try {
+        // ✅ التحقق من حدود الفترة التجريبية
+        const canAdd = await canAddTreatment(req.clinicId);
+        if (!canAdd.allowed) {
+            return res.status(403).json({ 
+                success: false, 
+                error: canAdd.reason || 'لا يمكن إضافة معالجات جديدة في الفترة التجريبية'
+            });
+        }
+    
         const {
             patientId,
             doctorId,
