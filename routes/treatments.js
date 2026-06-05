@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Treatment = require('../models/Treatment');
 const Patient = require('../models/Patient');
 const Clinic = require('../models/Clinic');
@@ -9,27 +10,27 @@ router.use(authMiddleware);
 router.use(secretaryOrOwner);
 
 // إضافة معالجة جديدة
-// إضافة معالجة جديدة (متوافقة مع الهيكل الجديد للخدمات)
 router.post('/', async (req, res) => {
     try {
         const {
-    patientId,
-    doctorId,
-    doctorName,
-    mainServiceId,
-    mainServiceName,
-    subServiceId,
-    subServiceName,
-    originalPrice,
-    discount,
-    discountType,
-    finalPrice,
-    teeth,
-    numberOfTeeth,        // ✅ أضف هذا
-    jawDetails,
-    additionalNotes,      // ✅ أضف هذا
-    notes
-} = req.body;
+            patientId,
+            doctorId,
+            doctorName,
+            mainServiceId,
+            mainServiceName,
+            subServiceId,
+            subServiceName,
+            originalPrice,
+            discount,
+            discountType,
+            finalPrice,
+            teeth,
+            numberOfTeeth,
+            jawDetails,
+            notes,
+            archType,           // ✅ أضف هذا
+            paid                // ✅ أضف هذا
+        } = req.body;
         
         const clinic = await Clinic.findById(req.clinicId);
         
@@ -59,34 +60,60 @@ router.post('/', async (req, res) => {
             }
         }
         
+        const paidAmount = paid || 0;
+        const remainingAmount = calculatedFinalPrice - paidAmount;
+        
         const treatment = new Treatment({
-    clinicId: req.clinicId,
-    patientId,
-    patientName: patient.name,
-    doctorId,
-    doctorName,
-    mainServiceId,
-    mainServiceName: mainServiceName || (mainService ? mainService.name : null),
-    subServiceId,
-    subServiceName: subServiceName || (subService ? subService.name : null),
-    originalPrice,
-    discount: discount || 0,
-    discountType: discountType || 'ريال',
-    finalPrice: calculatedFinalPrice,
-    teeth: teeth || [],
-    numberOfTeeth: numberOfTeeth || 0,
-    jawDetails: jawDetails || null,
-    additionalNotes: additionalNotes || null,
-    notes,
-    date: new Date(),
-    // ✅ أضف هذين السطرين
-    paid: req.body.paid || 0,
-    remaining: (calculatedFinalPrice - (req.body.paid || 0)) < 0 ? 0 : (calculatedFinalPrice - (req.body.paid || 0))
-});
+            clinicId: req.clinicId,
+            patientId,
+            patientName: patient.name,
+            doctorId,
+            doctorName,
+            mainServiceId,
+            mainServiceName: mainServiceName || (mainService ? mainService.name : null),
+            subServiceId,
+            subServiceName: subServiceName || (subService ? subService.name : null),
+            originalPrice,
+            discount: discount || 0,
+            discountType: discountType || 'ريال',
+            finalPrice: calculatedFinalPrice,
+            teeth: teeth || [],
+            numberOfTeeth: numberOfTeeth || 0,
+            jawDetails: jawDetails || null,
+            notes: notes || null,
+            archType: archType || null,           // ✅ أضف هذا
+            date: new Date(),
+            paid: paidAmount,
+            remaining: remainingAmount < 0 ? 0 : remainingAmount
+        });
         
         await treatment.save();
         
-        res.status(201).json({ success: true, treatment });
+        // ✅ إرجاع المعالجة مع جميع الحقول
+        res.status(201).json({ 
+            success: true, 
+            treatment: {
+                id: treatment._id,
+                patientId: treatment.patientId,
+                patientName: treatment.patientName,
+                doctorId: treatment.doctorId,
+                doctorName: treatment.doctorName,
+                mainServiceName: treatment.mainServiceName,
+                subServiceName: treatment.subServiceName,
+                originalPrice: treatment.originalPrice,
+                discount: treatment.discount,
+                discountType: treatment.discountType,
+                finalPrice: treatment.finalPrice,
+                paid: treatment.paid,
+                remaining: treatment.remaining,
+                teeth: treatment.teeth,
+                numberOfTeeth: treatment.numberOfTeeth,
+                archType: treatment.archType,
+                jawDetails: treatment.jawDetails,
+                notes: treatment.notes,
+                date: treatment.date
+            }
+        });
         
     } catch (error) {
         console.error('Error adding treatment:', error);
@@ -95,14 +122,10 @@ router.post('/', async (req, res) => {
 });
 
 // جلب معالجات مريض
-// جلب معالجات مريض
-const mongoose = require('mongoose');
-
 router.get('/patient/:patientId', async (req, res) => {
     try {
         const ObjectId = mongoose.Types.ObjectId;
         
-        // ✅ تحويل patientId من String إلى ObjectId
         let patientObjectId;
         try {
             patientObjectId = new ObjectId(req.params.patientId);
@@ -113,12 +136,29 @@ router.get('/patient/:patientId', async (req, res) => {
         console.log('📡 patientId (String):', req.params.patientId);
         console.log('📡 patientId (ObjectId):', patientObjectId);
         
+        // ✅ إضافة select لجلب جميع الحقول المطلوبة
         const treatments = await Treatment.find({
             clinicId: req.clinicId,
             patientId: patientObjectId
-        }).sort({ date: -1 });
+        }).select('id patientId patientName doctorId doctorName mainServiceName subServiceName originalPrice discount discountType finalPrice paid remaining teeth numberOfTeeth archType jawDetails notes date').sort({ date: -1 });
         
         console.log('📡 عدد المعالجات:', treatments.length);
+        
+        res.json({ success: true, treatments: treatments });
+    } catch (error) {
+        console.error('❌ خطأ:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// جلب جميع المعالجات (للتقارير)
+router.get('/', async (req, res) => {
+    try {
+        const treatments = await Treatment.find({
+            clinicId: req.clinicId
+        }).select('id patientId patientName doctorId doctorName mainServiceName subServiceName originalPrice discount discountType finalPrice paid remaining teeth numberOfTeeth archType jawDetails notes date').sort({ date: -1 });
+        
+        console.log('📡 عدد المعالجات الكلي:', treatments.length);
         
         res.json({ success: true, treatments: treatments });
     } catch (error) {
@@ -143,10 +183,12 @@ router.post('/:id/share', async (req, res) => {
 مرحباً ${treatment.patientName}،
 تم تسجيل معالجة جديدة في عيادتك:
 
-📋 الخدمة: ${treatment.serviceName}
+📋 الخدمة: ${treatment.subServiceName || treatment.mainServiceName}
 💰 السعر الأصلي: ${treatment.originalPrice} ريال
 🏷️ الخصم: ${treatment.discount} ريال
 💵 المبلغ النهائي: ${treatment.finalPrice} ريال
+💳 المدفوع: ${treatment.paid || 0} ريال
+📊 المتبقي: ${treatment.remaining || treatment.finalPrice} ريال
 📅 التاريخ: ${new Date(treatment.date).toLocaleDateString('ar-EG')}
 
 شكراً لثقتكم بنا
@@ -163,10 +205,11 @@ router.post('/:id/share', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 // ✅ إضافة دفعة أو عودة لمعالجة
 router.post('/:id/payment', async (req, res) => {
     try {
-        const { amount, type, note } = req.body; // type: 'payment' or 'refund'
+        const { amount, type, note } = req.body;
         
         const treatment = await Treatment.findOne({
             _id: req.params.id,
@@ -187,7 +230,6 @@ router.post('/:id/payment', async (req, res) => {
             return res.status(400).json({ error: 'نوع العملية غير صحيح' });
         }
         
-        // التحقق من عدم تجاوز المدفوع السعر النهائي
         if (newPaid > treatment.finalPrice) {
             return res.status(400).json({ error: 'المبلغ المدفوع لا يمكن أن يتجاوز السعر النهائي' });
         }
@@ -199,8 +241,6 @@ router.post('/:id/payment', async (req, res) => {
         treatment.paid = newPaid;
         treatment.remaining = treatment.finalPrice - newPaid;
         await treatment.save();
-        
-        // هنا يمكنك إضافة سجل الدفعة في جدول منفصل إذا أردت
         
         res.json({ 
             success: true, 
