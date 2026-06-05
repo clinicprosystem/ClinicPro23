@@ -22,11 +22,12 @@ router.post('/register', async (req, res) => {
             name: ownerName,
             phone,
             password: hashedPassword,
-            role: 'clinic_owner'
+            role: 'clinic_owner',
+            subscriptionType: 'trial',  // ✅ إضافة نوع الاشتراك
         });
         await user.save();
         
-        // إنشاء العيادة
+        // إنشاء العيادة مع فترة تجريبية 7 أيام
         const trialEnd = new Date();
         trialEnd.setDate(trialEnd.getDate() + 7);
         
@@ -34,7 +35,9 @@ router.post('/register', async (req, res) => {
             name: clinicName,
             phone,
             ownerName,
-            trialEndDate: trialEnd
+            trialEndDate: trialEnd,
+            subscriptionType: 'trial',      // ✅ نوع الاشتراك
+            subscriptionStatus: 'trial',    // ✅ حالة الاشتراك
         });
         await clinic.save();
         
@@ -42,15 +45,7 @@ router.post('/register', async (req, res) => {
         user.clinicId = clinic._id;
         await user.save();
         
-        // إضافة خدمات افتراضية للعيادة
-        clinic.services = [
-            { name: 'حشو', price: 100, category: 'teeth' },
-            { name: 'خلع', price: 80, category: 'teeth' },
-            { name: 'علاج عصب', price: 300, category: 'teeth' },
-            { name: 'تقويم', price: 3000, category: 'arch' },
-            { name: 'تبييض', price: 500, category: 'arch' }
-        ];
-        await clinic.save();
+        // ❌ تم إزالة إضافة الخدمات الافتراضية
         
         // إنشاء توكن
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -64,6 +59,7 @@ router.post('/register', async (req, res) => {
                 phone: user.phone,
                 role: user.role,
                 clinicId: clinic._id,
+                subscriptionType: 'trial',
                 trialEndDate: clinic.trialEndDate
             }
         });
@@ -73,7 +69,6 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ error: 'خطأ في التسجيل' });
     }
 });
-
 // تسجيل الدخول
 router.post('/login', async (req, res) => {
     try {
