@@ -6,12 +6,13 @@ const clinicSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
     ownerName: { type: String, required: true },
     
-    // الاشتراكات
-    trialEndDate: { type: Date, required: true },
-    subscriptionEndDate: { type: Date, default: null },
-    subscriptionStatus: { type: String, enum: ['trial', 'active', 'expired', 'frozen'], default: 'trial' },
-    isActive: { type: Boolean, default: true },
-    isFrozen: { type: Boolean, default: false },
+// الاشتراكات
+trialEndDate: { type: Date, required: true },
+subscriptionEndDate: { type: Date, default: null },
+subscriptionType: { type: String, enum: ['trial', 'monthly', 'yearly', 'university_student'], default: 'trial' },  // ✅ أضف هذا
+subscriptionStatus: { type: String, enum: ['trial', 'active', 'expired', 'frozen'], default: 'trial' },
+isActive: { type: Boolean, default: true },
+isFrozen: { type: Boolean, default: false },
     
     // الأطباء
     doctors: [{
