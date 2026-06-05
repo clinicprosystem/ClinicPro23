@@ -89,12 +89,49 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'رقم الجوال أو كلمة السر غير صحيحة' });
         }
         
-        // التحقق من صلاحية العيادة
+        // ✅ جلب معلومات العيادة والاشتراك
         let clinic = null;
+        let subscription = {
+            type: 'trial',
+            status: 'trial',
+            canAddData: true,
+            endDate: null,
+            daysLeft: 0
+        };
+        
         if (user.clinicId) {
             clinic = await Clinic.findById(user.clinicId);
-            if (clinic && clinic.isFrozen) {
-                return res.status(403).json({ error: 'حساب العيادة موقوف مؤقتاً، راجع المسؤول' });
+            
+            if (clinic) {
+                const now = new Date();
+                
+                // ✅ تحديد نوع الاشتراك
+                subscription.type = clinic.subscriptionType || 'trial';
+                subscription.status = clinic.subscriptionStatus || 'trial';
+                
+                // ✅ تحديد صلاحية الإضافة
+                let canAddData = false;
+                let endDate = null;
+                let daysLeft = 0;
+                
+                if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < clinic.trialEndDate) {
+                    canAddData = true;
+                    endDate = clinic.trialEndDate;
+                    daysLeft = Math.ceil((clinic.trialEndDate - now) / (1000 * 60 * 60 * 24));
+                } else if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < clinic.subscriptionEndDate) {
+                    canAddData = true;
+                    endDate = clinic.subscriptionEndDate;
+                    daysLeft = Math.ceil((clinic.subscriptionEndDate - now) / (1000 * 60 * 60 * 24));
+                }
+                
+                subscription.canAddData = canAddData;
+                subscription.endDate = endDate;
+                subscription.daysLeft = daysLeft;
+                
+                // ✅ التحقق من تجميد الحساب
+                if (clinic.isFrozen) {
+                    return res.status(403).json({ error: 'حساب العيادة موقوف مؤقتاً، راجع المسؤول' });
+                }
             }
         }
         
@@ -110,16 +147,15 @@ router.post('/login', async (req, res) => {
                 role: user.role,
                 clinicId: user.clinicId,
                 isMasterAdmin: user.isMasterAdmin || false,
-                trialEndDate: clinic?.trialEndDate,
-                subscriptionEndDate: clinic?.subscriptionEndDate
+                subscription  // ✅ إضافة معلومات الاشتراك
             }
         });
         
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'خطأ في تسجيل الدخول' });
     }
 });
-
 // إنشاء حساب المالك الأساسي (مرة واحدة فقط)
 router.post('/create-master', async (req, res) => {
     try {
