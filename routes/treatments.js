@@ -74,11 +74,14 @@ router.post('/', async (req, res) => {
     discountType: discountType || 'ريال',
     finalPrice: calculatedFinalPrice,
     teeth: teeth || [],
-    numberOfTeeth: numberOfTeeth || 0,        // ✅ أضف هذا
+    numberOfTeeth: numberOfTeeth || 0,
     jawDetails: jawDetails || null,
-    additionalNotes: additionalNotes || null,  // ✅ أضف هذا
+    additionalNotes: additionalNotes || null,
     notes,
-    date: new Date()
+    date: new Date(),
+    // ✅ أضف هذين السطرين
+    paid: req.body.paid || 0,
+    remaining: (calculatedFinalPrice - (req.body.paid || 0)) < 0 ? 0 : (calculatedFinalPrice - (req.body.paid || 0))
 });
         
         await treatment.save();
@@ -157,6 +160,85 @@ router.post('/:id/share', async (req, res) => {
         res.json({ success: true, whatsappUrl });
         
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+// ✅ إضافة دفعة أو عودة لمعالجة
+router.post('/:id/payment', async (req, res) => {
+    try {
+        const { amount, type, note } = req.body; // type: 'payment' or 'refund'
+        
+        const treatment = await Treatment.findOne({
+            _id: req.params.id,
+            clinicId: req.clinicId
+        });
+        
+        if (!treatment) {
+            return res.status(404).json({ error: 'معالجة غير موجودة' });
+        }
+        
+        let newPaid = treatment.paid || 0;
+        
+        if (type === 'payment') {
+            newPaid += amount;
+        } else if (type === 'refund') {
+            newPaid -= amount;
+        } else {
+            return res.status(400).json({ error: 'نوع العملية غير صحيح' });
+        }
+        
+        // التحقق من عدم تجاوز المدفوع السعر النهائي
+        if (newPaid > treatment.finalPrice) {
+            return res.status(400).json({ error: 'المبلغ المدفوع لا يمكن أن يتجاوز السعر النهائي' });
+        }
+        
+        if (newPaid < 0) {
+            return res.status(400).json({ error: 'المبلغ لا يمكن أن يكون سالباً' });
+        }
+        
+        treatment.paid = newPaid;
+        treatment.remaining = treatment.finalPrice - newPaid;
+        await treatment.save();
+        
+        // هنا يمكنك إضافة سجل الدفعة في جدول منفصل إذا أردت
+        
+        res.json({ 
+            success: true, 
+            treatment: {
+                id: treatment._id,
+                paid: treatment.paid,
+                remaining: treatment.remaining,
+                finalPrice: treatment.finalPrice
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating payment:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ جلب حالة الدفع لمعالجة
+router.get('/:id/payment-status', async (req, res) => {
+    try {
+        const treatment = await Treatment.findOne({
+            _id: req.params.id,
+            clinicId: req.clinicId
+        }).select('paid remaining finalPrice');
+        
+        if (!treatment) {
+            return res.status(404).json({ error: 'معالجة غير موجودة' });
+        }
+        
+        res.json({ 
+            success: true, 
+            paid: treatment.paid || 0,
+            remaining: treatment.remaining || treatment.finalPrice,
+            totalPrice: treatment.finalPrice
+        });
+        
+    } catch (error) {
+        console.error('Error getting payment status:', error);
         res.status(500).json({ error: error.message });
     }
 });
