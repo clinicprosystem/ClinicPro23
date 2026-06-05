@@ -10,6 +10,67 @@ router.use(authMiddleware);
 router.use(clinicOwnerOnly);
 
 
+// ✅ دالة للتحقق من صلاحية الإضافة (للمرضى والمعالجات)
+async function canAddData(clinicId) {
+    // تحديث حالة الاشتراك أولاً
+    await updateSubscriptionStatus(clinicId);
+    
+    const clinic = await Clinic.findById(clinicId);
+    if (!clinic) return false;
+    
+    const now = new Date();
+    
+    // إذا كان الحساب موقوف
+    if (clinic.isFrozen) return false;
+    
+    // إذا كانت فترة تجريبية ولم تنته
+    if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < new Date(clinic.trialEndDate)) {
+        return true;
+    }
+    
+    // إذا كان اشتراك نشط ولم ينته
+    if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < new Date(clinic.subscriptionEndDate)) {
+        return true;
+    }
+    
+    return false;
+}
+
+// ✅ دالة للتحقق من عدد المعالجات في الفترة التجريبية
+async function canAddTreatmentInTrial(clinicId) {
+    // تحديث حالة الاشتراك أولاً
+    await updateSubscriptionStatus(clinicId);
+    
+    const clinic = await Clinic.findById(clinicId);
+    if (clinic.subscriptionStatus !== 'trial') return true;
+    
+    // التحقق من تاريخ انتهاء التجربة
+    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+        return false;
+    }
+    
+    // حساب عدد المعالجات
+    const Treatment = require('../models/Treatment');
+    const treatmentsCount = await Treatment.countDocuments({ clinicId: clinicId });
+    
+    return treatmentsCount < 3;  // حد أقصى 3 معالجات
+}
+
+// ✅ دالة للتحقق من عدد المرضى في الفترة التجريبية
+async function canAddPatientInTrial(clinicId) {
+    await updateSubscriptionStatus(clinicId);
+    
+    const clinic = await Clinic.findById(clinicId);
+    if (clinic.subscriptionStatus !== 'trial') return true;
+    
+    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+        return false;
+    }
+    
+    const patientsCount = await Patient.countDocuments({ clinicId: clinicId });
+    return patientsCount < 3;  // حد أقصى 3 مرضى
+}
+
 // ✅ دالة لتحديث حالة الاشتراك تلقائياً
 async function updateSubscriptionStatus(clinicId) {
     const clinic = await Clinic.findById(clinicId);
