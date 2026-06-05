@@ -1,4 +1,6 @@
 const express = require('express');
+const Patient = require('../models/Patient');
+const Treatment = require('../models/Treatment');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const User = require('../models/User');
