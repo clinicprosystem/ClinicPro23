@@ -628,4 +628,210 @@ router.get('/subscription-status', async (req, res) => {
   }
 });
 
+// ===================== دوال الإحصائيات والحدود =====================
+
+// ✅ 1. عدد المعالجات
+router.get('/treatments/count', async (req, res) => {
+    try {
+        const Treatment = require('../models/Treatment');
+        const count = await Treatment.countDocuments({ clinicId: req.clinicId });
+        res.json({ success: true, count: count || 0 });
+    } catch (error) {
+        console.error('Error getting treatments count:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 2. عدد المرضى
+router.get('/patients/count', async (req, res) => {
+    try {
+        const count = await Patient.countDocuments({ clinicId: req.clinicId });
+        res.json({ success: true, count: count || 0 });
+    } catch (error) {
+        console.error('Error getting patients count:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 3. عدد الأطباء
+router.get('/doctors/count', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        const count = clinic?.doctors?.length || 0;
+        res.json({ success: true, count: count });
+    } catch (error) {
+        console.error('Error getting doctors count:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 4. عدد السكرتيرات
+router.get('/secretaries/count', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        const count = clinic?.secretaries?.length || 0;
+        res.json({ success: true, count: count });
+    } catch (error) {
+        console.error('Error getting secretaries count:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 5. عدد الخدمات الرئيسية
+router.get('/main-services/count', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        const count = clinic?.mainServices?.length || 0;
+        res.json({ success: true, count: count });
+    } catch (error) {
+        console.error('Error getting main services count:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 6. جلب معالجة واحدة
+router.get('/treatments/:id', async (req, res) => {
+    try {
+        const Treatment = require('../models/Treatment');
+        const treatment = await Treatment.findOne({
+            _id: req.params.id,
+            clinicId: req.clinicId
+        });
+        
+        if (!treatment) {
+            return res.status(404).json({ error: 'معالجة غير موجودة' });
+        }
+        
+        res.json({ 
+            success: true, 
+            treatment: {
+                id: treatment._id,
+                patientId: treatment.patientId,
+                patientName: treatment.patientName,
+                doctorId: treatment.doctorId,
+                doctorName: treatment.doctorName,
+                mainServiceId: treatment.mainServiceId,
+                mainServiceName: treatment.mainServiceName,
+                subServiceId: treatment.subServiceId,
+                subServiceName: treatment.subServiceName,
+                originalPrice: treatment.originalPrice,
+                discount: treatment.discount,
+                discountType: treatment.discountType,
+                finalPrice: treatment.finalPrice,
+                paid: treatment.paid || 0,
+                remaining: treatment.remaining || treatment.finalPrice,
+                teeth: treatment.teeth,
+                numberOfTeeth: treatment.numberOfTeeth,
+                archType: treatment.archType,
+                jawDetails: treatment.jawDetails,
+                notes: treatment.notes,
+                date: treatment.date
+            }
+        });
+    } catch (error) {
+        console.error('Error getting treatment:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 7. تحديث حالة الاشتراك (مفصل)
+router.get('/subscription/status', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        if (!clinic) {
+            return res.status(404).json({ error: 'عيادة غير موجودة' });
+        }
+        
+        const now = new Date();
+        let subscriptionType = clinic.subscriptionType || 'trial';
+        let subscriptionStatus = clinic.subscriptionStatus || 'trial';
+        let canAddData = false;
+        let endDate = null;
+        let daysLeft = 0;
+        let message = '';
+        
+        if (subscriptionStatus === 'trial' && clinic.trialEndDate) {
+            if (now < new Date(clinic.trialEndDate)) {
+                canAddData = true;
+                endDate = clinic.trialEndDate;
+                daysLeft = Math.ceil((new Date(clinic.trialEndDate) - now) / (1000 * 60 * 60 * 24));
+                message = `فترة تجريبية، متبقي ${daysLeft} يوم`;
+            } else {
+                subscriptionStatus = 'expired';
+                message = 'انتهت الفترة التجريبية';
+            }
+        }
+        else if (subscriptionStatus === 'active' && clinic.subscriptionEndDate) {
+            if (now < new Date(clinic.subscriptionEndDate)) {
+                canAddData = true;
+                endDate = clinic.subscriptionEndDate;
+                daysLeft = Math.ceil((new Date(clinic.subscriptionEndDate) - now) / (1000 * 60 * 60 * 24));
+                message = `اشتراك فعال، متبقي ${daysLeft} يوم`;
+            } else {
+                subscriptionStatus = 'expired';
+                message = 'انتهى الاشتراك';
+            }
+        }
+        
+        if (clinic.isFrozen) {
+            canAddData = false;
+            message = 'الحساب موقوف مؤقتاً';
+        }
+        
+        res.json({
+            success: true,
+            subscriptionType: subscriptionType,
+            subscriptionStatus: subscriptionStatus,
+            canAddData: canAddData,
+            endDate: endDate,
+            daysLeft: daysLeft,
+            message: message
+        });
+    } catch (error) {
+        console.error('Error getting subscription status:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ 8. التحقق من إمكانية إضافة بيانات
+router.get('/subscription/can-add', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        if (!clinic) {
+            return res.json({ canAdd: false });
+        }
+        
+        const now = new Date();
+        let canAdd = false;
+        
+        if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < new Date(clinic.trialEndDate)) {
+            canAdd = true;
+        }
+        else if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < new Date(clinic.subscriptionEndDate)) {
+            canAdd = true;
+        }
+        
+        if (clinic.isFrozen) {
+            canAdd = false;
+        }
+        
+        res.json({ canAdd: canAdd });
+    } catch (error) {
+        console.error('Error checking can add:', error);
+        res.json({ canAdd: false });
+    }
+});
+
+// ✅ 9. الحصول على نوع الاشتراك الحالي
+router.get('/subscription/type', async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        const subscriptionType = clinic?.subscriptionType || 'trial';
+        res.json({ subscriptionType: subscriptionType });
+    } catch (error) {
+        console.error('Error getting subscription type:', error);
+        res.json({ subscriptionType: 'trial' });
+    }
+});
+
 module.exports = router;
