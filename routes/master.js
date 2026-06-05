@@ -150,8 +150,8 @@ router.post('/clinic/:id/university-plan', async (req, res) => {
         
         // ✅ تحديد تاريخ انتهاء (سنة واحدة كحد افتراضي)
         const newEndDate = new Date();
-        newEndDate.setFullYear(newEndDate.getFullYear() + 1);
-        clinic.subscriptionEndDate = newEndDate;
+newEndDate.setDate(newEndDate.getDate() + 30);  // 30 يوم
+clinic.subscriptionEndDate = newEndDate;
         
         // ✅ إلغاء الفترة التجريبية
         clinic.trialEndDate = null;
