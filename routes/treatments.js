@@ -224,17 +224,48 @@ router.get('/', async (req, res) => {
     try {
         const treatments = await Treatment.find({
             clinicId: req.clinicId
-        }).select('id patientId patientName doctorName mainServiceName subServiceName originalPrice discount discountType finalPrice paid remaining date').sort({ date: -1 });
+        })
+        .populate('patientId', 'name phone')  // ✅ جلب بيانات المريض
+        .sort({ date: -1 });
         
-        // ✅ إضافة سجل المدفوعات لكل معالجة
+        // ✅ معالجة البيانات وإضافة patientName و patientPhone
         const treatmentsWithPayments = await Promise.all(treatments.map(async (treatment) => {
             const payments = await Payment.find({
                 treatmentId: treatment._id
             }).select('amount type note date').sort({ date: -1 });
             
+            const treatmentObj = treatment.toObject();
+            
+            // ✅ إضافة اسم المريض ورقمه من البيانات المسترطبة
+            treatmentObj.patientName = treatment.patientId?.name || 'مريض غير محدد';
+            treatmentObj.patientPhone = treatment.patientId?.phone || '';
+            
+            // ✅ إزالة patientId إذا كان كائن (اختياري)
+            if (treatmentObj.patientId && typeof treatmentObj.patientId === 'object') {
+                treatmentObj.patientId = treatmentObj.patientId._id || treatmentObj.patientId;
+            }
+            
             return {
-                ...treatment.toObject(),
-                payments: payments
+                id: treatmentObj._id,
+                patientId: treatmentObj.patientId,
+                patientName: treatmentObj.patientName,
+                patientPhone: treatmentObj.patientPhone,
+                doctorName: treatmentObj.doctorName,
+                mainServiceName: treatmentObj.mainServiceName,
+                subServiceName: treatmentObj.subServiceName,
+                originalPrice: treatmentObj.originalPrice,
+                discount: treatmentObj.discount,
+                discountType: treatmentObj.discountType,
+                finalPrice: treatmentObj.finalPrice,
+                paid: treatmentObj.paid || 0,
+                remaining: treatmentObj.remaining || treatmentObj.finalPrice,
+                date: treatmentObj.date,
+                payments: payments,
+                teeth: treatmentObj.teeth,
+                numberOfTeeth: treatmentObj.numberOfTeeth,
+                archType: treatmentObj.archType,
+                jawDetails: treatmentObj.jawDetails,
+                notes: treatmentObj.notes
             };
         }));
         
