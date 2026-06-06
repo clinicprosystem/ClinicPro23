@@ -174,6 +174,7 @@ router.get('/services', async (req, res) => {
 });
 
 // إضافة طبيب
+// إضافة طبيب
 router.post('/add-doctor', async (req, res) => {
   try {
     const { name, phone, percentage } = req.body;
@@ -183,32 +184,28 @@ router.post('/add-doctor', async (req, res) => {
       return res.status(404).json({ error: 'عيادة غير موجودة' });
     }
     
-    // ✅ السماح بتكرار رقم الهاتف (لا تتحقق من uniqueness)
-    // (تم إزالة التحقق من وجود الرقم)
-    
-    // إنشاء حساب مستخدم للطبيب (برقم فريد)
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
     
-    // ✅ إضافة timestamp لجعل رقم الهاتف فريداً في جدول users
     const uniquePhone = phone.startsWith('+') 
         ? `${phone}_doctor_${Date.now()}`
         : `${phone}_doctor_${Date.now()}`;
     
     const doctorUser = new User({
       name: name,
-      phone: uniquePhone,  // ✅ رقم فريد في جدول users
+      phone: uniquePhone,
       password: hashedPassword,
       role: 'doctor',
-      clinicId: req.clinicId
+      clinicId: req.clinicId,
+      subscriptionType: clinic.subscriptionType || 'trial',  // ✅ نفس نوع اشتراك العيادة
+      subscriptionStatus: clinic.subscriptionStatus || 'trial',  // ✅ نفس حالة الاشتراك
     });
     await doctorUser.save();
     
-    // ✅ في قائمة الأطباء، نستخدم الرقم الأصلي (بدون timestamp)
     clinic.doctors.push({
       doctorId: doctorUser._id,
       name: name,
-      phone: phone,  // ✅ الرقم الأصلي يظهر في الواجهة
+      phone: phone,
       percentage: percentage || 0,
       isActive: true
     });
@@ -219,8 +216,9 @@ router.post('/add-doctor', async (req, res) => {
       doctor: { 
         _id: doctorUser._id, 
         name: name, 
-        phone: phone,  // ✅ نرسل الرقم الأصلي
-        percentage: percentage || 0 
+        phone: phone,
+        percentage: percentage || 0,
+        subscriptionType: doctorUser.subscriptionType  // ✅ إرسال نوع الاشتراك
       },
       tempPassword: tempPassword
     });
