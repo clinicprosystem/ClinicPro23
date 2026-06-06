@@ -84,54 +84,12 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'رقم الجوال أو كلمة السر غير صحيحة' });
         }
         
-        // ✅ جلب معلومات العيادة والاشتراك
-        let clinic = null;
-        let subscriptionType = 'trial';
-        let subscriptionStatus = 'trial';
-        let canAddData = true;
-        let endDate = null;
-        let daysLeft = 0;
-        
-        if (user.clinicId) {
-            clinic = await Clinic.findById(user.clinicId);
-            
-            if (clinic) {
-                const now = new Date();
-                
-                // ✅ للمستخدمين التابعين (سكرتير، طبيب) استخدم اشتراك العيادة فقط
-if (user.role === 'secretary' || user.role === 'doctor') {
-    subscriptionType = clinic?.subscriptionType || 'trial';
-    subscriptionStatus = clinic?.subscriptionStatus || 'trial';
-} else {
-    // ✅ لصاحب العيادة استخدم اشتراكه الخاص
-    subscriptionType = user.subscriptionType || clinic?.subscriptionType || 'trial';
-    subscriptionStatus = user.subscriptionStatus || clinic?.subscriptionStatus || 'trial';
-}
-                // ✅ تحديد صلاحية الإضافة
-                canAddData = false;
-                
-                if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < clinic.trialEndDate) {
-                    canAddData = true;
-                    endDate = clinic.trialEndDate;
-                    daysLeft = Math.ceil((clinic.trialEndDate - now) / (1000 * 60 * 60 * 24));
-                } else if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < clinic.subscriptionEndDate) {
-                    canAddData = true;
-                    endDate = clinic.subscriptionEndDate;
-                    daysLeft = Math.ceil((clinic.subscriptionEndDate - now) / (1000 * 60 * 60 * 24));
-                } else if (clinic.subscriptionType === 'university_student') {
-                    canAddData = true;
-                }
-                
-                // ✅ التحقق من تجميد الحساب
-                if (clinic.isFrozen) {
-                    return res.status(403).json({ error: 'حساب العيادة موقوف مؤقتاً، راجع المسؤول' });
-                }
-            }
-        }
+        // ✅ اقرأ من user model مباشرة (القيمة مخزنة بالفعل)
+        let subscriptionType = user.subscriptionType || 'trial';
+        let subscriptionStatus = user.subscriptionStatus || 'trial';
         
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
         
-        // ✅ إرسال الرد مع subscriptionType مباشرة في user object
         res.json({
             success: true,
             token,
@@ -142,17 +100,8 @@ if (user.role === 'secretary' || user.role === 'doctor') {
                 role: user.role,
                 clinicId: user.clinicId,
                 isMasterAdmin: user.isMasterAdmin || false,
-                subscriptionType: subscriptionType,      // ✅ أضف هذا
-                subscriptionStatus: subscriptionStatus,  // ✅ أضف هذا
-                canAddData: canAddData,                  // ✅ أضف هذا
-                daysLeft: daysLeft,                      // ✅ أضف هذا
-                subscription: {                          // ✅ احتفظ به للتوافق
-                    type: subscriptionType,
-                    status: subscriptionStatus,
-                    canAddData: canAddData,
-                    endDate: endDate,
-                    daysLeft: daysLeft
-                }
+                subscriptionType: subscriptionType,  // ✅ مباشرة من user
+                subscriptionStatus: subscriptionStatus,
             }
         });
         
