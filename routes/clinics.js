@@ -597,44 +597,78 @@ router.get('/my-clinic', async (req, res) => {
 });
 
 // التحقق من صلاحية الاشتراك
-router.get('/subscription-status', async (req, res) => {
-  try {
-    const clinic = await Clinic.findById(req.clinicId);
-    const now = new Date();
-    
-    let status = 'active';
-    let daysLeft = 0;
-    let message = '';
-    
-    if (clinic.isFrozen) {
-      status = 'frozen';
-      message = 'الحساب موقوف مؤقتاً، راجع المسؤول';
-    } else if (clinic.trialEndDate && now < clinic.trialEndDate) {
-      status = 'trial';
-      daysLeft = Math.ceil((clinic.trialEndDate - now) / (1000 * 60 * 60 * 24));
-      message = `فترة تجريبية، متبقي ${daysLeft} يوم`;
-    } else if (clinic.subscriptionEndDate && now < clinic.subscriptionEndDate) {
-      status = 'subscribed';
-      daysLeft = Math.ceil((clinic.subscriptionEndDate - now) / (1000 * 60 * 60 * 24));
-      message = `اشتراك فعال، متبقي ${daysLeft} يوم`;
-    } else {
-      status = 'expired';
-      message = 'انتهت صلاحية الاشتراك، يرجى التجديد';
+// ✅ بدلاً من استخدام authMiddleware و clinicOwnerOnly على كل الملف
+// قم بنقل هذا المسار خارج الـ router.use(authMiddleware)
+
+// في بداية الملف (قبل router.use(authMiddleware))
+router.get('/subscription/status', authMiddleware, async (req, res) => {
+    try {
+        const clinic = await Clinic.findById(req.clinicId);
+        if (!clinic) {
+            return res.status(404).json({ error: 'عيادة غير موجودة' });
+        }
+        
+        const now = new Date();
+        let subscriptionType = clinic.subscriptionType || 'trial';
+        let subscriptionStatus = clinic.subscriptionStatus || 'trial';
+        let canAddData = false;
+        let endDate = null;
+        let daysLeft = 0;
+        let message = '';
+        
+        if (subscriptionStatus === 'trial' && clinic.trialEndDate) {
+            if (now < new Date(clinic.trialEndDate)) {
+                canAddData = true;
+                endDate = clinic.trialEndDate;
+                daysLeft = Math.ceil((new Date(clinic.trialEndDate) - now) / (1000 * 60 * 60 * 24));
+                message = `فترة تجريبية، متبقي ${daysLeft} يوم`;
+            } else {
+                subscriptionStatus = 'expired';
+                message = 'انتهت الفترة التجريبية';
+            }
+        }
+        else if (subscriptionStatus === 'active' && clinic.subscriptionEndDate) {
+            if (now < new Date(clinic.subscriptionEndDate)) {
+                canAddData = true;
+                endDate = clinic.subscriptionEndDate;
+                daysLeft = Math.ceil((new Date(clinic.subscriptionEndDate) - now) / (1000 * 60 * 60 * 24));
+                message = `اشتراك فعال، متبقي ${daysLeft} يوم`;
+            } else {
+                subscriptionStatus = 'expired';
+                message = 'انتهى الاشتراك';
+            }
+        }
+        
+        // ✅ إذا كان نوع الاشتراك university_student، فهو فعال
+        if (subscriptionType === 'university_student') {
+            canAddData = true;
+            subscriptionStatus = 'active';
+            message = 'باقة طالب جامعي - مفعلة';
+        }
+        
+        if (clinic.isFrozen) {
+            canAddData = false;
+            message = 'الحساب موقوف مؤقتاً';
+        }
+        
+        res.json({
+            success: true,
+            subscriptionType: subscriptionType,
+            subscriptionStatus: subscriptionStatus,
+            canAddData: canAddData,
+            endDate: endDate,
+            daysLeft: daysLeft,
+            message: message
+        });
+    } catch (error) {
+        console.error('Error getting subscription status:', error);
+        res.status(500).json({ error: error.message });
     }
-    
-    res.json({
-      success: true,
-      status,
-      daysLeft,
-      message,
-      trialEndDate: clinic.trialEndDate,
-      subscriptionEndDate: clinic.subscriptionEndDate
-    });
-    
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
+
+// ثم بعد ذلك
+router.use(authMiddleware);
+router.use(clinicOwnerOnly);
 
 // ===================== دوال الإحصائيات والحدود =====================
 
