@@ -504,27 +504,34 @@ router.post('/add-secretary', async (req, res) => {
   try {
     const { name, phone, password } = req.body;
     
-    // التحقق من عدم وجود الرقم
+    // ✅ التحقق من عدم وجود الرقم
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
       return res.status(400).json({ error: 'هذا الرقم مستخدم بالفعل' });
     }
     
-    // تشفير كلمة السر
+    // ✅ جلب العيادة لمعرفة نوع الاشتراك
+    const clinic = await Clinic.findById(req.clinicId);
+    if (!clinic) {
+      return res.status(404).json({ error: 'عيادة غير موجودة' });
+    }
+    
+    // ✅ تشفير كلمة السر
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // إنشاء حساب سكرتير
+    // ✅ إنشاء حساب سكرتير مع نفس نوع اشتراك العيادة
     const secretary = new User({
       name,
       phone,
       password: hashedPassword,
       role: 'secretary',
-      clinicId: req.clinicId
+      clinicId: req.clinicId,
+      subscriptionType: clinic.subscriptionType || 'trial',  // ✅ نفس نوع اشتراك العيادة
+      subscriptionStatus: clinic.subscriptionStatus || 'trial',  // ✅ نفس حالة الاشتراك
     });
     await secretary.save();
     
-    // إضافة السكرتير إلى قائمة السكرتيرات في العيادة (اختياري)
-    const clinic = await Clinic.findById(req.clinicId);
+    // ✅ إضافة السكرتير إلى قائمة السكرتيرات في العيادة
     if (clinic) {
       clinic.secretaries.push({
         secretaryId: secretary._id,
@@ -540,7 +547,8 @@ router.post('/add-secretary', async (req, res) => {
       secretary: { 
         _id: secretary._id, 
         name: secretary.name, 
-        phone: secretary.phone 
+        phone: secretary.phone,
+        subscriptionType: secretary.subscriptionType  // ✅ إرسال نوع الاشتراك
       },
       tempPassword: password
     });
