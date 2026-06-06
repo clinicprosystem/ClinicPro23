@@ -26,11 +26,13 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
+// في middleware/auth.js
 const clinicOwnerOnly = (req, res, next) => {
-    if (req.userRole !== 'clinic_owner' && req.userRole !== 'master_admin') {
-        return res.status(403).json({ error: 'هذه الخاصية لصاحب العيادة فقط' });
+    // ✅ السماح لـ clinic_owner و university_student
+    if (req.userRole === 'clinic_owner' || req.userRole === 'university_student') {
+        return next();
     }
-    next();
+    return res.status(403).json({ error: 'غير مصرح لك. هذا الإجراء مخصص لأصحاب العيادات فقط' });
 };
 
 const secretaryOrOwner = (req, res, next) => {
