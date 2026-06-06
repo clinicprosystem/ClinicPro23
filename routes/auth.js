@@ -86,13 +86,11 @@ router.post('/login', async (req, res) => {
         
         // ✅ جلب معلومات العيادة والاشتراك
         let clinic = null;
-        let subscription = {
-            type: 'trial',
-            status: 'trial',
-            canAddData: true,
-            endDate: null,
-            daysLeft: 0
-        };
+        let subscriptionType = 'trial';
+        let subscriptionStatus = 'trial';
+        let canAddData = true;
+        let endDate = null;
+        let daysLeft = 0;
         
         if (user.clinicId) {
             clinic = await Clinic.findById(user.clinicId);
@@ -100,14 +98,12 @@ router.post('/login', async (req, res) => {
             if (clinic) {
                 const now = new Date();
                 
-                // ✅ تحديد نوع الاشتراك
-                subscription.type = clinic.subscriptionType || 'trial';
-                subscription.status = clinic.subscriptionStatus || 'trial';
+                // ✅ استخدام اشتراك المستخدم إذا كان موجوداً، وإلا استخدم اشتراك العيادة
+                subscriptionType = user.subscriptionType || clinic.subscriptionType || 'trial';
+                subscriptionStatus = user.subscriptionStatus || clinic.subscriptionStatus || 'trial';
                 
                 // ✅ تحديد صلاحية الإضافة
-                let canAddData = false;
-                let endDate = null;
-                let daysLeft = 0;
+                canAddData = false;
                 
                 if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < clinic.trialEndDate) {
                     canAddData = true;
@@ -117,11 +113,9 @@ router.post('/login', async (req, res) => {
                     canAddData = true;
                     endDate = clinic.subscriptionEndDate;
                     daysLeft = Math.ceil((clinic.subscriptionEndDate - now) / (1000 * 60 * 60 * 24));
+                } else if (clinic.subscriptionType === 'university_student') {
+                    canAddData = true;
                 }
-                
-                subscription.canAddData = canAddData;
-                subscription.endDate = endDate;
-                subscription.daysLeft = daysLeft;
                 
                 // ✅ التحقق من تجميد الحساب
                 if (clinic.isFrozen) {
@@ -132,6 +126,7 @@ router.post('/login', async (req, res) => {
         
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
         
+        // ✅ إرسال الرد مع subscriptionType مباشرة في user object
         res.json({
             success: true,
             token,
@@ -142,7 +137,17 @@ router.post('/login', async (req, res) => {
                 role: user.role,
                 clinicId: user.clinicId,
                 isMasterAdmin: user.isMasterAdmin || false,
-                subscription  // ✅ إضافة معلومات الاشتراك
+                subscriptionType: subscriptionType,      // ✅ أضف هذا
+                subscriptionStatus: subscriptionStatus,  // ✅ أضف هذا
+                canAddData: canAddData,                  // ✅ أضف هذا
+                daysLeft: daysLeft,                      // ✅ أضف هذا
+                subscription: {                          // ✅ احتفظ به للتوافق
+                    type: subscriptionType,
+                    status: subscriptionStatus,
+                    canAddData: canAddData,
+                    endDate: endDate,
+                    daysLeft: daysLeft
+                }
             }
         });
         
