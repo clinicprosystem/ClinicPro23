@@ -498,11 +498,11 @@ router.get('/secretaries', async (req, res) => {
 });
 
 // إضافة سكرتير
+// إضافة سكرتير
 router.post('/add-secretary', async (req, res) => {
   try {
     const { name, phone, password } = req.body;
     
-    // ✅ التحقق من عدم وجود الرقم
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
       return res.status(400).json({ error: 'هذا الرقم مستخدم بالفعل' });
@@ -514,31 +514,28 @@ router.post('/add-secretary', async (req, res) => {
       return res.status(404).json({ error: 'عيادة غير موجودة' });
     }
     
-    // ✅ تشفير كلمة السر
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // ✅ إنشاء حساب سكرتير مع نفس نوع اشتراك العيادة
+    // ✅ إنشاء سكرتير مع نسخ subscriptionType من العيادة
     const secretary = new User({
       name,
       phone,
       password: hashedPassword,
       role: 'secretary',
       clinicId: req.clinicId,
-      subscriptionType: clinic.subscriptionType || 'trial',  // ✅ نفس نوع اشتراك العيادة
-      subscriptionStatus: clinic.subscriptionStatus || 'trial',  // ✅ نفس حالة الاشتراك
+      subscriptionType: clinic.subscriptionType || 'trial',     // ✅ من العيادة
+      subscriptionStatus: clinic.subscriptionStatus || 'trial', // ✅ من العيادة
     });
     await secretary.save();
     
-    // ✅ إضافة السكرتير إلى قائمة السكرتيرات في العيادة
-    if (clinic) {
-      clinic.secretaries.push({
-        secretaryId: secretary._id,
-        name: name,
-        phone: phone,
-        isActive: true
-      });
-      await clinic.save();
-    }
+    // إضافة إلى قائمة السكرتيرات في العيادة
+    clinic.secretaries.push({
+      secretaryId: secretary._id,
+      name: name,
+      phone: phone,
+      isActive: true
+    });
+    await clinic.save();
     
     res.json({ 
       success: true, 
@@ -546,7 +543,7 @@ router.post('/add-secretary', async (req, res) => {
         _id: secretary._id, 
         name: secretary.name, 
         phone: secretary.phone,
-        subscriptionType: secretary.subscriptionType  // ✅ إرسال نوع الاشتراك
+        subscriptionType: secretary.subscriptionType,  // ✅ يرسل القيمة
       },
       tempPassword: password
     });
@@ -556,7 +553,7 @@ router.post('/add-secretary', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+        
 // حذف سكرتير
 router.delete('/secretaries/:id', async (req, res) => {
   try {
