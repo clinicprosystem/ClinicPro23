@@ -12,6 +12,29 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(masterAuth);
 
+// ✅ دالة لتحديث اشتراك جميع المستخدمين التابعين للعيادة
+async function updateAllUsersSubscription(clinicId, subscriptionType, subscriptionStatus) {
+    try {
+        const result = await User.updateMany(
+            { 
+                clinicId: clinicId, 
+                role: { $in: ['secretary', 'doctor'] } 
+            },
+            { 
+                $set: { 
+                    subscriptionType: subscriptionType,
+                    subscriptionStatus: subscriptionStatus
+                } 
+            }
+        );
+        console.log(`✅ تم تحديث ${result.modifiedCount} مستخدم تابع للعيادة ${clinicId}`);
+        return result;
+    } catch (error) {
+        console.error('❌ خطأ في تحديث المستخدمين التابعين:', error);
+        return null;
+    }
+}
+
 // 1. جلب جميع العيادات
 router.get('/clinics', async (req, res) => {
     try {
@@ -41,7 +64,6 @@ router.get('/clinics', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-// 2. تجديد اشتراك عيادة
 router.post('/clinic/:id/renew', async (req, res) => {
     try {
         const { type } = req.body; // 'monthly' or 'yearly'
@@ -62,10 +84,13 @@ router.post('/clinic/:id/renew', async (req, res) => {
         clinic.isFrozen = false;
         await clinic.save();
         
-        // ✅ تغيير role صاحب العيادة إلى clinic_owner
+        // ✅ تحديث جميع السكرتيرات والأطباء التابعين
+        await updateAllUsersSubscription(clinic._id, type, 'active');
+        
+        // ✅ تغيير role صاحب العيادة (إذا كان طالب جامعي)
         const clinicOwner = await User.findOne({ 
             clinicId: clinic._id, 
-            role: 'university_student'  // ابحث عن المستخدم الذي كان طالب جامعي
+            role: 'university_student'
         });
         
         if (clinicOwner) {
@@ -84,7 +109,6 @@ router.post('/clinic/:id/renew', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 // 3. إيقاف حساب (تجميد)
 router.post('/clinic/:id/freeze', async (req, res) => {
     try {
@@ -149,8 +173,6 @@ router.get('/stats', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-// 7. تفعيل باقة طالب جامعي
-// 7. تفعيل باقة طالب جامعي
 router.post('/clinic/:id/university-plan', async (req, res) => {
     try {
         const clinic = await Clinic.findById(req.params.id);
@@ -164,21 +186,24 @@ router.post('/clinic/:id/university-plan', async (req, res) => {
         clinic.subscriptionStatus = 'active';
         
         const newEndDate = new Date();
-newEndDate.setDate(newEndDate.getDate() + 30);  // 30 يوم
-clinic.subscriptionEndDate = newEndDate;
+        newEndDate.setDate(newEndDate.getDate() + 30);
+        clinic.subscriptionEndDate = newEndDate;
         clinic.isActive = true;
         clinic.isFrozen = false;
         
         await clinic.save();
         
-        // ✅ 2. تحديث دور صاحب العيادة
+        // ✅ 2. تحديث جميع السكرتيرات والأطباء التابعين
+        await updateAllUsersSubscription(clinic._id, 'university_student', 'active');
+        
+        // ✅ 3. تحديث دور صاحب العيادة
         const clinicOwner = await User.findOne({ 
             clinicId: clinic._id, 
             role: 'clinic_owner' 
         });
         
         if (clinicOwner) {
-            clinicOwner.role = 'university_student';  // ✅ تغيير الدور
+            clinicOwner.role = 'university_student';
             await clinicOwner.save();
             console.log(`✅ تم تحديث دور صاحب العيادة من clinic_owner إلى university_student`);
         }
