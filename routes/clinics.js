@@ -140,6 +140,28 @@ async function updateSubscriptionStatus(clinicId) {
     
     return clinic.subscriptionStatus;
 }
+// ✅ دالة لتحديث اشتراك جميع المستخدمين التابعين للعيادة
+async function updateAllUsersSubscription(clinicId, subscriptionType, subscriptionStatus) {
+    try {
+        const result = await User.updateMany(
+            { 
+                clinicId: clinicId, 
+                role: { $in: ['secretary', 'doctor'] } 
+            },
+            { 
+                $set: { 
+                    subscriptionType: subscriptionType,
+                    subscriptionStatus: subscriptionStatus
+                } 
+            }
+        );
+        console.log(`✅ تم تحديث ${result.modifiedCount} مستخدم تابع للعيادة ${clinicId}`);
+        return result;
+    } catch (error) {
+        console.error('❌ خطأ في تحديث المستخدمين التابعين:', error);
+        return null;
+    }
+}
 // ============= الأطباء =============
 
 // جلب الأطباء - فقط لصاحب العيادة
