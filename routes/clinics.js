@@ -123,19 +123,30 @@ async function updateSubscriptionStatus(clinicId) {
     if (!clinic) return;
     
     const now = new Date();
+    let newStatus = clinic.subscriptionStatus;
+    let newSubscriptionType = clinic.subscriptionType;
     
-    // إذا كانت فترة تجريبية وانتهت
+    // ✅ التحقق من انتهاء الفترة التجريبية
     if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now > new Date(clinic.trialEndDate)) {
-        clinic.subscriptionStatus = 'expired';
-        await clinic.save();
+        newStatus = 'expired';
         console.log(`⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`);
     }
     
-    // إذا كان اشتراك نشط وانتهى
+    // ✅ التحقق من انتهاء الاشتراك المدفوع
     if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now > new Date(clinic.subscriptionEndDate)) {
-        clinic.subscriptionStatus = 'expired';
-        await clinic.save();
+        newStatus = 'expired';
         console.log(`⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`);
+    }
+    
+    // ✅ إذا تغيرت الحالة، قم بتحديث العيادة وجميع المستخدمين التابعين
+    if (newStatus !== clinic.subscriptionStatus) {
+        clinic.subscriptionStatus = newStatus;
+        await clinic.save();
+        
+        // ✅ تحديث جميع السكرتيرات والأطباء التابعين إلى expired
+        await updateAllUsersSubscription(clinicId, clinic.subscriptionType, newStatus);
+        
+        console.log(`✅ تم تحديث ${newStatus} للعيادة وجميع المستخدمين التابعين`);
     }
     
     return clinic.subscriptionStatus;
