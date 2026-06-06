@@ -42,7 +42,6 @@ const secretaryOrOwner = (req, res, next) => {
     }
     return res.status(403).json({ error: 'غير مصرح لك' });
 };
-    next();
-};
+
 
 module.exports = { authMiddleware, clinicOwnerOnly, secretaryOrOwner };
