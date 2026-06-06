@@ -98,10 +98,15 @@ router.post('/login', async (req, res) => {
             if (clinic) {
                 const now = new Date();
                 
-                // ✅ استخدام اشتراك المستخدم إذا كان موجوداً، وإلا استخدم اشتراك العيادة
-                subscriptionType = user.subscriptionType || clinic.subscriptionType || 'trial';
-                subscriptionStatus = user.subscriptionStatus || clinic.subscriptionStatus || 'trial';
-                
+                // ✅ للمستخدمين التابعين (سكرتير، طبيب) استخدم اشتراك العيادة فقط
+if (user.role === 'secretary' || user.role === 'doctor') {
+    subscriptionType = clinic?.subscriptionType || 'trial';
+    subscriptionStatus = clinic?.subscriptionStatus || 'trial';
+} else {
+    // ✅ لصاحب العيادة استخدم اشتراكه الخاص
+    subscriptionType = user.subscriptionType || clinic?.subscriptionType || 'trial';
+    subscriptionStatus = user.subscriptionStatus || clinic?.subscriptionStatus || 'trial';
+}
                 // ✅ تحديد صلاحية الإضافة
                 canAddData = false;
                 
