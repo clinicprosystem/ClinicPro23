@@ -8,9 +8,6 @@ const { authMiddleware } = require('../middleware/auth');
 const { masterAuth } = require('../middleware/masterAuth');
 const router = express.Router();
 
-// كل المسارات تحتاج مصادقة + صلاحيات المالك الأساسي
-router.use(authMiddleware);
-router.use(masterAuth);
 
 // ✅ دالة لتحديث اشتراك جميع المستخدمين التابعين للعيادة
 async function updateAllUsersSubscription(clinicId, subscriptionType, subscriptionStatus) {
@@ -34,6 +31,12 @@ async function updateAllUsersSubscription(clinicId, subscriptionType, subscripti
         return null;
     }
 }
+
+// كل المسارات تحتاج مصادقة + صلاحيات المالك الأساسي
+router.use(authMiddleware);
+router.use(masterAuth);
+
+
 
 // 1. جلب جميع العيادات
 router.get('/clinics', async (req, res) => {
