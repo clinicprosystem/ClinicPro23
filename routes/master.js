@@ -8,6 +8,34 @@ const { authMiddleware } = require('../middleware/auth');
 const { masterAuth } = require('../middleware/masterAuth');
 const router = express.Router();
 
+// ✅ دالة لتحديث حالة الاشتراك تلقائياً
+async function updateSubscriptionStatus(clinicId) {
+    const clinic = await Clinic.findById(clinicId);
+    if (!clinic) return;
+    
+    const now = new Date();
+    let newStatus = clinic.subscriptionStatus;
+    
+    if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now > new Date(clinic.trialEndDate)) {
+        newStatus = 'expired';
+        console.log(`⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`);
+    }
+    
+    if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now > new Date(clinic.subscriptionEndDate)) {
+        newStatus = 'expired';
+        console.log(`⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`);
+    }
+    
+    if (newStatus !== clinic.subscriptionStatus) {
+        clinic.subscriptionStatus = newStatus;
+        await clinic.save();
+        
+        // ✅ تحديث جميع المستخدمين التابعين
+        await updateAllUsersSubscription(clinicId, clinic.subscriptionType, newStatus);
+    }
+    
+    return clinic.subscriptionStatus;
+}
 
 // ✅ دالة لتحديث اشتراك جميع المستخدمين التابعين للعيادة
 async function updateAllUsersSubscription(clinicId, subscriptionType, subscriptionStatus) {
