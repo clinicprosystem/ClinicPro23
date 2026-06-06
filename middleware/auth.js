@@ -36,9 +36,12 @@ const clinicOwnerOnly = (req, res, next) => {
 };
 
 const secretaryOrOwner = (req, res, next) => {
-    if (!['clinic_owner', 'secretary'].includes(req.userRole)) {
-        return res.status(403).json({ error: 'غير مصرح لك' });
+    // ✅ إضافة university_student إلى الصلاحيات المسموح لها
+    if (['clinic_owner', 'secretary', 'university_student'].includes(req.userRole)) {
+        return next();
     }
+    return res.status(403).json({ error: 'غير مصرح لك' });
+};
     next();
 };
 
