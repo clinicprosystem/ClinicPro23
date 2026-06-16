@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - باقات الاشتراك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+
+        .wallet-card {
+            background: #eff6ff; border-radius: 16px; padding: 16px; margin-bottom: 20px;
+            border: 1px solid #bfdbfe;
+        }
+        .wallet-card .title {
+            display: flex; align-items: center; gap: 8px; color: #1d4ed8; font-weight: 700; font-size: 14px;
+        }
+        .wallet-card .number {
+            font-size: 26px; font-weight: 800; color: #1d4ed8; text-align: center; padding: 8px 0 2px 0;
+            letter-spacing: 2px;
+        }
+        .wallet-card .hint { font-size: 12px; color: #1d4ed8; text-align: center; opacity: 0.7; }
+
+        .plan-card {
+            background: white; border-radius: 16px; padding: 16px; margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            cursor: pointer; transition: all 0.2s; border: 3px solid transparent;
+        }
+        .plan-card:hover { border-color: #e2e8f0; }
+        .plan-card.selected { border-color: #1A5F7A; background: rgba(26,95,122,0.03); }
+        .plan-card .top-row {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+        }
+        .plan-card .top-row .left { display: flex; align-items: center; gap: 8px; }
+        .plan-card .top-row .left .radio {
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #cbd5e1;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .plan-card .top-row .left .radio.active { border-color: #1A5F7A; background: #1A5F7A; }
+        .plan-card .top-row .left .radio.active::after {
+            content: ''; width: 8px; height: 8px; border-radius: 50%; background: white;
+        }
+        .plan-card .top-row .left .name { font-size: 18px; font-weight: 800; color: #1A5F7A; }
+        .plan-card .top-row .badge {
+            padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;
+            background: rgba(5,150,105,0.1); color: #059669;
+        }
+        .plan-card .top-row .price { font-size: 18px; font-weight: 800; color: #059669; }
+        .plan-card .duration { font-size: 13px; color: #64748b; margin-top: 4px; margin-right: 32px; }
+        .plan-card .features { margin-top: 10px; padding-right: 32px; }
+        .plan-card .features .feature {
+            font-size: 13px; padding: 2px 0; color: #1e293b;
+        }
+        .plan-card .features .feature.disabled { color: #94a3b8; }
+
+        .btn-subscribe {
+            width: 100%; padding: 14px; background: #059669; color: white; border: none;
+            border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-subscribe:hover { opacity: 0.85; }
+        .btn-subscribe:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn-subscribe .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .info-note {
+            background: #fef3c7; border-radius: 12px; padding: 12px; margin-top: 16px;
+            display: flex; align-items: center; gap: 8px; color: #d97706; font-size: 13px;
+        }
+        .info-note i { font-size: 18px; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+            .plan-card .top-row .name { font-size: 15px; }
+            .plan-card .top-row .price { font-size: 15px; }
+            .plan-card .features { padding-right: 16px; }
+            .plan-card .duration { margin-right: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
+        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="active"><i class="fas fa-crown"></i> باقات الاشتراك</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>💎 باقات الاشتراك</h1>
+        </div>
+    </div>
+
+    <!-- معلومات المحفظة -->
+    <div class="wallet-card">
+        <div class="title"><i class="fas fa-wallet"></i> رقم المحفظة الإلكترونية جيب</div>
+        <div class="number" id="walletNumber">872074</div>
+        <div class="hint">📱 يمكنك الدفع عبر محفظة جيب</div>
+    </div>
+
+    <!-- الباقات -->
+    <div id="plansContainer">
+        <div class="loader" style="display:flex;justify-content:center;padding:40px;">
+            <div class="spinner" style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#1A5F7A;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        </div>
+    </div>
+
+    <button class="btn-subscribe" id="subscribeBtn" onclick="subscribe()">
+        <i class="fas fa-check-circle"></i> تأكيد الاشتراك وإرسال طلب الدفع
+    </button>
+
+    <div class="info-note">
+        <i class="fas fa-info-circle"></i>
+        <span>بعد إتمام عملية الدفع، سيتم تفعيل اشتراكك خلال 24 ساعة</span>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let selectedPlan = 'monthly';
+const adminWhatsApp = '967773041464';
+const walletNumber = '872074';
+
+const plans = {
+    monthly: {
+        name: 'شهري',
+        price: 5000,
+        duration: '30 يوم',
+        features: [
+            { text: 'عدد غير محدود من المرضى', enabled: true },
+            { text: 'عدد غير محدود من المعالجات', enabled: true },
+            { text: 'عدد غير محدود من الأطباء', enabled: true },
+            { text: 'عدد غير محدود من السكرتيرات', enabled: true },
+            { text: 'عدد غير محدود من الخدمات', enabled: true },
+            { text: 'الدعم الفني', enabled: true },
+        ]
+    },
+    yearly: {
+        name: 'سنوي',
+        price: 50000,
+        duration: '365 يوم',
+        features: [
+            { text: 'عدد غير محدود من المرضى', enabled: true },
+            { text: 'عدد غير محدود من المعالجات', enabled: true },
+            { text: 'عدد غير محدود من الأطباء', enabled: true },
+            { text: 'عدد غير محدود من السكرتيرات', enabled: true },
+            { text: 'عدد غير محدود من الخدمات', enabled: true },
+            { text: 'الدعم الفني', enabled: true },
+            { text: 'خصم 15%', enabled: true },
+        ]
+    },
+    university_student: {
+        name: 'طالب جامعي',
+        price: 3000,
+        duration: '30 يوم',
+        features: [
+            { text: 'عدد غير محدود من المرضى', enabled: true },
+            { text: 'عدد غير محدود من المعالجات', enabled: true },
+            { text: 'إضافة أطباء جدد', enabled: false },
+            { text: 'إضافة سكرتيرات', enabled: false },
+            { text: 'تسعير الخدمات', enabled: false },
+            { text: 'إضافة دفعة/عودة', enabled: false },
+        ]
+    }
+};
+
+// ============================================
+// ✅ عرض الباقات
+// ============================================
+function renderPlans() {
+    const container = document.getElementById('plansContainer');
+    const currentSub = userData?.subscriptionType || 'trial';
+
+    container.innerHTML = Object.entries(plans).map(([key, plan]) => {
+        const isSelected = selectedPlan === key;
+        const isCurrent = currentSub === key;
+
+        return `
+            <div class="plan-card ${isSelected ? 'selected' : ''}" onclick="selectPlan('${key}')">
+                <div class="top-row">
+                    <div class="left">
+                        <div class="radio ${isSelected ? 'active' : ''}"></div>
+                        <span class="name">${plan.name}</span>
+                        ${isCurrent ? `<span class="badge">حالي</span>` : ''}
+                    </div>
+                    <span class="price">${plan.price} ريال</span>
+                </div>
+                <div class="duration">المدة: ${plan.duration}</div>
+                <div class="features">
+                    ${plan.features.map(f => `
+                        <div class="feature ${f.enabled ? '' : 'disabled'}">
+                            ${f.enabled ? '✅' : '❌'} ${f.text}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// ✅ دوال الإجراءات
+// ============================================
+function selectPlan(key) {
+    selectedPlan = key;
+    renderPlans();
+}
+
+function subscribe() {
+    const plan = plans[selectedPlan];
+    const btn = document.getElementById('subscribeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> جاري الإرسال...';
+
+    const message = `
+*طلب اشتراك جديد - ClinicPro*
+
+🏥 اسم العيادة: ${userData?.clinicName || 'غير محدد'}
+👤 اسم صاحب العيادة: ${userData?.name || 'غير محدد'}
+📞 رقم الهاتف: ${userData?.phone || 'غير محدد'}
+💳 نوع الاشتراك: ${plan.name}
+💰 المبلغ: ${plan.price} ريال
+📅 المدة: ${plan.duration}
+
+📌 *تعليمات الدفع:*
+الرجاء تحويل المبلغ إلى المحفظة الإلكترونية:
+📱 رقم المحفظة: ${walletNumber}
+
+📌 *ملاحظة:*
+بعد إتمام عملية الدفع، يرجى إرسال صورة عملية الإرسال لتأكيد الاشتراك وتفعيل الباقة.
+
+شكراً لثقتكم بنا 🤝
+    `.trim();
+
+    setTimeout(() => {
+        const url = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الاشتراك وإرسال طلب الدفع';
+    }, 500);
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+renderPlans();
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
