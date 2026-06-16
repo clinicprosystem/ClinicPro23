@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - الإعدادات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+
+        .profile-section {
+            background: rgba(26,95,122,0.05); padding: 20px; text-align: center; margin-bottom: 16px;
+            border-radius: 16px;
+        }
+        .profile-section .avatar {
+            width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 10px;
+            background: rgba(26,95,122,0.1); display: flex; align-items: center; justify-content: center;
+            font-size: 35px; color: #1A5F7A;
+        }
+        .profile-section .name { font-size: 18px; font-weight: 800; }
+        .profile-section .phone { font-size: 14px; color: #64748b; }
+        .profile-section .role-tag {
+            display: inline-block; margin-top: 4px; padding: 3px 14px;
+            background: rgba(26,95,122,0.1); border-radius: 20px; font-size: 12px; color: #1A5F7A;
+        }
+
+        .settings-group { margin-bottom: 16px; }
+        .settings-group .group-title {
+            font-size: 14px; font-weight: 700; color: #64748b; padding: 0 4px 8px 4px;
+        }
+
+        .setting-item {
+            background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 2px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .setting-item:hover { background: #f8fafc; }
+        .setting-item .left { display: flex; align-items: center; gap: 12px; }
+        .setting-item .left .icon { width: 32px; text-align: center; font-size: 16px; }
+        .setting-item .left .info .title { font-size: 14px; font-weight: 500; }
+        .setting-item .left .info .sub { font-size: 12px; color: #94a3b8; }
+        .setting-item .right { display: flex; align-items: center; gap: 8px; }
+        .setting-item .right .toggle {
+            width: 44px; height: 24px; border-radius: 12px; background: #cbd5e1; cursor: pointer;
+            transition: background 0.3s; position: relative; border: none;
+        }
+        .setting-item .right .toggle.active { background: #1A5F7A; }
+        .setting-item .right .toggle .dot {
+            width: 18px; height: 18px; border-radius: 50%; background: white;
+            position: absolute; top: 3px; left: 3px; transition: transform 0.3s;
+        }
+        .setting-item .right .toggle.active .dot { transform: translateX(20px); }
+        .setting-item .right .arrow { color: #94a3b8; font-size: 14px; }
+        .setting-item .right .value { font-size: 14px; color: #64748b; }
+        .setting-item .right .value.danger { color: #ef4444; }
+
+        .divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+
+        .setting-item.danger .left .title { color: #ef4444; }
+        .setting-item.danger .left .icon { color: #ef4444; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: white; border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { color: #1A5F7A; margin-bottom: 8px; }
+        .modal-content p { color: #64748b; font-size: 14px; margin-bottom: 16px; }
+        .modal-content .btn-group { display: flex; gap: 12px; }
+        .modal-content .btn-group button {
+            flex: 1; padding: 10px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .modal-content .btn-group button:hover { opacity: 0.85; }
+        .modal-content .btn-group .cancel { background: #f1f5f9; color: #475569; }
+        .modal-content .btn-group .confirm { background: #ef4444; color: white; }
+        .modal-content .btn-group .confirm.blue { background: #1A5F7A; }
+        .modal-content .btn-group .confirm.orange { background: #f59e0b; }
+
+        .loader { display: flex; justify-content: center; padding: 20px; }
+        .loader .spinner { width: 30px; height: 30px; border: 3px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+            .setting-item { flex-wrap: wrap; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
+        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li class="active"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>⚙️ الإعدادات</h1>
+        </div>
+    </div>
+
+    <!-- الملف الشخصي -->
+    <div class="profile-section">
+        <div class="avatar">👤</div>
+        <div class="name" id="profileName">طبيب الأسنان</div>
+        <div class="phone" id="profilePhone">📞 +967771234567</div>
+        <div class="role-tag" id="profileRole">صاحب عيادة</div>
+    </div>
+
+    <!-- عام -->
+    <div class="settings-group">
+        <div class="group-title">عام</div>
+        <div class="setting-item">
+            <div class="left">
+                <span class="icon"><i class="fas fa-bell" style="color:#1A5F7A;"></i></span>
+                <div class="info">
+                    <div class="title">الإشعارات</div>
+                    <div class="sub">استلام إشعارات عند إضافة معالجة جديدة</div>
+                </div>
+            </div>
+            <div class="right">
+                <button class="toggle active" id="notifToggle" onclick="toggleSwitch(this)">
+                    <span class="dot"></span>
+                </button>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="left">
+                <span class="icon"><i class="fas fa-sync" style="color:#1A5F7A;"></i></span>
+                <div class="info">
+                    <div class="title">المزامنة التلقائية</div>
+                    <div class="sub">مزامنة البيانات تلقائياً مع السيرفر</div>
+                </div>
+            </div>
+            <div class="right">
+                <button class="toggle active" id="syncToggle" onclick="toggleSwitch(this)">
+                    <span class="dot"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- معلومات التطبيق -->
+    <div class="settings-group">
+        <div class="group-title">معلومات التطبيق</div>
+        <div class="setting-item">
+            <div class="left">
+                <span class="icon"><i class="fas fa-info-circle" style="color:#1A5F7A;"></i></span>
+                <div class="info"><div class="title">الإصدار</div></div>
+            </div>
+            <div class="right"><span class="value">1.0.0</span></div>
+        </div>
+        <div class="setting-item" onclick="openPrivacy()">
+            <div class="left">
+                <span class="icon"><i class="fas fa-shield-alt" style="color:#1A5F7A;"></i></span>
+                <div class="info"><div class="title">سياسة الخصوصية</div></div>
+            </div>
+            <div class="right"><span class="arrow"><i class="fas fa-chevron-left"></i></span></div>
+        </div>
+        <div class="setting-item" onclick="openHelp()">
+            <div class="left">
+                <span class="icon"><i class="fas fa-question-circle" style="color:#1A5F7A;"></i></span>
+                <div class="info"><div class="title">مساعدة</div></div>
+            </div>
+            <div class="right"><span class="arrow"><i class="fas fa-chevron-left"></i></span></div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- مزامنة وتنظيف -->
+    <div class="settings-group">
+        <div class="setting-item" onclick="openSyncModal()">
+            <div class="left">
+                <span class="icon"><i class="fas fa-sync-alt" style="color:#3b82f6;"></i></span>
+                <div class="info">
+                    <div class="title">مزامنة وتنظيف البيانات</div>
+                    <div class="sub">مزامنة جميع البيانات مع السيرفر وحذف المحلي</div>
+                </div>
+            </div>
+            <div class="right"><span class="arrow"><i class="fas fa-chevron-left"></i></span></div>
+        </div>
+        <div class="setting-item" onclick="openClearQueueModal()">
+            <div class="left">
+                <span class="icon"><i class="fas fa-eraser" style="color:#f59e0b;"></i></span>
+                <div class="info">
+                    <div class="title">مسح قائمة الانتظار (Queue)</div>
+                    <div class="sub">حذف جميع العمليات غير المكتملة</div>
+                </div>
+            </div>
+            <div class="right"><span class="arrow"><i class="fas fa-chevron-left"></i></span></div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- تغيير كلمة السر -->
+    <div class="setting-item" onclick="changePassword()">
+        <div class="left">
+            <span class="icon"><i class="fas fa-lock" style="color:#1A5F7A;"></i></span>
+            <div class="info"><div class="title">تغيير كلمة السر</div></div>
+        </div>
+        <div class="right"><span class="arrow"><i class="fas fa-chevron-left"></i></span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- مسح جميع البيانات -->
+    <div class="setting-item danger" onclick="openClearDataModal()">
+        <div class="left">
+            <span class="icon"><i class="fas fa-trash-alt"></i></span>
+            <div class="info"><div class="title">مسح جميع البيانات</div></div>
+        </div>
+        <div class="right"><span class="arrow"><i class="fas fa-chevron-left"></i></span></div>
+    </div>
+</div>
+
+<!-- مودال تأكيد -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <h3 id="modalTitle">تأكيد</h3>
+        <p id="modalMessage">هل أنت متأكد؟</p>
+        <div class="btn-group">
+            <button class="cancel" onclick="closeModal()">إلغاء</button>
+            <button class="confirm" id="modalConfirmBtn" onclick="confirmAction()">تأكيد</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+let modalAction = null;
+
+// ============================================
+// ✅ دوال التبديل
+// ============================================
+function toggleSwitch(el) {
+    el.classList.toggle('active');
+}
+
+// ============================================
+// ✅ دوال المودال
+// ============================================
+function openModal(title, message, action, btnText = 'تأكيد', btnClass = 'confirm') {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMessage').textContent = message;
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.textContent = btnText;
+    btn.className = btnClass;
+    modalAction = action;
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    modalAction = null;
+}
+
+function confirmAction() {
+    if (modalAction) modalAction();
+    closeModal();
+}
+
+// ============================================
+// ✅ دوال الإعدادات
+// ============================================
+function openPrivacy() {
+    alert('📄 سياسة الخصوصية\n🚧 قيد التطوير');
+}
+
+function openHelp() {
+    alert('📞 مساعدة\n🚧 قيد التطوير');
+}
+
+function changePassword() {
+    alert('🔑 تغيير كلمة السر\n🚧 قيد التطوير');
+}
+
+function openSyncModal() {
+    openModal(
+        'مزامنة وتنظيف',
+        'سيتم:\n1. مزامنة جميع البيانات مع السيرفر\n2. حذف جميع البيانات المحلية\n3. إعادة تحميل البيانات من السيرفر\n\nهل تريد المتابعة؟',
+        () => { alert('🔄 تمت المزامنة والتنظيف بنجاح (محاكاة)'); },
+        'تنفيذ',
+        'confirm blue'
+    );
+}
+
+function openClearQueueModal() {
+    openModal(
+        'مسح قائمة الانتظار',
+        'هل أنت متأكد؟ سيتم حذف جميع العمليات غير المكتملة.',
+        () => { alert('✅ تم مسح قائمة الانتظار (محاكاة)'); },
+        'مسح',
+        'confirm orange'
+    );
+}
+
+function openClearDataModal() {
+    openModal(
+        '⚠️ تحذير',
+        'هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع البيانات.',
+        () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        },
+        'مسح الكل',
+        'confirm'
+    );
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+const token = localStorage.getItem('token') || '';
+const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('profileName').textContent = userData.name;
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('profilePhone').textContent = `📞 ${userData.phone || ''}`;
+    document.getElementById('profileRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+// إغلاق المودال عند الضغط خارجها
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
