@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ClinicPro - لوحة التحكم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ===== القائمة الجانبية ===== */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background: #1A5F7A;
+            color: white;
+            padding: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .logo {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .sidebar .logo span {
+            color: #57C0E8;
+        }
+
+        .sidebar .user-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar .user-info .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar .user-info .role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 12px 0;
+        }
+
+        .sidebar ul li {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-right: 4px solid transparent;
+        }
+
+        .sidebar ul li:hover,
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.08);
+            border-right-color: #57C0E8;
+        }
+
+        .sidebar ul li i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar ul li .badge {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 1px 8px;
+            border-radius: 12px;
+            margin-right: auto;
+        }
+
+        .sidebar ul li.logout {
+            color: #f87171;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 16px;
+        }
+
+        .sidebar ul li.logout:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .sidebar .divider {
+            padding: 8px 24px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        /* ===== المحتوى الرئيسي ===== */
+        .main-content {
+            margin-right: 260px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ===== الهيدر ===== */
+        .header {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            color: #1A5F7A;
+        }
+
+        .header .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .actions button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #555;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s;
+            position: relative;
+        }
+
+        .header .actions button:hover {
+            background: #f0f4f8;
+        }
+
+        .header .actions .notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* ===== بطاقة الترحيب ===== */
+        .welcome-card {
+            background: linear-gradient(135deg, #1A5F7A, #57C0E8);
+            padding: 24px;
+            border-radius: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .welcome-card .avatar-lg {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+
+        .welcome-card h2 {
+            font-size: 20px;
+        }
+
+        .welcome-card p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        /* ===== بطاقات الإحصائيات ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .icon.blue { background: #dbeafe; color: #1A5F7A; }
+        .stat-card .icon.green { background: #d1fae5; color: #059669; }
+        .stat-card .icon.orange { background: #fef3c7; color: #d97706; }
+        .stat-card .icon.purple { background: #ede9fe; color: #7c3aed; }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* ===== زر الاشتراك ===== */
+        .subscription-banner {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .subscription-banner:hover {
+            opacity: 0.9;
+        }
+
+        .subscription-banner .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subscription-banner .left i {
+            font-size: 24px;
+        }
+
+        .subscription-banner .left .title {
+            font-weight: 700;
+        }
+
+        .subscription-banner .left .sub {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .subscription-banner .arrow {
+            font-size: 18px;
+        }
+
+        /* ===== آخر المعالجات ===== */
+        .recent-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .recent-section .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .recent-section .header-row h3 {
+            font-size: 18px;
+            color: #1e293b;
+        }
+
+        .recent-section .header-row a {
+            color: #1A5F7A;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .treatment-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .treatment-item:hover {
+            background: #f8fafc;
+        }
+
+        .treatment-item .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(26, 95, 122, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1A5F7A;
+            flex-shrink: 0;
+        }
+
+        .treatment-item .info {
+            flex: 1;
+        }
+
+        .treatment-item .info .name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .treatment-item .info .details {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .treatment-item .info .details i {
+            margin-left: 3px;
+        }
+
+        .treatment-item .price {
+            font-weight: 700;
+            color: #1A5F7A;
+            font-size: 13px;
+            background: rgba(26, 95, 122, 0.08);
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* ===== زر الهامبرغر ===== */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1A5F7A;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+        }
+
+        /* ===== متجاوب ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+            .hamburger {
+                display: block;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .welcome-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-card {
+                padding: 14px;
+            }
+            .stat-card .value {
+                font-size: 20px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .treatment-item {
+                flex-wrap: wrap;
+            }
+            .treatment-item .price {
+                margin-right: auto;
+            }
+        }
+
+        /* ===== لودر ===== */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        .loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #1A5F7A;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== القائمة الجانبية ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li class="active" onclick="loadPage('dashboard')">
+            <i class="fas fa-chart-pie"></i> الرئيسية
+        </li>
+        <li onclick="loadPage('patients')">
+            <i class="fas fa-users"></i> المرضى
+            <span class="badge" id="patientsBadge">0</span>
+        </li>
+        <li onclick="loadPage('treatments')">
+            <i class="fas fa-tooth"></i> المعالجات
+            <span class="badge" id="treatmentsBadge">0</span>
+        </li>
+        <li onclick="loadPage('services')">
+            <i class="fas fa-list"></i> الخدمات والأسعار
+        </li>
+        <li onclick="loadPage('doctors')">
+            <i class="fas fa-user-md"></i> الأطباء
+        </li>
+        <li onclick="loadPage('secretaries')">
+            <i class="fas fa-user-tie"></i> السكرتيرات
+        </li>
+        <li onclick="loadPage('lab')">
+            <i class="fas fa-flask"></i> المعمل
+        </li>
+        <li onclick="loadPage('reports')">
+            <i class="fas fa-chart-bar"></i> التقارير
+        </li>
+        <li onclick="loadPage('notifications')">
+            <i class="fas fa-bell"></i> الإشعارات
+        </li>
+        <li onclick="loadPage('settings')">
+            <i class="fas fa-cog"></i> الإعدادات
+        </li>
+        <li onclick="loadPage('profile')">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </li>
+    </ul>
+</div>
+
+<!-- ===== المحتوى الرئيسي ===== -->
+<div class="main-content" id="mainContent">
+    <!-- ===== الهيدر ===== -->
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1 id="pageTitle">لوحة التحكم</h1>
+        </div>
+        <div class="actions">
+            <button onclick="refreshData()" title="تحديث">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button onclick="loadPage('notifications')" title="الإشعارات">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== المحتوى الديناميكي ===== -->
+    <div id="dynamicContent">
+        <!-- سيتم تحميله بواسطة JavaScript -->
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let clinicId = userData?.clinicId || '';
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+            return null;
+        }
+        return await response.json();
+    } catch (e) {
+        console.error('❌ API Error:', e);
+        return null;
+    }
+}
+
+// ============================================
+// ✅ دوال الصفحات
+// ============================================
+function loadPage(page) {
+    // تحديث القائمة الجانبية
+    document.querySelectorAll('.sidebar ul li').forEach(el => el.classList.remove('active'));
+    const items = document.querySelectorAll('.sidebar ul li');
+    const pageMap = {
+        'dashboard': 0, 'patients': 1, 'treatments': 2, 'services': 3,
+        'doctors': 4, 'secretaries': 5, 'lab': 6, 'reports': 7,
+        'notifications': 8, 'settings': 9, 'profile': 10
+    };
+    const idx = pageMap[page];
+    if (idx !== undefined && items[idx]) items[idx].classList.add('active');
+
+    // تحديث عنوان الصفحة
+    const titles = {
+        'dashboard': 'لوحة التحكم',
+        'patients': 'المرضى',
+        'treatments': 'المعالجات',
+        'services': 'الخدمات والأسعار',
+        'doctors': 'الأطباء',
+        'secretaries': 'السكرتيرات',
+        'lab': 'المعمل',
+        'reports': 'التقارير',
+        'notifications': 'الإشعارات',
+        'settings': 'الإعدادات',
+        'profile': 'الملف الشخصي'
+    };
+    document.getElementById('pageTitle').textContent = titles[page] || page;
+
+    // تحميل المحتوى
+    const content = document.getElementById('dynamicContent');
+    content.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    switch(page) {
+        case 'dashboard': renderDashboard(content); break;
+        case 'patients': renderPatients(content); break;
+        case 'treatments': renderTreatments(content); break;
+        case 'services': renderServices(content); break;
+        case 'doctors': renderDoctors(content); break;
+        case 'secretaries': renderSecretaries(content); break;
+        case 'lab': renderLab(content); break;
+        case 'reports': renderReports(content); break;
+        case 'notifications': renderNotifications(content); break;
+        case 'settings': renderSettings(content); break;
+        case 'profile': renderProfile(content); break;
+        default: content.innerHTML = '<div class="empty-state"><i class="fas fa-construction"></i><p>جاري التطوير...</p></div>';
+    }
+}
+
+// ============================================
+// ✅ لوحة التحكم (Dashboard)
+// ============================================
+async function renderDashboard(container) {
+    try {
+        const [patients, treatments, doctors, recent] = await Promise.all([
+            apiCall('/patients'),
+            apiCall('/treatments'),
+            apiCall('/clinics/doctors'),
+            apiCall('/treatments')
+        ]);
+
+        const pCount = patients?.patients?.length || 0;
+        const tCount = treatments?.treatments?.length || 0;
+        const dCount = doctors?.doctors?.length || 0;
+        const recentTreats = treatments?.treatments?.slice(0, 5) || [];
+
+        document.getElementById('patientsBadge').textContent = pCount;
+        document.getElementById('treatmentsBadge').textContent = tCount;
+
+        // ✅ التحقق من الاشتراك
+        let subscriptionHtml = '';
+        try {
+            const sub = await apiCall('/clinics/subscription/status');
+            const subType = sub?.subscriptionType || 'trial';
+            if (subType === 'trial' || subType === 'expired') {
+                subscriptionHtml = `
+                    <div class="subscription-banner" onclick="loadPage('subscription')">
+                        <div class="left">
+                            <i class="fas fa-subscriptions"></i>
+                            <div>
+                                <div class="title">تجديد الاشتراك</div>
+                                <div class="sub">${subType === 'trial' ? 'فترة تجريبية - قم بترقية اشتراكك' : 'انتهت صلاحية الاشتراك - جدد الآن'}</div>
+                            </div>
+                        </div>
+                        <div class="arrow"><i class="fas fa-arrow-left"></i></div>
+                    </div>
+                `;
+            }
+        } catch(e) { console.warn('Subscription check failed:', e); }
+
+        container.innerHTML = `
+            <!-- الترحيب -->
+            <div class="welcome-card">
+                <div class="avatar-lg">👤</div>
+                <div>
+                    <h2>مرحباً، ${userData?.name || 'طبيب الأسنان'}</h2>
+                    <p>يسعدنا وجودك معنا اليوم</p>
+                </div>
+            </div>
+
+            ${subscriptionHtml}
+
+            <!-- الإحصائيات -->
+            <div class="stats-grid">
+                <div class="stat-card" onclick="loadPage('patients')">
+                    <div class="icon blue"><i class="fas fa-users"></i></div>
+                    <div class="value">${pCount}</div>
+                    <div class="label">المرضى</div>
+                </div>
+                <div class="stat-card" onclick="loadPage('treatments')">
+                    <div class="icon green"><i class="fas fa-tooth"></i></div>
+                    <div class="value">${tCount}</div>
+                    <div class="label">المعالجات</div>
+                </div>
+                <div class="stat-card" onclick="loadPage('doctors')">
+                    <div class="icon orange"><i class="fas fa-user-md"></i></div>
+                    <div class="value">${dCount}</div>
+                    <div class="label">الأطباء</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon purple"><i class="fas fa-coins"></i></div>
+                    <div class="value">--</div>
+                    <div class="label">الإيرادات</div>
+                </div>
+            </div>
+
+            <!-- آخر المعالجات -->
+            <div class="recent-section">
+                <div class="header-row">
+                    <h3>آخر المعالجات</h3>
+                    <a href="#" onclick="loadPage('treatments');return false;">عرض الكل →</a>
+                </div>
+                ${recentTreats.length === 0 ? `
+                    <div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد معالجات حديثة</p></div>
+                ` : recentTreats.map(t => `
+                    <div class="treatment-item" onclick="loadPage('treatments')">
+                        <div class="icon-circle"><i class="fas fa-tooth"></i></div>
+                        <div class="info">
+                            <div class="name">${t.subServiceName || t.serviceName || 'خدمة'}</div>
+                            <div class="details">
+                                <span><i class="fas fa-user"></i> ${t.patientName || 'مريض'}</span>
+                                <span><i class="fas fa-user-md"></i> ${t.doctorName || 'طبيب'}</span>
+                                <span><i class="fas fa-calendar"></i> ${t.date ? t.date.substring(0,10) : '-'}</span>
+                            </div>
+                        </div>
+                        <div class="price">${t.finalPrice || 0} ريال</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch(e) {
+        console.error('Dashboard error:', e);
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ في تحميل البيانات</p></div>';
+    }
+}
+
+// ============================================
+// ✅ وظائف الصفحات (مؤقتة)
+// ============================================
+function renderPatients(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">👤 قائمة المرضى</h3>
+            <div class="empty-state"><i class="fas fa-users"></i><p>جاري تحميل قائمة المرضى...</p></div>
+        </div>
+    `;
+    // سيتم تنفيذها لاحقاً
+}
+
+function renderTreatments(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">🦷 قائمة المعالجات</h3>
+            <div class="empty-state"><i class="fas fa-tooth"></i><p>جاري تحميل قائمة المعالجات...</p></div>
+        </div>
+    `;
+}
+
+function renderServices(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">📋 الخدمات والأسعار</h3>
+            <div class="empty-state"><i class="fas fa-list"></i><p>جاري تحميل الخدمات...</p></div>
+        </div>
+    `;
+}
+
+function renderDoctors(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">👨‍⚕️ الأطباء</h3>
+            <div class="empty-state"><i class="fas fa-user-md"></i><p>جاري تحميل قائمة الأطباء...</p></div>
+        </div>
+    `;
+}
+
+function renderSecretaries(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">👩‍💼 السكرتيرات</h3>
+            <div class="empty-state"><i class="fas fa-user-tie"></i><p>جاري تحميل قائمة السكرتيرات...</p></div>
+        </div>
+    `;
+}
+
+function renderLab(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">🧪 المعمل</h3>
+            <div class="empty-state"><i class="fas fa-flask"></i><p>جاري تحميل بيانات المعمل...</p></div>
+        </div>
+    `;
+}
+
+function renderReports(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">📊 التقارير</h3>
+            <div class="empty-state"><i class="fas fa-chart-bar"></i><p>جاري تحميل التقارير...</p></div>
+        </div>
+    `;
+}
+
+function renderNotifications(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">🔔 الإشعارات</h3>
+            <div class="empty-state"><i class="fas fa-bell"></i><p>لا توجد إشعارات</p></div>
+        </div>
+    `;
+}
+
+function renderSettings(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">⚙️ الإعدادات</h3>
+            <div class="empty-state"><i class="fas fa-cog"></i><p>جاري تحميل الإعدادات...</p></div>
+        </div>
+    `;
+}
+
+function renderProfile(container) {
+    container.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1A5F7A;margin-bottom:16px;">👤 الملف الشخصي</h3>
+            <div style="text-align:center;padding:20px;">
+                <div style="font-size:64px;margin-bottom:12px;">👤</div>
+                <h4 style="font-size:20px;">${userData?.name || 'طبيب الأسنان'}</h4>
+                <p style="color:#64748b;">${userData?.phone || ''}</p>
+                <p style="color:#64748b;">${userData?.role === 'clinic_owner' ? 'صاحب عيادة' : userData?.role || 'مستخدم'}</p>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
+// ✅ وظائف مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function refreshData() {
+    loadPage('dashboard');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+// إذا لم يكن هناك توكن، ارجع إلى صفحة تسجيل الدخول
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+// عرض اسم المستخدم
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent = 
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+// تحميل لوحة التحكم
+loadPage('dashboard');
+
+// إغلاق القائمة الجانبية عند الضغط على رابط (للجوال)
+document.querySelectorAll('.sidebar ul li').forEach(el => {
+    el.addEventListener('click', () => {
+        if (window.innerWidth <= 768) toggleSidebar();
+    });
+});
+</script>
+
+</body>
+</html>
