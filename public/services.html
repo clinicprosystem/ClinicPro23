@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - الخدمات والأسعار</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
+        .header .actions button:hover { background: #f0f4f8; }
+
+        .filters {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+        }
+        .filter-chip {
+            padding: 6px 16px; border-radius: 20px; border: 2px solid #1A5F7A;
+            font-size: 13px; cursor: pointer; transition: all 0.3s;
+            background: white; color: #1A5F7A;
+        }
+        .filter-chip:hover { background: #f0f7fa; }
+        .filter-chip.active { background: #1A5F7A; color: white; }
+
+        .service-card {
+            background: white; border-radius: 12px; margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .service-card .header-row {
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .service-card .header-row:hover { background: #f8fafc; }
+        .service-card .header-row .left { display: flex; align-items: center; gap: 12px; }
+        .service-card .header-row .left .icon-box {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: rgba(26,95,122,0.1); display: flex; align-items: center; justify-content: center;
+            color: #1A5F7A; font-size: 20px;
+        }
+        .service-card .header-row .left .info .name { font-weight: 700; font-size: 16px; color: #1e293b; }
+        .service-card .header-row .left .info .sub { font-size: 12px; color: #94a3b8; }
+        .service-card .header-row .actions { display: flex; gap: 4px; }
+        .service-card .header-row .actions button {
+            background: none; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+            transition: background 0.2s; font-size: 16px;
+        }
+        .service-card .header-row .actions button:hover { background: #f1f5f9; }
+        .service-card .header-row .actions button.delete { color: #ef4444; }
+
+        .service-card .sub-services {
+            padding: 0 20px 16px 20px;
+        }
+        .service-card .sub-services .sub-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; border-radius: 8px; transition: background 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .service-card .sub-services .sub-item:hover { background: #f8fafc; }
+        .service-card .sub-services .sub-item .left { display: flex; align-items: center; gap: 8px; }
+        .service-card .sub-services .sub-item .left i { color: #1A5F7A; font-size: 14px; }
+        .service-card .sub-services .sub-item .left .name { font-size: 14px; color: #1e293b; }
+        .service-card .sub-services .sub-item .left .no-price { font-size: 12px; color: #94a3b8; }
+        .service-card .sub-services .sub-item .right { display: flex; align-items: center; gap: 4px; }
+        .service-card .sub-services .sub-item .right .price { font-weight: 700; color: #1A5F7A; font-size: 14px; }
+        .service-card .sub-services .sub-item .right .no-price-tag { font-size: 12px; color: #94a3b8; }
+        .service-card .sub-services .sub-item .right button {
+            background: none; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer;
+            transition: background 0.2s; font-size: 14px; color: #1A5F7A;
+        }
+        .service-card .sub-services .sub-item .right button:hover { background: #f1f5f9; }
+        .service-card .sub-services .sub-item .right button.delete { color: #ef4444; }
+        .service-card .sub-services .sub-item .sync-badge {
+            font-size: 10px; color: #f59e0b; background: #fef3c7; padding: 1px 8px; border-radius: 10px; margin-left: 8px;
+        }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 64px; margin-bottom: 16px; color: #cbd5e1; }
+        .empty-state h3 { font-size: 18px; color: #64748b; }
+        .empty-state p { font-size: 14px; }
+
+        .loader { display: flex; justify-content: center; align-items: center; min-height: 200px; }
+        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .fab {
+            position: fixed; bottom: 30px; left: 30px; width: 56px; height: 56px;
+            border-radius: 50%; background: #57C0E8; color: white; border: none;
+            font-size: 28px; cursor: pointer; box-shadow: 0 4px 16px rgba(87,192,232,0.4);
+            transition: transform 0.2s; z-index: 100;
+        }
+        .fab:hover { transform: scale(1.05); }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+            .fab { bottom: 20px; left: 20px; width: 48px; height: 48px; font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
+        <li class="active"><i class="fas fa-list"></i> الخدمات والأسعار</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>📋 الخدمات والأسعار</h1>
+        </div>
+        <div class="actions">
+            <button onclick="loadServices()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+        </div>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filters" id="filtersContainer">
+        <span class="filter-chip active" data-filter="الكل" onclick="filterServices('الكل', this)">الكل</span>
+        <span class="filter-chip" data-filter="أسنان" onclick="filterServices('أسنان', this)">أسنان</span>
+        <span class="filter-chip" data-filter="فكين" onclick="filterServices('فكين', this)">فكين</span>
+    </div>
+
+    <!-- قائمة الخدمات -->
+    <div id="servicesList">
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<!-- زر الإضافة -->
+<button class="fab" onclick="addMainService()">+</button>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let mainServices = [];
+let subServices = {};
+let selectedFilter = 'الكل';
+let isUniversityStudent = false;
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        return await response.json();
+    } catch (e) { console.error('❌ API Error:', e); return null; }
+}
+
+// ============================================
+// ✅ تحميل الخدمات
+// ============================================
+async function loadServices() {
+    const list = document.getElementById('servicesList');
+    list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    try {
+        const response = await apiCall('/clinics/main-services');
+        if (response?.services) {
+            mainServices = response.services;
+            // جلب الخدمات الفرعية لكل خدمة
+            for (let i = 0; i < mainServices.length; i++) {
+                const subResponse = await apiCall(`/clinics/sub-services?mainServiceId=${mainServices[i]._id}`);
+                if (subResponse?.services) {
+                    subServices[mainServices[i]._id] = subResponse.services;
+                }
+            }
+            renderServices();
+            return;
+        }
+    } catch(e) { console.warn('⚠️ Failed to fetch:', e); }
+
+    // بيانات افتراضية
+    mainServices = [
+        { _id: '1', name: 'حشو', category: 'teeth' },
+        { _id: '2', name: 'تقويم', category: 'arch' },
+        { _id: '3', name: 'خلع', category: 'teeth' },
+    ];
+    subServices = {
+        '1': [{ _id: '1-1', name: 'حشو عادي', price: 150 }, { _id: '1-2', name: 'حشو تجميعي', price: 250 }],
+        '2': [{ _id: '2-1', name: 'تقويم ثابت', price: 1200 }, { _id: '2-2', name: 'تقويم متحرك', price: 800 }],
+        '3': [{ _id: '3-1', name: 'خلع بسيط', price: 100 }, { _id: '3-2', name: 'خلع جراحي', price: 300 }],
+    };
+    renderServices();
+}
+
+// ============================================
+// ✅ عرض الخدمات
+// ============================================
+function renderServices() {
+    const list = document.getElementById('servicesList');
+
+    let filtered = mainServices;
+    if (selectedFilter === 'أسنان') filtered = mainServices.filter(s => s.category === 'teeth');
+    else if (selectedFilter === 'فكين') filtered = mainServices.filter(s => s.category === 'arch');
+
+    if (filtered.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-list"></i>
+                <h3>لا توجد خدمات</h3>
+                <p>اضغط على زر + لإضافة خدمة رئيسية</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = filtered.map(main => {
+        const subs = subServices[main._id] || [];
+        const icon = main.category === 'teeth' ? 'fa-tooth' : 'fa-face-smile';
+
+        return `
+            <div class="service-card">
+                <div class="header-row" onclick="toggleSubs(this)">
+                    <div class="left">
+                        <div class="icon-box"><i class="fas ${icon}"></i></div>
+                        <div class="info">
+                            <div class="name">${main.name}</div>
+                            <div class="sub">${subs.length} خدمة فرعية</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button onclick="event.stopPropagation();addSubService('${main._id}')" title="إضافة خدمة فرعية"><i class="fas fa-plus"></i></button>
+                        <button class="delete" onclick="event.stopPropagation();deleteMainService('${main._id}','${main.name}')" title="حذف"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="sub-services" style="display:none;">
+                    ${subs.map(sub => `
+                        <div class="sub-item">
+                            <div class="left">
+                                <i class="fas fa-arrow-left"></i>
+                                <span class="name">${sub.name}</span>
+                                ${isUniversityStudent ? `<span class="no-price">السعر غير محدد لهذه الباقة</span>` : ''}
+                            </div>
+                            <div class="right">
+                                ${isUniversityStudent
+                                    ? `<span class="no-price-tag">السعر غير متاح</span>`
+                                    : `<span class="price">${sub.price} ريال</span>`
+                                }
+                                ${!isUniversityStudent ? `<button onclick="event.stopPropagation();editSubService('${sub._id}','${sub.name}','${sub.price}')"><i class="fas fa-edit"></i></button>` : ''}
+                                <button class="delete" onclick="event.stopPropagation();deleteSubService('${sub._id}','${sub.name}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${subs.length === 0 ? '<div style="padding:12px;text-align:center;color:#94a3b8;font-size:13px;">لا توجد خدمات فرعية</div>' : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// ✅ فتح/إغلاق الخدمات الفرعية
+// ============================================
+function toggleSubs(element) {
+    const subContainer = element.closest('.service-card').querySelector('.sub-services');
+    if (subContainer.style.display === 'none') {
+        subContainer.style.display = 'block';
+    } else {
+        subContainer.style.display = 'none';
+    }
+}
+
+// ============================================
+// ✅ دوال الإجراءات
+// ============================================
+function filterServices(filter, element) {
+    selectedFilter = filter;
+    document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+    if (element) element.classList.add('active');
+    renderServices();
+}
+
+function addMainService() {
+    if (isUniversityStudent) {
+        alert('⚠️ غير مسموح بإضافة خدمات في باقة طالب جامعي');
+        return;
+    }
+    const name = prompt('📝 أدخل اسم الخدمة الرئيسية:');
+    if (!name || name.trim() === '') return;
+    const category = confirm('🦷 هل هذه الخدمة للفكين؟\n"إلغاء" = أسنان، "موافق" = فكين') ? 'arch' : 'teeth';
+
+    // محاكاة الإضافة
+    const newId = Date.now().toString();
+    mainServices.push({ _id: newId, name: name.trim(), category });
+    subServices[newId] = [];
+    renderServices();
+    alert(`✅ تم إضافة الخدمة "${name.trim()}"`);
+}
+
+function addSubService(mainId) {
+    const main = mainServices.find(m => m._id === mainId);
+    if (!main) return;
+    const name = prompt(`📝 أدخل اسم المعالجة لـ "${main.name}":`);
+    if (!name || name.trim() === '') return;
+
+    let price = 0;
+    if (!isUniversityStudent) {
+        const priceInput = prompt('💰 أدخل السعر (ريال):');
+        if (priceInput === null) return;
+        price = parseInt(priceInput) || 0;
+    }
+
+    if (!subServices[mainId]) subServices[mainId] = [];
+    subServices[mainId].push({ _id: Date.now().toString(), name: name.trim(), price });
+    renderServices();
+    alert(`✅ تم إضافة المعالجة "${name.trim()}"`);
+}
+
+function editSubService(id, name, price) {
+    if (isUniversityStudent) {
+        alert('⚠️ لا يمكنك تعديل الأسعار في باقة طالب جامعي');
+        return;
+    }
+    const newPrice = prompt(`💰 تعديل سعر "${name}":`, price);
+    if (newPrice === null) return;
+    const newPriceNum = parseInt(newPrice) || 0;
+    // تحديث في البيانات
+    for (const key in subServices) {
+        const sub = subServices[key].find(s => s._id === id);
+        if (sub) { sub.price = newPriceNum; break; }
+    }
+    renderServices();
+    alert(`✅ تم تحديث السعر إلى ${newPriceNum} ريال`);
+}
+
+function deleteMainService(id, name) {
+    if (!confirm(`🗑️ هل أنت متأكد من حذف الخدمة "${name}"؟\nسيتم حذف جميع المعالجات المرتبطة بها.`)) return;
+    mainServices = mainServices.filter(s => s._id !== id);
+    delete subServices[id];
+    renderServices();
+    alert('✅ تم حذف الخدمة');
+}
+
+function deleteSubService(id, name) {
+    if (!confirm(`🗑️ هل أنت متأكد من حذف المعالجة "${name}"؟`)) return;
+    for (const key in subServices) {
+        subServices[key] = subServices[key].filter(s => s._id !== id);
+    }
+    renderServices();
+    alert('✅ تم حذف المعالجة');
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+// التحقق من نوع الاشتراك
+if (userData?.role === 'university_student') {
+    isUniversityStudent = true;
+}
+
+loadServices();
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
