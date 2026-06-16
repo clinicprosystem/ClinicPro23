@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - الملف الشخصي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
+        .header .actions button:hover { background: #f0f4f8; }
+
+        .profile-header {
+            text-align: center; padding: 20px 0;
+        }
+        .profile-header .avatar-lg {
+            width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 12px;
+            background: rgba(26,95,122,0.1); display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: #1A5F7A;
+        }
+        .profile-header .name { font-size: 22px; font-weight: 800; color: #1e293b; }
+        .profile-header .phone { font-size: 14px; color: #64748b; }
+        .profile-header .role-tag {
+            display: inline-block; margin-top: 8px; padding: 4px 16px;
+            background: rgba(26,95,122,0.1); border-radius: 20px; color: #1A5F7A; font-size: 13px; font-weight: 700;
+        }
+
+        .card {
+            background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .card .card-title {
+            font-size: 16px; font-weight: 700; color: #1A5F7A; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .card .card-title .icon {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            background: rgba(26,95,122,0.1); color: #1A5F7A;
+        }
+
+        .subscription-card {
+            padding: 16px; border-radius: 16px;
+        }
+        .subscription-card .status-row {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .subscription-card .status-row .status-icon { font-size: 20px; }
+        .subscription-card .status-row .status-text { font-size: 18px; font-weight: 700; }
+        .subscription-card .message { font-size: 14px; margin-top: 8px; }
+        .subscription-card .days-left { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .subscription-card .progress-bar {
+            width: 100%; height: 4px; background: #e2e8f0; border-radius: 4px; margin-top: 8px; overflow: hidden;
+        }
+        .subscription-card .progress-bar .fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+        .subscription-card.expired { background: #fee2e2; }
+        .subscription-card.active { background: #d1fae5; }
+        .subscription-card.trial { background: #fef3c7; }
+        .subscription-card.university { background: #ede9fe; }
+
+        .warning-box {
+            background: rgba(239,68,68,0.1); border-radius: 12px; padding: 12px;
+            display: flex; align-items: center; gap: 8px; margin: 8px 0 12px;
+        }
+        .warning-box i { color: #dc2626; }
+        .warning-box .text { font-size: 12px; color: #dc2626; }
+
+        .btn-renew {
+            width: 100%; padding: 10px; background: #059669; color: white; border: none;
+            border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-renew:hover { opacity: 0.85; }
+
+        .info-tile {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+        }
+        .info-tile:last-child { border-bottom: none; }
+        .info-tile .left { display: flex; align-items: center; gap: 10px; color: #1A5F7A; }
+        .info-tile .left .label { color: #1e293b; }
+        .info-tile .right { font-weight: 700; }
+
+        .btn-logout {
+            width: 100%; padding: 12px; background: transparent; color: #ef4444; border: 2px solid #ef4444;
+            border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-logout:hover { background: #fee2e2; }
+
+        .loader { display: flex; justify-content: center; padding: 40px; }
+        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
+        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li class="active"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>👤 الملف الشخصي</h1>
+        </div>
+        <div class="actions">
+            <button onclick="loadProfile()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+        </div>
+    </div>
+
+    <div id="profileContent">
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let subscriptionData = {};
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        return await response.json();
+    } catch (e) { console.error('❌ API Error:', e); return null; }
+}
+
+// ============================================
+// ✅ تحميل الملف الشخصي
+// ============================================
+async function loadProfile() {
+    const content = document.getElementById('profileContent');
+    content.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    try {
+        const response = await apiCall('/clinics/subscription/status');
+        if (response) {
+            subscriptionData = response;
+        }
+        renderProfile();
+    } catch(e) {
+        console.error('❌ Error:', e);
+        renderProfile();
+    }
+}
+
+// ============================================
+// ✅ عرض الملف الشخصي
+// ============================================
+function renderProfile() {
+    const content = document.getElementById('profileContent');
+    const user = userData;
+    const isClinicOwner = user?.role === 'clinic_owner';
+    const sub = subscriptionData;
+
+    const status = sub.status || 'trial';
+    const type = sub.type || 'trial';
+    const message = sub.message || '';
+    const daysLeft = sub.daysLeft || 0;
+    const endDate = sub.endDate || '';
+
+    const statusClass = status === 'expired' ? 'expired' :
+                        status === 'active' ? 'active' :
+                        status === 'trial' ? 'trial' :
+                        type === 'university_student' ? 'university' : '';
+
+    const statusIcon = status === 'expired' ? 'fa-times-circle' :
+                       status === 'active' ? 'fa-check-circle' :
+                       type === 'university_student' ? 'fa-graduation-cap' :
+                       'fa-hourglass-half';
+
+    const statusColor = status === 'expired' ? '#dc2626' :
+                        status === 'active' ? '#059669' :
+                        type === 'university_student' ? '#7c3aed' :
+                        '#d97706';
+
+    const statusText = status === 'expired' ? 'انتهى الاشتراك' :
+                       status === 'active' ? 'اشتراك نشط' :
+                       type === 'university_student' ? 'طالب جامعي' :
+                       'فترة تجريبية';
+
+    const typeText = type === 'monthly' ? 'شهري' :
+                     type === 'yearly' ? 'سنوي' :
+                     type === 'university_student' ? 'طالب جامعي' :
+                     'فترة تجريبية';
+
+    const roleText = user?.role === 'clinic_owner' ? 'صاحب عيادة' :
+                     user?.role === 'university_student' ? 'طالب جامعي' :
+                     user?.role === 'secretary' ? 'سكرتير' :
+                     user?.role === 'doctor' ? 'طبيب' : 'مستخدم';
+
+    let subscriptionHtml = '';
+    if (isClinicOwner) {
+        subscriptionHtml = `
+            <div class="subscription-card ${statusClass}">
+                <div class="status-row">
+                    <span class="status-icon" style="color:${statusColor}"><i class="fas ${statusIcon}"></i></span>
+                    <span class="status-text" style="color:${statusColor}">${statusText}</span>
+                </div>
+                ${message ? `<div class="message">${message}</div>` : ''}
+                ${daysLeft > 0 ? `
+                    <div class="days-left">متبقي ${daysLeft} يوم</div>
+                    <div class="progress-bar">
+                        <div class="fill" style="width:${Math.min(100, (daysLeft / 30) * 100)}%;background:${statusColor};"></div>
+                    </div>
+                ` : ''}
+                ${status === 'expired' ? `
+                    <div class="warning-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="text">انتهت صلاحية الاشتراك. يرجى التجديد لإضافة مرضى ومعالجات جديدة</span>
+                    </div>
+                    <button class="btn-renew" onclick="renewSubscription()">
+                        <i class="fas fa-refresh"></i> تجديد الاشتراك
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    content.innerHTML = `
+        <!-- صورة الملف الشخصي -->
+        <div class="profile-header">
+            <div class="avatar-lg">👤</div>
+            <div class="name">${user?.name || 'مستخدم'}</div>
+            <div class="phone">📞 ${user?.phone || ''}</div>
+            <div class="role-tag">${roleText}</div>
+        </div>
+
+        <!-- الاشتراك -->
+        ${isClinicOwner ? subscriptionHtml : ''}
+
+        <!-- معلومات إضافية -->
+        <div class="card">
+            <div class="card-title">
+                <span class="icon"><i class="fas fa-info"></i></span>
+                معلومات الحساب
+            </div>
+            <div class="info-tile">
+                <div class="left"><span class="label">نوع الاشتراك</span></div>
+                <div class="right">${typeText}</div>
+            </div>
+            <div class="info-tile">
+                <div class="left"><span class="label">تاريخ الانتهاء</span></div>
+                <div class="right">${endDate ? endDate.substring(0, 10) : 'غير محدد'}</div>
+            </div>
+        </div>
+
+        <!-- تسجيل الخروج -->
+        <button class="btn-logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </button>
+    `;
+}
+
+// ============================================
+// ✅ دوال الإجراءات
+// ============================================
+function renewSubscription() {
+    alert('🔄 تجديد الاشتراك\n🚧 قيد التطوير');
+}
+
+function logout() {
+    if (!confirm('⚠️ هل أنت متأكد من تسجيل الخروج؟')) return;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+// Math.min polyfill for older browsers
+if (!Math.min) {
+    Math.min = function() {
+        var min = arguments[0];
+        for (var i = 1; i < arguments.length; i++) {
+            if (arguments[i] < min) min = arguments[i];
+        }
+        return min;
+    };
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+loadProfile();
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
