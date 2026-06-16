@@ -1,13 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');  // ✅ أضف هذا
 require('dotenv').config();
 const admin = require('firebase-admin');
 
 const app = express();
 
-// ✅ تهيئة Firebase Admin SDK (بدون Service Account معقد)
-// إذا كان ملف service-account.json موجوداً
+// ✅ تهيئة Firebase Admin SDK
 try {
     const serviceAccount = require('./service-account.json');
     admin.initializeApp({
@@ -15,7 +15,6 @@ try {
     });
     console.log('✅ Firebase Admin initialized with service account');
 } catch (e) {
-    // إذا لم يوجد ملف، استخدم الإعدادات الافتراضية
     admin.initializeApp();
     console.log('✅ Firebase Admin initialized with default settings');
 }
@@ -29,6 +28,10 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// ============= ✅ خدمة الملفات الثابتة للموقع =============
+// ضع جميع ملفات HTML في مجلد public/
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ============= مسار إرسال الإشعار =============
 app.post('/api/send-notification', async (req, res) => {
@@ -86,6 +89,11 @@ app.use('/api/lab', labRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
+// ✅ مسار الموقع - يجب أن يكون بعد مسارات API
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // الاتصال بقاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ تم الاتصال بـ MongoDB'))
@@ -95,4 +103,5 @@ mongoose.connect(process.env.MONGO_URI)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 السيرفر يعمل على http://localhost:${PORT}`);
+    console.log(`🌐 الموقع متاح على http://localhost:${PORT}`);
 });
