@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - المعالجات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        /* ===== القائمة الجانبية ===== */
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li .badge { background: #ef4444; color: white; font-size: 10px; padding: 1px 8px; border-radius: 12px; margin-right: auto; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        /* ===== المحتوى الرئيسي ===== */
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        /* ===== الهيدر ===== */
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+        .header .actions { display: flex; align-items: center; gap: 8px; }
+        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
+        .header .actions button:hover { background: #f0f4f8; }
+
+        /* ===== فلتر الخدمات ===== */
+        .filters {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+            padding: 8px 0; overflow-x: auto;
+        }
+        .filter-chip {
+            padding: 6px 16px; border-radius: 20px; border: 2px solid #1A5F7A;
+            font-size: 13px; cursor: pointer; transition: all 0.3s;
+            background: white; color: #1A5F7A; white-space: nowrap;
+        }
+        .filter-chip:hover { background: #f0f7fa; }
+        .filter-chip.active { background: #1A5F7A; color: white; }
+
+        /* ===== بطاقة المعالجة ===== */
+        .treatment-card {
+            background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .treatment-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+        .treatment-card .top-row {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+        }
+        .treatment-card .service-tag {
+            padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+        }
+        .treatment-card .service-tag.green { background: #d1fae5; color: #059669; }
+        .treatment-card .service-tag.red { background: #fee2e2; color: #dc2626; }
+        .treatment-card .service-tag.orange { background: #fef3c7; color: #d97706; }
+        .treatment-card .service-tag.purple { background: #ede9fe; color: #7c3aed; }
+        .treatment-card .service-tag.blue { background: #dbeafe; color: #2563eb; }
+        .treatment-card .service-tag.default { background: rgba(26,95,122,0.1); color: #1A5F7A; }
+
+        .treatment-card .date { font-size: 12px; color: #94a3b8; }
+
+        .treatment-card .patient-row {
+            display: flex; align-items: center; gap: 8px; margin: 8px 0 4px 0;
+        }
+        .treatment-card .patient-row i { color: #1A5F7A; font-size: 14px; }
+        .treatment-card .patient-row .name { font-weight: 700; font-size: 15px; color: #1e293b; }
+
+        .treatment-card .doctor-row {
+            display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b;
+        }
+        .treatment-card .doctor-row i { font-size: 12px; }
+
+        .treatment-card .bottom-row {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 8px;
+        }
+        .treatment-card .bottom-row .price {
+            font-size: 18px; font-weight: 800; color: #1A5F7A;
+        }
+        .treatment-card .bottom-row .old-price {
+            font-size: 13px; color: #94a3b8; text-decoration: line-through; margin-left: 8px;
+        }
+        .treatment-card .bottom-row .discount-badge {
+            font-size: 11px; color: #059669; background: #d1fae5; padding: 2px 8px; border-radius: 10px;
+        }
+
+        .treatment-card .teeth-row {
+            display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px;
+        }
+        .treatment-card .teeth-row .tooth {
+            background: #f1f5f9; padding: 2px 8px; border-radius: 10px; font-size: 10px; color: #475569;
+        }
+        .treatment-card .arch-tag {
+            background: rgba(26,95,122,0.1); color: #1A5F7A; padding: 2px 10px; border-radius: 10px; font-size: 10px; display: inline-block; margin-top: 6px;
+        }
+
+        /* ===== الحالات الفارغة ===== */
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 64px; margin-bottom: 16px; color: #cbd5e1; }
+        .empty-state h3 { font-size: 18px; color: #64748b; margin-bottom: 8px; }
+        .empty-state p { font-size: 14px; }
+        .empty-state .btn-group { display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+        .empty-state .btn-group button {
+            padding: 10px 20px; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.3s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .empty-state .btn-group button:hover { opacity: 0.85; }
+        .btn-primary { background: #57C0E8; color: white; }
+        .btn-secondary { background: #1A5F7A; color: white; }
+
+        /* ===== لودر ===== */
+        .loader { display: flex; justify-content: center; align-items: center; min-height: 200px; }
+        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== زر الإضافة ===== */
+        .fab {
+            position: fixed; bottom: 30px; left: 30px; width: 56px; height: 56px;
+            border-radius: 50%; background: #57C0E8; color: white; border: none;
+            font-size: 28px; cursor: pointer; box-shadow: 0 4px 16px rgba(87,192,232,0.4);
+            transition: transform 0.2s; z-index: 100;
+        }
+        .fab:hover { transform: scale(1.05); }
+
+        /* ===== متجاوب ===== */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+            .fab { bottom: 20px; left: 20px; width: 48px; height: 48px; font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+            .treatment-card .bottom-row .price { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li class="active"><i class="fas fa-tooth"></i> المعالجات <span class="badge" id="treatmentsBadge">0</span></li>
+        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>🦷 المعالجات</h1>
+        </div>
+        <div class="actions">
+            <button onclick="loadTreatments()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+        </div>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filters" id="filtersContainer">
+        <span class="filter-chip active" data-filter="الكل" onclick="filterTreatments('الكل', this)">الكل</span>
+    </div>
+
+    <!-- قائمة المعالجات -->
+    <div id="treatmentsList">
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<!-- زر الإضافة -->
+<button class="fab" onclick="addTreatment()">+</button>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let treatments = [];
+let filteredTreatments = [];
+let selectedFilter = 'الكل';
+let serviceColors = {
+    'حشو': 'green', 'خلع': 'red', 'علاج عصب': 'orange',
+    'تقويم': 'purple', 'تبييض': 'blue'
+};
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        return await response.json();
+    } catch (e) { console.error('❌ API Error:', e); return null; }
+}
+
+// ============================================
+// ✅ تحميل المعالجات
+// ============================================
+async function loadTreatments() {
+    const list = document.getElementById('treatmentsList');
+    list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    try {
+        const response = await apiCall('/treatments');
+        if (response?.treatments) {
+            treatments = response.treatments;
+            document.getElementById('treatmentsBadge').textContent = treatments.length;
+            updateFilters();
+            renderTreatments();
+            return;
+        }
+    } catch(e) { console.warn('⚠️ Failed to fetch:', e); }
+
+    // بيانات افتراضية
+    treatments = [
+        { id: '1', patientName: 'أحمد محمد', subServiceName: 'حشو', doctorName: 'د. خالد', finalPrice: 250, discount: 0, date: '2026-06-15', teeth: [{number: 3}] },
+        { id: '2', patientName: 'سارة عبدالله', subServiceName: 'تقويم', doctorName: 'د. علي', finalPrice: 1200, discount: 200, date: '2026-06-14', archType: 'فك علوي' },
+        { id: '3', patientName: 'خالد علي', subServiceName: 'خلع', doctorName: 'د. أحمد', finalPrice: 150, discount: 0, date: '2026-06-13', teeth: [{number: 5}] },
+        { id: '4', patientName: 'نورا حسن', subServiceName: 'تبييض', doctorName: 'د. سارة', finalPrice: 500, discount: 50, date: '2026-06-12' },
+    ];
+    document.getElementById('treatmentsBadge').textContent = treatments.length;
+    updateFilters();
+    renderTreatments();
+}
+
+// ============================================
+// ✅ تحديث الفلاتر
+// ============================================
+function updateFilters() {
+    const container = document.getElementById('filtersContainer');
+    const services = new Set();
+    treatments.forEach(t => {
+        const name = t.subServiceName || t.serviceName;
+        if (name) services.add(name);
+    });
+
+    let html = '<span class="filter-chip active" data-filter="الكل" onclick="filterTreatments(\'الكل\', this)">الكل</span>';
+    services.forEach(s => {
+        html += `<span class="filter-chip" data-filter="${s}" onclick="filterTreatments('${s}', this)">${s}</span>`;
+    });
+    container.innerHTML = html;
+}
+
+// ============================================
+// ✅ فلترة المعالجات
+// ============================================
+function filterTreatments(filter, element) {
+    selectedFilter = filter;
+    document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+    if (element) element.classList.add('active');
+    renderTreatments();
+}
+
+// ============================================
+// ✅ عرض المعالجات
+// ============================================
+function renderTreatments() {
+    const list = document.getElementById('treatmentsList');
+
+    filteredTreatments = selectedFilter === 'الكل'
+        ? treatments
+        : treatments.filter(t =>
+            (t.subServiceName || t.serviceName) === selectedFilter
+        );
+
+    if (filteredTreatments.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-tooth"></i>
+                <h3>لا توجد معالجات</h3>
+                <p>اضغط على زر التحديث لجلب المعالجات من السيرفر</p>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="loadTreatments()"><i class="fas fa-cloud-download-alt"></i> جلب من السيرفر</button>
+                    <button class="btn-secondary" onclick="addTreatment()"><i class="fas fa-plus"></i> إضافة معالجة</button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = filteredTreatments.map(t => {
+        const color = serviceColors[t.subServiceName] || 'default';
+        const oldPrice = (t.originalPrice || t.finalPrice || 0) + (t.discount || 0);
+        const teeth = t.teeth || [];
+        const archType = t.archType || '';
+        const teethHtml = teeth.length > 0
+            ? `<div class="teeth-row">${teeth.map(tooth => `<span class="tooth">السن ${tooth.number}</span>`).join('')}</div>`
+            : '';
+        const archHtml = archType ? `<span class="arch-tag">${archType}</span>` : '';
+
+        return `
+            <div class="treatment-card" onclick="viewTreatment('${t.id || t._id}')">
+                <div class="top-row">
+                    <span class="service-tag ${color}">${t.subServiceName || t.serviceName || 'خدمة'}</span>
+                    <span class="date">${t.date ? t.date.substring(0,10) : '-'}</span>
+                </div>
+                <div class="patient-row">
+                    <i class="fas fa-user"></i>
+                    <span class="name">${t.patientName || 'مريض'}</span>
+                </div>
+                <div class="doctor-row">
+                    <i class="fas fa-user-md"></i>
+                    <span>الطبيب: ${t.doctorName || 'غير محدد'}</span>
+                </div>
+                ${teethHtml}
+                ${archHtml}
+                <div class="bottom-row">
+                    <div>
+                        ${t.discount > 0 ? `<span class="old-price">${oldPrice} ريال</span>` : ''}
+                        <span class="price">${t.finalPrice || 0} ريال</span>
+                        ${t.discount > 0 ? `<span class="discount-badge">-${t.discount} ريال</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// ✅ دوال الإجراءات
+// ============================================
+function viewTreatment(id) {
+    alert(`📋 عرض تفاصيل المعالجة (ID: ${id})\n🚧 قيد التطوير`);
+}
+
+function addTreatment() {
+    alert('➕ إضافة معالجة جديدة\n🚧 قيد التطوير');
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+loadTreatments();
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
