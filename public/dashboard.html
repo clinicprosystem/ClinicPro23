@@ -19,7 +19,6 @@
             min-height: 100vh;
         }
 
-        /* ===== القائمة الجانبية ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -121,22 +120,12 @@
             background: rgba(239, 68, 68, 0.15);
         }
 
-        .sidebar .divider {
-            padding: 8px 24px;
-            font-size: 11px;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 1px;
-            margin-top: 8px;
-        }
-
-        /* ===== المحتوى الرئيسي ===== */
         .main-content {
             margin-right: 260px;
             padding: 20px;
             min-height: 100vh;
         }
 
-        /* ===== الهيدر ===== */
         .header {
             background: white;
             padding: 16px 24px;
@@ -189,7 +178,6 @@
             font-weight: 700;
         }
 
-        /* ===== بطاقة الترحيب ===== */
         .welcome-card {
             background: linear-gradient(135deg, #1A5F7A, #57C0E8);
             padding: 24px;
@@ -222,7 +210,6 @@
             font-size: 14px;
         }
 
-        /* ===== بطاقات الإحصائيات ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -272,7 +259,6 @@
             color: #64748b;
         }
 
-        /* ===== زر الاشتراك ===== */
         .subscription-banner {
             background: linear-gradient(135deg, #f59e0b, #ea580c);
             border-radius: 12px;
@@ -315,7 +301,6 @@
             font-size: 18px;
         }
 
-        /* ===== آخر المعالجات ===== */
         .recent-section {
             background: white;
             border-radius: 16px;
@@ -339,6 +324,7 @@
             color: #1A5F7A;
             text-decoration: none;
             font-size: 14px;
+            cursor: pointer;
         }
 
         .treatment-item {
@@ -400,6 +386,19 @@
             border-radius: 8px;
         }
 
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            color: #1A5F7A;
+            margin-bottom: 16px;
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -409,9 +408,18 @@
         .empty-state i {
             font-size: 48px;
             margin-bottom: 12px;
+            color: #cbd5e1;
         }
 
-        /* ===== زر الهامبرغر ===== */
+        .empty-state h3 {
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
         .hamburger {
             display: none;
             background: none;
@@ -432,7 +440,39 @@
             z-index: 999;
         }
 
-        /* ===== متجاوب ===== */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #1A5F7A;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-status.green { background: #d1fae5; color: #059669; }
+        .badge-status.orange { background: #fef3c7; color: #d97706; }
+        .badge-status.red { background: #fee2e2; color: #dc2626; }
+        .badge-status.blue { background: #dbeafe; color: #2563eb; }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(100%);
@@ -480,30 +520,10 @@
                 margin-right: auto;
             }
         }
-
-        /* ===== لودر ===== */
-        .loader {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 200px;
-        }
-        .loader .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
-            border-top-color: #1A5F7A;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
-<!-- ===== القائمة الجانبية ===== -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="sidebar" id="sidebar">
     <div class="logo">🏥 <span>Clinic</span>Pro</div>
@@ -513,40 +533,43 @@
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <li class="active" onclick="loadPage('dashboard')">
+        <li class="active" onclick="window.location.href='dashboard.html'">
             <i class="fas fa-chart-pie"></i> الرئيسية
         </li>
-        <li onclick="loadPage('patients')">
+        <li onclick="window.location.href='patients.html'">
             <i class="fas fa-users"></i> المرضى
             <span class="badge" id="patientsBadge">0</span>
         </li>
-        <li onclick="loadPage('treatments')">
+        <li onclick="window.location.href='treatments.html'">
             <i class="fas fa-tooth"></i> المعالجات
             <span class="badge" id="treatmentsBadge">0</span>
         </li>
-        <li onclick="loadPage('services')">
+        <li onclick="window.location.href='services.html'">
             <i class="fas fa-list"></i> الخدمات والأسعار
         </li>
-        <li onclick="loadPage('doctors')">
+        <li onclick="window.location.href='doctors.html'">
             <i class="fas fa-user-md"></i> الأطباء
         </li>
-        <li onclick="loadPage('secretaries')">
+        <li onclick="window.location.href='secretaries.html'">
             <i class="fas fa-user-tie"></i> السكرتيرات
         </li>
-        <li onclick="loadPage('lab')">
+        <li onclick="window.location.href='lab.html'">
             <i class="fas fa-flask"></i> المعمل
         </li>
-        <li onclick="loadPage('reports')">
+        <li onclick="window.location.href='reports.html'">
             <i class="fas fa-chart-bar"></i> التقارير
         </li>
-        <li onclick="loadPage('notifications')">
+        <li onclick="window.location.href='notifications.html'">
             <i class="fas fa-bell"></i> الإشعارات
         </li>
-        <li onclick="loadPage('settings')">
+        <li onclick="window.location.href='settings.html'">
             <i class="fas fa-cog"></i> الإعدادات
         </li>
-        <li onclick="loadPage('profile')">
+        <li onclick="window.location.href='profile.html'">
             <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li onclick="window.location.href='subscription-plans.html'">
+            <i class="fas fa-crown"></i> باقات الاشتراك
         </li>
         <li class="logout" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> تسجيل خروج
@@ -554,9 +577,7 @@
     </ul>
 </div>
 
-<!-- ===== المحتوى الرئيسي ===== -->
 <div class="main-content" id="mainContent">
-    <!-- ===== الهيدر ===== -->
     <div class="header">
         <div style="display:flex;align-items:center;gap:12px;">
             <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -566,16 +587,14 @@
             <button onclick="refreshData()" title="تحديث">
                 <i class="fas fa-sync-alt"></i>
             </button>
-            <button onclick="loadPage('notifications')" title="الإشعارات">
+            <button onclick="window.location.href='notifications.html'" title="الإشعارات">
                 <i class="fas fa-bell"></i>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
             </button>
         </div>
     </div>
 
-    <!-- ===== المحتوى الديناميكي ===== -->
     <div id="dynamicContent">
-        <!-- سيتم تحميله بواسطة JavaScript -->
         <div class="loader"><div class="spinner"></div></div>
     </div>
 </div>
@@ -614,66 +633,17 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // ============================================
-// ✅ دوال الصفحات
-// ============================================
-function loadPage(page) {
-    // تحديث القائمة الجانبية
-    document.querySelectorAll('.sidebar ul li').forEach(el => el.classList.remove('active'));
-    const items = document.querySelectorAll('.sidebar ul li');
-    const pageMap = {
-        'dashboard': 0, 'patients': 1, 'treatments': 2, 'services': 3,
-        'doctors': 4, 'secretaries': 5, 'lab': 6, 'reports': 7,
-        'notifications': 8, 'settings': 9, 'profile': 10
-    };
-    const idx = pageMap[page];
-    if (idx !== undefined && items[idx]) items[idx].classList.add('active');
-
-    // تحديث عنوان الصفحة
-    const titles = {
-        'dashboard': 'لوحة التحكم',
-        'patients': 'المرضى',
-        'treatments': 'المعالجات',
-        'services': 'الخدمات والأسعار',
-        'doctors': 'الأطباء',
-        'secretaries': 'السكرتيرات',
-        'lab': 'المعمل',
-        'reports': 'التقارير',
-        'notifications': 'الإشعارات',
-        'settings': 'الإعدادات',
-        'profile': 'الملف الشخصي'
-    };
-    document.getElementById('pageTitle').textContent = titles[page] || page;
-
-    // تحميل المحتوى
-    const content = document.getElementById('dynamicContent');
-    content.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-
-    switch(page) {
-        case 'dashboard': renderDashboard(content); break;
-        case 'patients': renderPatients(content); break;
-        case 'treatments': renderTreatments(content); break;
-        case 'services': renderServices(content); break;
-        case 'doctors': renderDoctors(content); break;
-        case 'secretaries': renderSecretaries(content); break;
-        case 'lab': renderLab(content); break;
-        case 'reports': renderReports(content); break;
-        case 'notifications': renderNotifications(content); break;
-        case 'settings': renderSettings(content); break;
-        case 'profile': renderProfile(content); break;
-        default: content.innerHTML = '<div class="empty-state"><i class="fas fa-construction"></i><p>جاري التطوير...</p></div>';
-    }
-}
-
-// ============================================
 // ✅ لوحة التحكم (Dashboard)
 // ============================================
-async function renderDashboard(container) {
+async function renderDashboard() {
+    const container = document.getElementById('dynamicContent');
+    container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+    
     try {
-        const [patients, treatments, doctors, recent] = await Promise.all([
+        const [patients, treatments, doctors] = await Promise.all([
             apiCall('/patients'),
             apiCall('/treatments'),
-            apiCall('/clinics/doctors'),
-            apiCall('/treatments')
+            apiCall('/clinics/doctors')
         ]);
 
         const pCount = patients?.patients?.length || 0;
@@ -684,14 +654,13 @@ async function renderDashboard(container) {
         document.getElementById('patientsBadge').textContent = pCount;
         document.getElementById('treatmentsBadge').textContent = tCount;
 
-        // ✅ التحقق من الاشتراك
         let subscriptionHtml = '';
         try {
             const sub = await apiCall('/clinics/subscription/status');
             const subType = sub?.subscriptionType || 'trial';
             if (subType === 'trial' || subType === 'expired') {
                 subscriptionHtml = `
-                    <div class="subscription-banner" onclick="loadPage('subscription')">
+                    <div class="subscription-banner" onclick="window.location.href='subscription-plans.html'">
                         <div class="left">
                             <i class="fas fa-subscriptions"></i>
                             <div>
@@ -706,7 +675,6 @@ async function renderDashboard(container) {
         } catch(e) { console.warn('Subscription check failed:', e); }
 
         container.innerHTML = `
-            <!-- الترحيب -->
             <div class="welcome-card">
                 <div class="avatar-lg">👤</div>
                 <div>
@@ -714,43 +682,38 @@ async function renderDashboard(container) {
                     <p>يسعدنا وجودك معنا اليوم</p>
                 </div>
             </div>
-
             ${subscriptionHtml}
-
-            <!-- الإحصائيات -->
             <div class="stats-grid">
-                <div class="stat-card" onclick="loadPage('patients')">
+                <div class="stat-card" onclick="window.location.href='patients.html'">
                     <div class="icon blue"><i class="fas fa-users"></i></div>
                     <div class="value">${pCount}</div>
                     <div class="label">المرضى</div>
                 </div>
-                <div class="stat-card" onclick="loadPage('treatments')">
+                <div class="stat-card" onclick="window.location.href='treatments.html'">
                     <div class="icon green"><i class="fas fa-tooth"></i></div>
                     <div class="value">${tCount}</div>
                     <div class="label">المعالجات</div>
                 </div>
-                <div class="stat-card" onclick="loadPage('doctors')">
+                <div class="stat-card" onclick="window.location.href='doctors.html'">
                     <div class="icon orange"><i class="fas fa-user-md"></i></div>
                     <div class="value">${dCount}</div>
                     <div class="label">الأطباء</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="window.location.href='reports.html'">
                     <div class="icon purple"><i class="fas fa-coins"></i></div>
                     <div class="value">--</div>
                     <div class="label">الإيرادات</div>
                 </div>
             </div>
-
-            <!-- آخر المعالجات -->
             <div class="recent-section">
                 <div class="header-row">
                     <h3>آخر المعالجات</h3>
-                    <a href="#" onclick="loadPage('treatments');return false;">عرض الكل →</a>
+                    <a onclick="window.location.href='treatments.html'">عرض الكل →</a>
                 </div>
                 ${recentTreats.length === 0 ? `
                     <div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد معالجات حديثة</p></div>
                 ` : recentTreats.map(t => `
-                    <div class="treatment-item" onclick="loadPage('treatments')">
+                    <div class="treatment-item" onclick="window.location.href='treatments.html'">
                         <div class="icon-circle"><i class="fas fa-tooth"></i></div>
                         <div class="info">
                             <div class="name">${t.subServiceName || t.serviceName || 'خدمة'}</div>
@@ -772,105 +735,6 @@ async function renderDashboard(container) {
 }
 
 // ============================================
-// ✅ وظائف الصفحات (مؤقتة)
-// ============================================
-function renderPatients(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">👤 قائمة المرضى</h3>
-            <div class="empty-state"><i class="fas fa-users"></i><p>جاري تحميل قائمة المرضى...</p></div>
-        </div>
-    `;
-    // سيتم تنفيذها لاحقاً
-}
-
-function renderTreatments(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">🦷 قائمة المعالجات</h3>
-            <div class="empty-state"><i class="fas fa-tooth"></i><p>جاري تحميل قائمة المعالجات...</p></div>
-        </div>
-    `;
-}
-
-function renderServices(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">📋 الخدمات والأسعار</h3>
-            <div class="empty-state"><i class="fas fa-list"></i><p>جاري تحميل الخدمات...</p></div>
-        </div>
-    `;
-}
-
-function renderDoctors(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">👨‍⚕️ الأطباء</h3>
-            <div class="empty-state"><i class="fas fa-user-md"></i><p>جاري تحميل قائمة الأطباء...</p></div>
-        </div>
-    `;
-}
-
-function renderSecretaries(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">👩‍💼 السكرتيرات</h3>
-            <div class="empty-state"><i class="fas fa-user-tie"></i><p>جاري تحميل قائمة السكرتيرات...</p></div>
-        </div>
-    `;
-}
-
-function renderLab(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">🧪 المعمل</h3>
-            <div class="empty-state"><i class="fas fa-flask"></i><p>جاري تحميل بيانات المعمل...</p></div>
-        </div>
-    `;
-}
-
-function renderReports(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">📊 التقارير</h3>
-            <div class="empty-state"><i class="fas fa-chart-bar"></i><p>جاري تحميل التقارير...</p></div>
-        </div>
-    `;
-}
-
-function renderNotifications(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">🔔 الإشعارات</h3>
-            <div class="empty-state"><i class="fas fa-bell"></i><p>لا توجد إشعارات</p></div>
-        </div>
-    `;
-}
-
-function renderSettings(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">⚙️ الإعدادات</h3>
-            <div class="empty-state"><i class="fas fa-cog"></i><p>جاري تحميل الإعدادات...</p></div>
-        </div>
-    `;
-}
-
-function renderProfile(container) {
-    container.innerHTML = `
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <h3 style="color:#1A5F7A;margin-bottom:16px;">👤 الملف الشخصي</h3>
-            <div style="text-align:center;padding:20px;">
-                <div style="font-size:64px;margin-bottom:12px;">👤</div>
-                <h4 style="font-size:20px;">${userData?.name || 'طبيب الأسنان'}</h4>
-                <p style="color:#64748b;">${userData?.phone || ''}</p>
-                <p style="color:#64748b;">${userData?.role === 'clinic_owner' ? 'صاحب عيادة' : userData?.role || 'مستخدم'}</p>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
 // ✅ وظائف مساعدة
 // ============================================
 function toggleSidebar() {
@@ -879,7 +743,7 @@ function toggleSidebar() {
 }
 
 function refreshData() {
-    loadPage('dashboard');
+    renderDashboard();
 }
 
 function logout() {
@@ -891,12 +755,10 @@ function logout() {
 // ============================================
 // ✅ بدء التشغيل
 // ============================================
-// إذا لم يكن هناك توكن، ارجع إلى صفحة تسجيل الدخول
 if (!token || token === 'null' || token === 'undefined') {
     window.location.href = 'index.html';
 }
 
-// عرض اسم المستخدم
 if (userData?.name) {
     document.getElementById('userName').textContent = userData.name;
     document.getElementById('userRole').textContent = 
@@ -906,10 +768,8 @@ if (userData?.name) {
         userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
 }
 
-// تحميل لوحة التحكم
-loadPage('dashboard');
+renderDashboard();
 
-// إغلاق القائمة الجانبية عند الضغط على رابط (للجوال)
 document.querySelectorAll('.sidebar ul li').forEach(el => {
     el.addEventListener('click', () => {
         if (window.innerWidth <= 768) toggleSidebar();
