@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path');  // ✅ أضف هذا
+const path = require('path');
 require('dotenv').config();
 const admin = require('firebase-admin');
 
@@ -30,7 +30,6 @@ app.use(cors({
 app.use(express.json());
 
 // ============= ✅ خدمة الملفات الثابتة للموقع =============
-// ضع جميع ملفات HTML في مجلد public/
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ============= مسار إرسال الإشعار =============
@@ -90,8 +89,16 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
 // ✅ مسار الموقع - يجب أن يكون بعد مسارات API
+// ✅ إذا كان المسار غير موجود، أرسل index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    // المحاولة: إرسال الملف المطلوب إذا كان موجوداً
+    const filePath = path.join(__dirname, 'public', req.path);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            // إذا لم يوجد الملف، أرسل index.html
+            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        }
+    });
 });
 
 // الاتصال بقاعدة البيانات
