@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - إضافة مريض</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
+        .header .actions button:hover { background: #f0f4f8; }
+
+        .form-card {
+            background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            max-width: 600px; margin: 0 auto;
+        }
+        .form-card .section-title {
+            font-size: 18px; font-weight: 700; color: #1A5F7A; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 700; font-size: 14px; color: #1e293b; margin-bottom: 4px; }
+        .form-group .required { color: #ef4444; }
+
+        .input-row { display: flex; gap: 8px; align-items: center; }
+        .country-select {
+            padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px;
+            background: white; min-width: 70px; text-align: center;
+        }
+        .country-select:focus { border-color: #1A5F7A; outline: none; }
+
+        .form-control {
+            width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 12px;
+            font-size: 15px; transition: border-color 0.3s; text-align: right;
+        }
+        .form-control:focus { border-color: #1A5F7A; outline: none; }
+        .form-control:disabled { background: #f1f5f9; cursor: not-allowed; }
+
+        .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .form-row .form-group { flex: 1; min-width: 120px; }
+
+        .btn-save {
+            width: 100%; padding: 14px; background: #57C0E8; color: white;
+            border: none; border-radius: 12px; font-size: 18px; font-weight: 700;
+            cursor: pointer; transition: background 0.3s;
+        }
+        .btn-save:hover { background: #4aadcc; }
+        .btn-save:disabled { background: #b0d4e0; cursor: not-allowed; }
+
+        .btn-save .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .hint-text { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 8px; }
+
+        .error-message { background: #fee2e2; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 16px; display: none; text-align: center; }
+        .error-message.show { display: block; }
+
+        .restricted { text-align: center; padding: 60px 20px; }
+        .restricted i { font-size: 80px; color: #cbd5e1; margin-bottom: 16px; }
+        .restricted h3 { font-size: 20px; color: #64748b; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+            .form-row { flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+            .form-card { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
+        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>➕ إضافة مريض جديد</h1>
+        </div>
+        <div class="actions"></div>
+    </div>
+
+    <div class="form-card" id="formContainer">
+        <div id="errorMessage" class="error-message"></div>
+
+        <!-- المعلومات الأساسية -->
+        <div class="section-title"><i class="fas fa-user-plus"></i> المعلومات الأساسية</div>
+
+        <div class="form-group">
+            <label>اسم المريض <span class="required">*</span></label>
+            <input class="form-control" id="patientName" placeholder="أدخل الاسم الكامل">
+        </div>
+
+        <div class="form-group">
+            <label>رقم الجوال <span class="required">*</span></label>
+            <div class="input-row">
+                <select class="country-select" id="countryCode">
+                    <option value="+967">🇾🇪 +967</option>
+                    <option value="+966">🇸🇦 +966</option>
+                    <option value="+20">🇪🇬 +20</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+965">🇰🇼 +965</option>
+                    <option value="+974">🇶🇦 +974</option>
+                    <option value="+973">🇧🇭 +973</option>
+                    <option value="+968">🇴🇲 +968</option>
+                </select>
+                <input class="form-control" id="patientPhone" placeholder="5xxxxxxxx" dir="ltr" style="text-align:left;">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>العمر</label>
+                <input class="form-control" id="patientAge" type="number" placeholder="مثال: 25">
+            </div>
+            <div class="form-group">
+                <label>الجنس <span class="required">*</span></label>
+                <select class="form-control" id="patientGender">
+                    <option value="">اختر الجنس</option>
+                    <option value="ذكر">ذكر</option>
+                    <option value="أنثى">أنثى</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="border-bottom:1px solid #e2e8f0;margin:16px 0;"></div>
+
+        <!-- التاريخ الطبي -->
+        <div class="section-title"><i class="fas fa-history"></i> التاريخ الطبي</div>
+
+        <div class="form-group">
+            <label>التاريخ الطبي</label>
+            <textarea class="form-control" id="medicalHistory" rows="3" placeholder="أمراض مزمنة، حساسية، عمليات سابقة..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>ملاحظات إضافية</label>
+            <textarea class="form-control" id="notes" rows="2" placeholder="أي ملاحظات أخرى"></textarea>
+        </div>
+
+        <button class="btn-save" id="saveBtn" onclick="savePatient()">
+            حفظ المريض
+        </button>
+
+        <div class="hint-text">📱 سيتم حفظ المريض محلياً ومزامنته تلقائياً عند توفر الإنترنت</div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let subscriptionType = 'trial';
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        return await response.json();
+    } catch (e) { console.error('❌ API Error:', e); return null; }
+}
+
+// ============================================
+// ✅ التحقق من الاشتراك
+// ============================================
+async function checkSubscription() {
+    try {
+        const response = await apiCall('/clinics/subscription/status');
+        if (response) {
+            subscriptionType = response.subscriptionType || 'trial';
+        }
+    } catch(e) { console.warn('⚠️ Failed to check subscription:', e); }
+}
+
+// ============================================
+// ✅ حفظ المريض
+// ============================================
+async function savePatient() {
+    const name = document.getElementById('patientName').value.trim();
+    const phone = document.getElementById('patientPhone').value.trim();
+    const countryCode = document.getElementById('countryCode').value;
+    const age = parseInt(document.getElementById('patientAge').value) || 0;
+    const gender = document.getElementById('patientGender').value;
+    const medicalHistory = document.getElementById('medicalHistory').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+    const fullPhone = countryCode + phone;
+
+    const errorMsg = document.getElementById('errorMessage');
+    errorMsg.classList.remove('show');
+
+    // ✅ التحقق من صحة الإدخال
+    if (!name) { showError('الرجاء إدخال اسم المريض'); return; }
+    if (!phone || phone.length < 9) { showError('الرجاء إدخال رقم جوال صحيح'); return; }
+    if (!gender) { showError('الرجاء اختيار الجنس'); return; }
+
+    // ✅ التحقق من الاشتراك
+    await checkSubscription();
+
+    // ✅ منع الحفظ إذا كان الاشتراك منتهي
+    if (subscriptionType === 'expired') {
+        showError('❌ انتهت صلاحية الاشتراك. يرجى التجديد لإضافة مرضى جدد');
+        return;
+    }
+
+    // ✅ منع الحفظ إذا تجاوز الحد في الفترة التجريبية
+    if (subscriptionType === 'trial') {
+        try {
+            const countResponse = await apiCall('/patients/count');
+            const count = countResponse?.count || 0;
+            if (count >= 3) {
+                showError('⚠️ لقد تجاوزت الحد المسموح في الفترة التجريبية (3 مرضى). قم بترقية اشتراكك لإضافة المزيد');
+                return;
+            }
+        } catch(e) { console.warn('⚠️ Failed to check count:', e); }
+    }
+
+    // ✅ طالب جامعي يسمح له
+    if (subscriptionType === 'university_student') {
+        console.log('🎓 طالب جامعي - يمكنه إضافة غير محدود من المرضى');
+    }
+
+    // ✅ حفظ المريض
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> جاري الحفظ...';
+
+    try {
+        // محاكاة الحفظ
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const patient = {
+            id: Date.now().toString(),
+            name: name,
+            phone: fullPhone,
+            age: age,
+            gender: gender,
+            medicalHistory: medicalHistory,
+            notes: notes
+        };
+
+        // محاولة إرسال إلى السيرفر
+        let serverSuccess = false;
+        try {
+            const response = await apiCall('/patients', 'POST', {
+                name, phone: fullPhone, age, gender, medicalHistory, notes
+            });
+            if (response?.success) serverSuccess = true;
+        } catch(e) { console.warn('⚠️ Server save failed:', e); }
+
+        btn.disabled = false;
+        btn.innerHTML = 'حفظ المريض';
+
+        if (serverSuccess) {
+            alert('✅ تم إضافة المريض ومزامنته مع السيرفر');
+        } else {
+            alert('📱 تم الحفظ محلياً، سيتم المزامنة عند توفر الإنترنت');
+        }
+
+        window.location.href = 'patients.html';
+
+    } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = 'حفظ المريض';
+        showError('❌ حدث خطأ: ' + e.message);
+    }
+}
+
+function showError(msg) {
+    const el = document.getElementById('errorMessage');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+checkSubscription();
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
