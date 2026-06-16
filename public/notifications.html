@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinicPro - الإشعارات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
+            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
+            transition: transform 0.3s ease; overflow-y: auto;
+        }
+        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
+        .sidebar .logo span { color: #57C0E8; }
+        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
+        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
+        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .sidebar ul { list-style: none; padding: 12px 0; }
+        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
+        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+
+        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+
+        .header {
+            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .header .left { display: flex; align-items: center; gap: 12px; }
+        .header .left h1 { font-size: 20px; color: #1A5F7A; }
+        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
+        .header .actions { display: flex; gap: 8px; }
+        .header .actions button {
+            background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px;
+            border-radius: 50%; transition: background 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        .header .actions button:hover { background: #f1f5f9; }
+        .header .actions button .badge {
+            position: relative; top: -8px; right: -4px; background: #ef4444; color: white;
+            font-size: 9px; padding: 1px 6px; border-radius: 10px;
+        }
+
+        .notification-item {
+            background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; align-items: flex-start; gap: 12px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .notification-item:hover { background: #f8fafc; }
+        .notification-item .icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+        .notification-item .content { flex: 1; }
+        .notification-item .content .title {
+            font-size: 15px; font-weight: 500; margin-bottom: 2px; color: #1e293b;
+        }
+        .notification-item .content .title.bold { font-weight: 700; }
+        .notification-item .content .body { font-size: 13px; color: #475569; }
+        .notification-item .content .date { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+        .notification-item .actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .notification-item .actions button {
+            background: none; border: none; padding: 6px 8px; border-radius: 8px; cursor: pointer;
+            transition: background 0.2s; font-size: 16px; color: #64748b;
+        }
+        .notification-item .actions button:hover { background: #f1f5f9; }
+        .notification-item .actions button.read { color: #059669; }
+
+        .notification-item.unread { background: rgba(26,95,122,0.04); }
+        .notification-item.unread .content .title { font-weight: 700; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 64px; margin-bottom: 16px; color: #cbd5e1; }
+        .empty-state h3 { font-size: 18px; color: #64748b; }
+
+        .loader { display: flex; justify-content: center; padding: 40px; }
+        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-right: 0; }
+            .header .left .hamburger { display: block; }
+            .notification-item { flex-wrap: wrap; }
+            .notification-item .actions { width: 100%; justify-content: flex-start; margin-top: 8px; }
+        }
+        @media (max-width: 480px) {
+            .header .left h1 { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="user-info">
+        <div class="avatar">👤</div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
+        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
+        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
+        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
+        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
+        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
+        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
+        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
+        <li class="active"><i class="fas fa-bell"></i> الإشعارات</li>
+        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
+        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
+        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+    </ul>
+</div>
+
+<!-- المحتوى الرئيسي -->
+<div class="main-content">
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>🔔 الإشعارات</h1>
+        </div>
+        <div class="actions">
+            <button onclick="markAllRead()" title="تحديد الكل كمقروء">
+                <i class="fas fa-check-double"></i>
+            </button>
+            <button onclick="deleteAll()" title="حذف الكل">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="notificationsList">
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+let notifications = [];
+let unreadCount = 0;
+
+// ============================================
+// ✅ تحميل الإشعارات (محاكاة)
+// ============================================
+function loadNotifications() {
+    const list = document.getElementById('notificationsList');
+    list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    // بيانات افتراضية (محاكاة)
+    setTimeout(() => {
+        notifications = [
+            { id: '1', title: '✅ مريض جديد', body: 'تم إضافة مريض جديد: أحمد محمد', type: 'success', isRead: false, createdAt: new Date(Date.now() - 1000 * 60 * 30) },
+            { id: '2', title: '⚠️ تنبيه', body: 'المبلغ المتبقي للمعالجة رقم 5 هو 200 ريال', type: 'warning', isRead: false, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
+            { id: '3', title: 'ℹ️ تحديث النظام', body: 'تم تحديث النظام إلى الإصدار 2.0', type: 'info', isRead: true, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24) },
+            { id: '4', title: '✅ مزامنة مكتملة', body: 'تمت مزامنة جميع البيانات مع السيرفر', type: 'success', isRead: true, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48) },
+        ];
+        renderNotifications();
+    }, 500);
+}
+
+// ============================================
+// ✅ عرض الإشعارات
+// ============================================
+function renderNotifications() {
+    const list = document.getElementById('notificationsList');
+    unreadCount = notifications.filter(n => !n.isRead).length;
+
+    if (notifications.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <h3>لا توجد إشعارات</h3>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = notifications.map(n => {
+        const isUnread = !n.isRead;
+        const iconMap = { success: '✅', warning: '⚠️', info: 'ℹ️' };
+        const icon = iconMap[n.type] || '📌';
+
+        return `
+            <div class="notification-item ${isUnread ? 'unread' : ''}" onclick="markAsRead('${n.id}')">
+                <div class="icon">${icon}</div>
+                <div class="content">
+                    <div class="title ${isUnread ? 'bold' : ''}">${n.title}</div>
+                    <div class="body">${n.body}</div>
+                    <div class="date">${formatDate(n.createdAt)}</div>
+                </div>
+                <div class="actions">
+                    ${isUnread ? `<button class="read" onclick="event.stopPropagation();markAsRead('${n.id}')" title="تحديد كمقروء"><i class="fas fa-check"></i></button>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// ✅ دوال الإجراءات
+// ============================================
+function markAsRead(id) {
+    const notification = notifications.find(n => n.id === id);
+    if (notification) {
+        notification.isRead = true;
+        renderNotifications();
+    }
+}
+
+function markAllRead() {
+    if (notifications.length === 0) return;
+    notifications.forEach(n => n.isRead = true);
+    renderNotifications();
+}
+
+function deleteAll() {
+    if (notifications.length === 0) return;
+    if (!confirm('🗑️ هل أنت متأكد من حذف جميع الإشعارات؟')) return;
+    notifications = [];
+    renderNotifications();
+}
+
+function formatDate(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+
+// ============================================
+// ✅ دوال مساعدة
+// ============================================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userRole').textContent =
+        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
+        userData.role === 'university_student' ? 'طالب جامعي' :
+        userData.role === 'secretary' ? 'سكرتير' :
+        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+}
+
+loadNotifications();
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+</script>
+
+</body>
+</html>
