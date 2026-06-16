@@ -88,6 +88,26 @@ app.use('/api/lab', labRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
+
+// ============= مسار التحقق من الإصدار =============
+const fs = require('fs');
+
+app.get('/api/version', (req, res) => {
+    try {
+        const versionFile = path.join(__dirname, 'public', 'version.json');
+        const data = fs.readFileSync(versionFile, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (e) {
+        res.json({
+            success: true,
+            version: '1.0.0',
+            releaseNotes: 'الإصدار الأول',
+            forceUpdate: false,
+            lastUpdated: new Date().toISOString()
+        });
+    }
+});
+
 // ✅ مسار الموقع - يجب أن يكون بعد مسارات API
 // ✅ إذا كان المسار غير موجود، أرسل index.html
 app.get('*', (req, res) => {
