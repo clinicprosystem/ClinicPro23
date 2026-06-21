@@ -246,6 +246,9 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 // ============================================
 // ✅ تحميل المعالجات
 // ============================================
+// ============================================
+// ✅ تحميل المعالجات (بدون بيانات افتراضية)
+// ============================================
 async function loadTreatments() {
     const list = document.getElementById('treatmentsList');
     list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
@@ -259,20 +262,22 @@ async function loadTreatments() {
             renderTreatments();
             return;
         }
-    } catch(e) { console.warn('⚠️ Failed to fetch:', e); }
+    } catch(e) {
+        console.warn('⚠️ Failed to fetch from server:', e);
+    }
 
-    // بيانات افتراضية
-    treatments = [
-        { id: '1', patientName: 'أحمد محمد', subServiceName: 'حشو', doctorName: 'د. خالد', finalPrice: 250, discount: 0, date: '2026-06-15', teeth: [{number: 3}] },
-        { id: '2', patientName: 'سارة عبدالله', subServiceName: 'تقويم', doctorName: 'د. علي', finalPrice: 1200, discount: 200, date: '2026-06-14', archType: 'فك علوي' },
-        { id: '3', patientName: 'خالد علي', subServiceName: 'خلع', doctorName: 'د. أحمد', finalPrice: 150, discount: 0, date: '2026-06-13', teeth: [{number: 5}] },
-        { id: '4', patientName: 'نورا حسن', subServiceName: 'تبييض', doctorName: 'د. سارة', finalPrice: 500, discount: 50, date: '2026-06-12' },
-    ];
-    document.getElementById('treatmentsBadge').textContent = treatments.length;
-    updateFilters();
-    renderTreatments();
+    // ❌ لا توجد بيانات افتراضية - عرض خطأ فقط
+    list.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>فشل في تحميل البيانات</h3>
+            <p>يرجى التحقق من اتصالك بالإنترنت</p>
+            <button onclick="loadTreatments()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
+                <i class="fas fa-sync-alt"></i> إعادة المحاولة
+            </button>
+        </div>
+    `;
 }
-
 // ============================================
 // ✅ تحديث الفلاتر
 // ============================================
@@ -370,11 +375,13 @@ function renderTreatments() {
 // ✅ دوال الإجراءات
 // ============================================
 function viewTreatment(id) {
-    alert(`📋 عرض تفاصيل المعالجة (ID: ${id})\n🚧 قيد التطوير`);
+    // ✅ الانتقال إلى صفحة تفاصيل المعالجة مع تمرير المعرف
+    window.location.href = `treatment-details.html?id=${id}`;
 }
 
 function addTreatment() {
-    alert('➕ إضافة معالجة جديدة\n🚧 قيد التطوير');
+    // ✅ الانتقال إلى صفحة إضافة معالجة مع إمكانية تمرير patientId
+    window.location.href = 'add-treatment.html';
 }
 
 // ============================================
