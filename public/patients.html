@@ -322,12 +322,14 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 // ============================================
 // ✅ تحميل المرضى
 // ============================================
+// ============================================
+// ✅ تحميل المرضى (بدون بيانات افتراضية)
+// ============================================
 async function loadPatients() {
     const list = document.getElementById('patientsList');
     list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
 
     try {
-        // محاولة جلب من السيرفر
         const response = await apiCall('/patients');
         if (response?.patients) {
             patients = response.patients;
@@ -337,20 +339,24 @@ async function loadPatients() {
             renderPatients();
             return;
         }
-    } catch(e) { console.warn('⚠️ Failed to fetch from server:', e); }
+    } catch(e) {
+        console.warn('⚠️ Failed to fetch from server:', e);
+    }
 
-    // إذا فشل السيرفر، استخدم البيانات المحلية (محاكاة)
+    // ❌ إزالة البيانات الافتراضية - عرض خطأ فقط
     isOnline = false;
     document.getElementById('offlineBadge').style.display = 'inline-block';
-    // بيانات افتراضية
-    patients = [
-        { _id: '1', name: 'أحمد محمد', phone: '+967712345678', age: 35, gender: 'ذكر' },
-        { _id: '2', name: 'سارة عبدالله', phone: '+967776543210', age: 28, gender: 'أنثى' },
-        { _id: '3', name: 'خالد علي', phone: '+967711223344', age: 42, gender: 'ذكر' },
-        { _id: '4', name: 'نورا حسن', phone: '+967775566778', age: 31, gender: 'أنثى' },
-    ];
-    document.getElementById('patientsBadge').textContent = patients.length;
-    renderPatients();
+    
+    list.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>فشل في تحميل البيانات</h3>
+            <p>يرجى التحقق من اتصالك بالإنترنت</p>
+            <button onclick="loadPatients()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
+                <i class="fas fa-sync-alt"></i> إعادة المحاولة
+            </button>
+        </div>
+    `;
 }
 
 // ============================================
