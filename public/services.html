@@ -218,7 +218,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // ============================================
-// ✅ تحميل الخدمات
+// ✅ تحميل الخدمات (بدون بيانات افتراضية)
 // ============================================
 async function loadServices() {
     const list = document.getElementById('servicesList');
@@ -238,20 +238,21 @@ async function loadServices() {
             renderServices();
             return;
         }
-    } catch(e) { console.warn('⚠️ Failed to fetch:', e); }
+    } catch(e) {
+        console.warn('⚠️ Failed to fetch from server:', e);
+    }
 
-    // بيانات افتراضية
-    mainServices = [
-        { _id: '1', name: 'حشو', category: 'teeth' },
-        { _id: '2', name: 'تقويم', category: 'arch' },
-        { _id: '3', name: 'خلع', category: 'teeth' },
-    ];
-    subServices = {
-        '1': [{ _id: '1-1', name: 'حشو عادي', price: 150 }, { _id: '1-2', name: 'حشو تجميعي', price: 250 }],
-        '2': [{ _id: '2-1', name: 'تقويم ثابت', price: 1200 }, { _id: '2-2', name: 'تقويم متحرك', price: 800 }],
-        '3': [{ _id: '3-1', name: 'خلع بسيط', price: 100 }, { _id: '3-2', name: 'خلع جراحي', price: 300 }],
-    };
-    renderServices();
+    // ❌ لا توجد بيانات افتراضية - عرض خطأ فقط
+    list.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>فشل في تحميل البيانات</h3>
+            <p>يرجى التحقق من اتصالك بالإنترنت</p>
+            <button onclick="loadServices()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
+                <i class="fas fa-sync-alt"></i> إعادة المحاولة
+            </button>
+        </div>
+    `;
 }
 
 // ============================================
@@ -341,26 +342,44 @@ function filterServices(filter, element) {
     renderServices();
 }
 
-function addMainService() {
+// ============================================
+// ✅ إضافة خدمة رئيسية (إرسال إلى السيرفر)
+// ============================================
+async function addMainService() {
     if (isUniversityStudent) {
         alert('⚠️ غير مسموح بإضافة خدمات في باقة طالب جامعي');
         return;
     }
+    
     const name = prompt('📝 أدخل اسم الخدمة الرئيسية:');
     if (!name || name.trim() === '') return;
+    
     const category = confirm('🦷 هل هذه الخدمة للفكين؟\n"إلغاء" = أسنان، "موافق" = فكين') ? 'arch' : 'teeth';
-
-    // محاكاة الإضافة
-    const newId = Date.now().toString();
-    mainServices.push({ _id: newId, name: name.trim(), category });
-    subServices[newId] = [];
-    renderServices();
-    alert(`✅ تم إضافة الخدمة "${name.trim()}"`);
+    
+    try {
+        const response = await apiCall('/clinics/main-services', 'POST', {
+            name: name.trim(),
+            category: category
+        });
+        
+        if (response?.success) {
+            alert(`✅ تم إضافة الخدمة "${name.trim()}" بنجاح`);
+            loadServices();
+        } else {
+            alert('❌ فشل في إضافة الخدمة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
 }
 
-function addSubService(mainId) {
+// ============================================
+// ✅ إضافة خدمة فرعية (إرسال إلى السيرفر)
+// ============================================
+async function addSubService(mainId) {
     const main = mainServices.find(m => m._id === mainId);
     if (!main) return;
+    
     const name = prompt(`📝 أدخل اسم المعالجة لـ "${main.name}":`);
     if (!name || name.trim() === '') return;
 
@@ -371,44 +390,89 @@ function addSubService(mainId) {
         price = parseInt(priceInput) || 0;
     }
 
-    if (!subServices[mainId]) subServices[mainId] = [];
-    subServices[mainId].push({ _id: Date.now().toString(), name: name.trim(), price });
-    renderServices();
-    alert(`✅ تم إضافة المعالجة "${name.trim()}"`);
+    try {
+        const response = await apiCall('/clinics/sub-services', 'POST', {
+            name: name.trim(),
+            price: price,
+            mainServiceId: mainId
+        });
+        
+        if (response?.success) {
+            alert(`✅ تم إضافة المعالجة "${name.trim()}" بنجاح`);
+            loadServices();
+        } else {
+            alert('❌ فشل في إضافة المعالجة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
 }
 
-function editSubService(id, name, price) {
+// ============================================
+// ✅ تعديل سعر خدمة فرعية (إرسال إلى السيرفر)
+// ============================================
+async function editSubService(id, name, price) {
     if (isUniversityStudent) {
         alert('⚠️ لا يمكنك تعديل الأسعار في باقة طالب جامعي');
         return;
     }
+    
     const newPrice = prompt(`💰 تعديل سعر "${name}":`, price);
     if (newPrice === null) return;
     const newPriceNum = parseInt(newPrice) || 0;
-    // تحديث في البيانات
-    for (const key in subServices) {
-        const sub = subServices[key].find(s => s._id === id);
-        if (sub) { sub.price = newPriceNum; break; }
+    
+    try {
+        const response = await apiCall(`/clinics/sub-services/${id}/price`, 'PUT', {
+            price: newPriceNum
+        });
+        
+        if (response?.success) {
+            alert(`✅ تم تحديث السعر إلى ${newPriceNum} ريال`);
+            loadServices();
+        } else {
+            alert('❌ فشل في تحديث السعر: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
     }
-    renderServices();
-    alert(`✅ تم تحديث السعر إلى ${newPriceNum} ريال`);
 }
 
-function deleteMainService(id, name) {
+// ============================================
+// ✅ حذف خدمة رئيسية (إرسال إلى السيرفر)
+// ============================================
+async function deleteMainService(id, name) {
     if (!confirm(`🗑️ هل أنت متأكد من حذف الخدمة "${name}"؟\nسيتم حذف جميع المعالجات المرتبطة بها.`)) return;
-    mainServices = mainServices.filter(s => s._id !== id);
-    delete subServices[id];
-    renderServices();
-    alert('✅ تم حذف الخدمة');
+    
+    try {
+        const response = await apiCall(`/clinics/main-services/${id}`, 'DELETE');
+        if (response?.success) {
+            alert('✅ تم حذف الخدمة بنجاح');
+            loadServices();
+        } else {
+            alert('❌ فشل في حذف الخدمة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
 }
 
-function deleteSubService(id, name) {
+// ============================================
+// ✅ حذف خدمة فرعية (إرسال إلى السيرفر)
+// ============================================
+async function deleteSubService(id, name) {
     if (!confirm(`🗑️ هل أنت متأكد من حذف المعالجة "${name}"؟`)) return;
-    for (const key in subServices) {
-        subServices[key] = subServices[key].filter(s => s._id !== id);
+    
+    try {
+        const response = await apiCall(`/clinics/sub-services/${id}`, 'DELETE');
+        if (response?.success) {
+            alert('✅ تم حذف المعالجة بنجاح');
+            loadServices();
+        } else {
+            alert('❌ فشل في حذف المعالجة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
     }
-    renderServices();
-    alert('✅ تم حذف المعالجة');
 }
 
 // ============================================
