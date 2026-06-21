@@ -172,7 +172,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // ============================================
-// ✅ تحميل المعامل
+// ✅ تحميل المعامل (بدون بيانات افتراضية)
 // ============================================
 async function loadLabs() {
     const list = document.getElementById('labsList');
@@ -185,28 +185,89 @@ async function loadLabs() {
             renderLabs();
             return;
         }
-    } catch(e) { console.warn('⚠️ Failed to fetch:', e); }
+    } catch(e) {
+        console.warn('⚠️ Failed to fetch from server:', e);
+    }
 
-    // بيانات افتراضية
-    labs = [
-        { _id: '1', name: 'معمل الأسنان الحديث', phone: '0551112222', address: 'الرياض - شارع الثلاثين' },
-        { _id: '2', name: 'معمل الابتسامة', phone: '0553334444', address: 'جدة - الروضة' },
-    ];
-    renderLabs();
+    // ❌ لا توجد بيانات افتراضية - عرض خطأ فقط
+    list.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>فشل في تحميل البيانات</h3>
+            <p>يرجى التحقق من اتصالك بالإنترنت</p>
+            <button onclick="loadLabs()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
+                <i class="fas fa-sync-alt"></i> إعادة المحاولة
+            </button>
+        </div>
+    `;
 }
 
 // ============================================
-// ✅ عرض المعامل
+// ✅ إضافة معمل جديد (إرسال إلى السيرفر)
 // ============================================
+async function addLab() {
+    if (isUniversityStudent) {
+        alert('⚠️ المعمل غير متاح في باقة طالب جامعي');
+        return;
+    }
+    
+    const name = prompt('📝 أدخل اسم المعمل:');
+    if (!name || name.trim() === '') return;
+    
+    const phone = prompt('📞 أدخل رقم الجوال:');
+    if (!phone || phone.trim() === '') return;
+    
+    const address = prompt('📍 أدخل العنوان (اختياري):');
+
+    try {
+        const response = await apiCall('/labs', 'POST', {
+            name: name.trim(),
+            phone: phone.trim(),
+            address: address || ''
+        });
+        
+        if (response?.success) {
+            alert(`✅ تم إضافة المعمل "${name.trim()}" بنجاح`);
+            loadLabs();
+        } else {
+            alert('❌ فشل في إضافة المعمل: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
+}
+
+// ============================================
+// ✅ حذف معمل (إرسال إلى السيرفر)
+// ============================================
+async function deleteLab(id, name) {
+    if (!confirm(`🗑️ هل أنت متأكد من حذف المعمل "${name}"؟`)) return;
+    
+    try {
+        const response = await apiCall(`/labs/${id}`, 'DELETE');
+        if (response?.success) {
+            alert('✅ تم حذف المعمل بنجاح');
+            loadLabs();
+        } else {
+            alert('❌ فشل في حذف المعمل: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
+}
+
 function renderLabs() {
     const list = document.getElementById('labsList');
 
     if (labs.length === 0) {
         list.innerHTML = `
             <div class="empty-state">
-                <i class="fas fa-flask"></i>
+                <i class="fas fa-exclamation-circle"></i>
                 <h3>لا توجد معامل</h3>
-                <p>اضغط على زر + لإضافة معمل جديد</p>
+                <p>يرجى التحقق من اتصالك بالإنترنت</p>
+                <button onclick="loadLabs()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
+                    <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                </button>
             </div>
         `;
         return;
@@ -220,7 +281,12 @@ function renderLabs() {
                 <div class="phone">📞 ${lab.phone || '-'}</div>
                 ${lab.address ? `<div class="address">📍 ${lab.address}</div>` : ''}
             </div>
-            <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            <div class="arrow">
+                <button onclick="event.stopPropagation();deleteLab('${lab._id}','${lab.name}')" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;padding:4px 8px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <i class="fas fa-chevron-left"></i>
+            </div>
         </div>
     `).join('');
 }
@@ -232,26 +298,7 @@ function viewLabOrders(id) {
     alert(`📋 عرض طلبيات المعمل (ID: ${id})\n🚧 قيد التطوير`);
 }
 
-function addLab() {
-    if (isUniversityStudent) {
-        alert('⚠️ المعمل غير متاح في باقة طالب جامعي');
-        return;
-    }
-    const name = prompt('📝 أدخل اسم المعمل:');
-    if (!name || name.trim() === '') return;
-    const phone = prompt('📞 أدخل رقم الجوال:');
-    const address = prompt('📍 أدخل العنوان (اختياري):');
 
-    const newLab = {
-        _id: Date.now().toString(),
-        name: name.trim(),
-        phone: phone || '',
-        address: address || ''
-    };
-    labs.push(newLab);
-    renderLabs();
-    alert('✅ تم إضافة المعمل بنجاح');
-}
 
 // ============================================
 // ✅ دوال مساعدة
