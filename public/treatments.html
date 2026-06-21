@@ -334,6 +334,7 @@ function renderTreatments() {
     }
 
     list.innerHTML = filteredTreatments.map(t => {
+        const treatmentId = t.id || t._id;
         const color = serviceColors[t.subServiceName] || 'default';
         const oldPrice = (t.originalPrice || t.finalPrice || 0) + (t.discount || 0);
         const teeth = t.teeth || [];
@@ -344,7 +345,7 @@ function renderTreatments() {
         const archHtml = archType ? `<span class="arch-tag">${archType}</span>` : '';
 
         return `
-            <div class="treatment-card" onclick="viewTreatment('${t.id || t._id}')">
+            <div class="treatment-card" onclick="viewTreatment('${treatmentId}')">
                 <div class="top-row">
                     <span class="service-tag ${color}">${t.subServiceName || t.serviceName || 'خدمة'}</span>
                     <span class="date">${t.date ? t.date.substring(0,10) : '-'}</span>
