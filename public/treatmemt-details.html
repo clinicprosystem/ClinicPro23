@@ -406,12 +406,106 @@ function renderDetails() {
 // ============================================
 // ✅ دوال الإجراءات
 // ============================================
-function addPayment() {
-    alert('💳 إضافة دفعة\n🚧 قيد التطوير');
+// ============================================
+// ✅ دوال الإجراءات (معدلة)
+// ============================================
+
+// ✅ إضافة دفعة
+async function addPayment() {
+    if (!treatmentId) { alert('⚠️ لا توجد معالجة محددة'); return; }
+    
+    const amount = prompt('💳 أدخل المبلغ الذي تريد إضافته:', '');
+    if (amount === null) return;
+    
+    const amountNum = parseInt(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+        alert('⚠️ الرجاء إدخال مبلغ صحيح');
+        return;
+    }
+    
+    if (amountNum > remainingAmount) {
+        alert(`⚠️ المبلغ المطلوب (${amountNum} ريال) يتجاوز المتبقي (${remainingAmount} ريال)`);
+        return;
+    }
+    
+    try {
+        const response = await apiCall(`/treatments/${treatmentId}/payment`, 'POST', {
+            amount: amountNum,
+            type: 'payment',
+            note: 'دفعة إضافية'
+        });
+        
+        if (response?.success) {
+            alert('✅ تم إضافة الدفعة بنجاح');
+            loadTreatment(); // إعادة تحميل البيانات
+        } else {
+            alert('❌ فشل في إضافة الدفعة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
 }
 
-function addRefund() {
-    alert('🔄 إضافة عودة\n🚧 قيد التطوير');
+// ✅ إضافة عودة
+async function addRefund() {
+    if (!treatmentId) { alert('⚠️ لا توجد معالجة محددة'); return; }
+    
+    if (paidAmount <= 0) {
+        alert('⚠️ لا يوجد مبلغ مدفوع لإرجاعه');
+        return;
+    }
+    
+    const amount = prompt('🔄 أدخل المبلغ الذي تريد إرجاعه:', '');
+    if (amount === null) return;
+    
+    const amountNum = parseInt(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+        alert('⚠️ الرجاء إدخال مبلغ صحيح');
+        return;
+    }
+    
+    if (amountNum > paidAmount) {
+        alert(`⚠️ المبلغ المطلوب (${amountNum} ريال) يتجاوز المدفوع (${paidAmount} ريال)`);
+        return;
+    }
+    
+    try {
+        const response = await apiCall(`/treatments/${treatmentId}/payment`, 'POST', {
+            amount: amountNum,
+            type: 'refund',
+            note: 'عودة مبلغ'
+        });
+        
+        if (response?.success) {
+            alert('✅ تم إضافة العودة بنجاح');
+            loadTreatment(); // إعادة تحميل البيانات
+        } else {
+            alert('❌ فشل في إضافة العودة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
+}
+
+// ============================================
+// ✅ دوال مساعدة إضافية
+// ============================================
+
+// ✅ تحديث حالة الدفع
+function updatePaymentStatus() {
+    const statusElement = document.querySelector('.card .info-row .value[style*="color"]');
+    if (remainingAmount > 0) {
+        statusElement.textContent = `المتبقي: ${remainingAmount} ريال`;
+        statusElement.style.color = '#dc2626';
+    } else {
+        statusElement.textContent = 'مدفوع بالكامل';
+        statusElement.style.color = '#059669';
+    }
+}
+
+// ✅ تنسيق الأرقام
+function formatCurrency(amount) {
+    return amount.toString() + ' ريال';
 }
 
 function shareWhatsApp() {
