@@ -270,11 +270,9 @@ async function loadTreatments() {
     list.innerHTML = `
         <div class="empty-state">
             <i class="fas fa-exclamation-circle"></i>
-            <h3>فشل في تحميل البيانات</h3>
-            <p>يرجى التحقق من اتصالك بالإنترنت</p>
-            <button onclick="loadTreatments()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
-                <i class="fas fa-sync-alt"></i> إعادة المحاولة
-            </button>
+            <h3>لا يوجد معالجات </h3>
+            <p>يرجى اضافة معالجة اولا </p>
+            
         </div>
     `;
 }
