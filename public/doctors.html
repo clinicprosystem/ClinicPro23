@@ -214,7 +214,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // ============================================
-// ✅ تحميل الأطباء
+// ✅ تحميل الأطباء (بدون بيانات افتراضية)
 // ============================================
 async function loadDoctors() {
     const list = document.getElementById('doctorsList');
@@ -227,15 +227,21 @@ async function loadDoctors() {
             renderDoctors();
             return;
         }
-    } catch(e) { console.warn('⚠️ Failed to fetch:', e); }
+    } catch(e) {
+        console.warn('⚠️ Failed to fetch from server:', e);
+    }
 
-    // بيانات افتراضية
-    doctors = [
-        { _id: '1', name: 'د. خالد أحمد', phone: '+967771234567', percentage: 30 },
-        { _id: '2', name: 'د. سارة محمد', phone: '+967772345678', percentage: 25 },
-        { _id: '3', name: 'د. علي حسن', phone: '+967773456789', percentage: 20 },
-    ];
-    renderDoctors();
+    // ❌ لا توجد بيانات افتراضية - عرض خطأ فقط
+    list.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>فشل في تحميل البيانات</h3>
+            <p>يرجى التحقق من اتصالك بالإنترنت</p>
+            <button onclick="loadDoctors()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
+                <i class="fas fa-sync-alt"></i> إعادة المحاولة
+            </button>
+        </div>
+    `;
 }
 
 // ============================================
@@ -302,17 +308,85 @@ function savePercentage() {
 }
 
 // ============================================
-// ✅ دوال الإجراءات
+// ✅ إضافة طبيب جديد (إرسال إلى السيرفر)
 // ============================================
-function addDoctor() {
-    alert('➕ إضافة طبيب جديد\n🚧 قيد التطوير');
+async function addDoctor() {
+    const name = prompt('👨‍⚕️ أدخل اسم الطبيب:');
+    if (!name || name.trim() === '') return;
+    
+    const phone = prompt('📞 أدخل رقم الجوال:');
+    if (!phone || phone.trim() === '') return;
+    
+    const percentage = prompt('📊 أدخل نسبة الطبيب (0-100):', '0');
+    const percentageNum = parseInt(percentage) || 0;
+    
+    if (percentageNum < 0 || percentageNum > 100) {
+        alert('⚠️ النسبة يجب أن تكون بين 0 و 100');
+        return;
+    }
+    
+    try {
+        const response = await apiCall('/clinics/add-doctor', 'POST', {
+            name: name.trim(),
+            phone: phone.trim(),
+            percentage: percentageNum
+        });
+        
+        if (response?.success) {
+            alert('✅ تم إضافة الطبيب بنجاح');
+            loadDoctors();
+        } else {
+            alert('❌ فشل في إضافة الطبيب: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
 }
 
-function deleteDoctor(id, name) {
+// ============================================
+// ✅ حذف طبيب
+// ============================================
+async function deleteDoctor(id, name) {
     if (!confirm(`🗑️ هل أنت متأكد من حذف الطبيب "${name}"؟`)) return;
-    doctors = doctors.filter(d => d._id !== id);
-    renderDoctors();
-    alert('✅ تم حذف الطبيب');
+    
+    try {
+        const response = await apiCall(`/clinics/doctors/${id}`, 'DELETE');
+        if (response?.success) {
+            alert('✅ تم حذف الطبيب بنجاح');
+            loadDoctors();
+        } else {
+            alert('❌ فشل في حذف الطبيب: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
+}
+
+// ============================================
+// ✅ تعديل نسبة الطبيب (إرسال إلى السيرفر)
+// ============================================
+async function savePercentage() {
+    const percentage = parseInt(document.getElementById('modalPercentage').value);
+    if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+        alert('⚠️ النسبة يجب أن تكون بين 0 و 100');
+        return;
+    }
+    
+    try {
+        const response = await apiCall(`/clinics/doctors/${editingDoctorId}/percentage`, 'PUT', {
+            percentage: percentage
+        });
+        
+        if (response?.success) {
+            alert('✅ تم تحديث النسبة بنجاح');
+            closeModal();
+            loadDoctors();
+        } else {
+            alert('❌ فشل في تحديث النسبة: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        alert('❌ حدث خطأ: ' + e.message);
+    }
 }
 
 // ============================================
