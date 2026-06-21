@@ -516,6 +516,30 @@ function clearSelection() {
 }
 
 // ============================================
+// ✅ دوال مساعدة إضافية
+// ============================================
+
+// ✅ حساب السعر النهائي تلقائياً
+function calculateFinalPrice() {
+    const price = parseInt(selectedSubService?.price) || 0;
+    const discount = parseInt(document.getElementById('discountAmount').value) || 0;
+    const discountType = document.getElementById('discountType').value;
+    
+    let finalPrice = price;
+    if (discountType === 'ريال') {
+        finalPrice = Math.max(0, price - discount);
+    } else {
+        finalPrice = Math.max(0, price - (price * discount / 100));
+    }
+    if (isUniversityStudent) finalPrice = 0;
+    
+    document.getElementById('finalPriceDisplay').textContent = `${finalPrice} ريال`;
+}
+
+// ✅ إضافة مستمعين لتحديث السعر تلقائياً
+document.getElementById('discountAmount').addEventListener('input', calculateFinalPrice);
+document.getElementById('discountType').addEventListener('change', calculateFinalPrice);
+// ============================================
 // ✅ حفظ المعالجة
 // ============================================
 function showError(msg) {
@@ -525,12 +549,16 @@ function showError(msg) {
     setTimeout(() => el.classList.remove('show'), 5000);
 }
 
+// ============================================
+// ✅ حفظ المعالجة (إرسال إلى السيرفر)
+// ============================================
 async function saveTreatment() {
     if (!selectedSubService) { showError('الرجاء اختيار الخدمة'); return; }
     if (!patientId) { showError('بيانات المريض غير مكتملة'); return; }
 
     let doctorId = document.getElementById('doctorSelect').value;
     let doctorName = '';
+    
     if (isUniversityStudent) {
         doctorId = userData?.id || '';
         doctorName = userData?.name || 'طبيب الأسنان';
@@ -544,8 +572,12 @@ async function saveTreatment() {
     const discount = parseInt(document.getElementById('discountAmount').value) || 0;
     const discountType = document.getElementById('discountType').value;
     let finalPrice = parseInt(selectedSubService.price) || 0;
-    if (discountType === 'ريال') finalPrice = Math.max(0, finalPrice - discount);
-    else finalPrice = Math.max(0, finalPrice - (finalPrice * discount / 100));
+    
+    if (discountType === 'ريال') {
+        finalPrice = Math.max(0, finalPrice - discount);
+    } else {
+        finalPrice = Math.max(0, finalPrice - (finalPrice * discount / 100));
+    }
     if (isUniversityStudent) finalPrice = 0;
 
     const notes = document.getElementById('notesInput').value.trim();
@@ -569,22 +601,31 @@ async function saveTreatment() {
         date: new Date().toISOString()
     };
 
+    console.log('📤 إرسال بيانات المعالجة:', treatmentData);
+
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> جاري الحفظ...';
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        alert('✅ تم إضافة المعالجة بنجاح');
-        window.location.href = `treatments.html`;
+        // ✅ إرسال إلى API
+        const response = await apiCall('/treatments', 'POST', treatmentData);
+        console.log('📡 رد السيرفر:', response);
+
+        if (response?.success) {
+            alert('✅ تم إضافة المعالجة بنجاح');
+            window.location.href = `treatments.html`;
+        } else {
+            showError(response?.error || '❌ فشل في إضافة المعالجة');
+            btn.disabled = false;
+            btn.innerHTML = 'حفظ المعالجة';
+        }
     } catch(e) {
+        console.error('❌ خطأ:', e);
+        showError('❌ حدث خطأ: ' + e.message);
         btn.disabled = false;
         btn.innerHTML = 'حفظ المعالجة';
-        showError('❌ حدث خطأ: ' + e.message);
     }
-
-    btn.disabled = false;
-    btn.innerHTML = 'حفظ المعالجة';
 }
 
 // ============================================
