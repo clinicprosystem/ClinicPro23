@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ClinicPro - إضافة طبيب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        :root {
+            --primary: #1A5F7A;
+            --primary-light: #57C0E8;
+            --secondary: #57C0E8;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --sidebar-width: 270px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .logo {
+            padding: 24px 20px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .sidebar .logo span { color: var(--primary-light); }
+        .sidebar .logo i { margin-left: 8px; }
+
+        .sidebar .user-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar .user-info .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar .user-info .role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar ul li {
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255,255,255,0.06);
+            border-right-color: rgba(255,255,255,0.3);
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.1);
+            border-right-color: var(--primary-light);
+        }
+
+        .sidebar ul li i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar ul li.logout {
+            color: #fca5a5;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 16px;
+        }
+
+        .sidebar ul li.logout:hover {
+            background: rgba(239, 68, 68, 0.12);
+            border-right-color: #ef4444;
+        }
+
+        .sidebar ul li.logout i { color: #fca5a5; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: 20px 24px;
+            min-height: 100vh;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .left .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .header .left .back-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .header .left h1 {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .header .left h1 i {
+            margin-left: 8px;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px;
+        }
+
+        /* ===== FORM CARD ===== */
+        .form-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-card .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-card .section-title i {
+            color: var(--primary-light);
+            font-size: 20px;
+        }
+
+        .form-card .section-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #57C0E8, transparent);
+            border-radius: 10px;
+        }
+
+        /* ===== FORM FIELDS ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            margin-right: 2px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            text-align: right;
+            background: white;
+            color: #1e293b;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-control:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        /* ===== INPUT ROW ===== */
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .country-select-wrapper {
+            position: relative;
+            min-width: 85px;
+        }
+
+        .country-select-wrapper select {
+            width: 100%;
+            padding: 12px 8px 12px 28px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s ease;
+            color: #1e293b;
+            direction: ltr;
+        }
+
+        .country-select-wrapper select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+
+        .country-select-wrapper .arrow-down {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .input-row .form-control {
+            flex: 1;
+            direction: ltr;
+        }
+
+        /* ===== PERCENTAGE FIELD ===== */
+        .percentage-wrapper {
+            position: relative;
+        }
+
+        .percentage-wrapper .form-control {
+            padding-left: 44px;
+            text-align: center;
+        }
+
+        .percentage-wrapper .percent-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* ===== ERROR MESSAGE ===== */
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            border-right: 4px solid #dc2626;
+            animation: slideDown 0.4s ease;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .error-message i {
+            font-size: 18px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== BUTTON ===== */
+        .btn-save {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #57C0E8, #4aadcc);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-save:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(87, 192, 232, 0.4);
+        }
+
+        .btn-save:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-save i {
+            font-size: 18px;
+        }
+
+        .btn-save .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content {
+                margin-right: 0;
+                max-width: 100%;
+                padding: 16px;
+            }
+            .hamburger { display: block; }
+            .form-card {
+                padding: 20px 16px;
+            }
+            .header .left h1 {
+                font-size: 18px;
+            }
+            .country-select-wrapper {
+                min-width: 75px;
+            }
+            .country-select-wrapper select {
+                padding: 11px 6px 11px 24px;
+                font-size: 13px;
+            }
+            .input-row .form-control {
+                font-size: 14px;
+                padding: 11px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 16px;
+            }
+            .header .left h1 {
+                font-size: 16px;
+            }
+            .form-card {
+                padding: 16px 12px;
+                border-radius: 12px;
+            }
+            .form-card .section-title {
+                font-size: 16px;
+            }
+            .form-control {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .btn-save {
+                padding: 13px;
+                font-size: 16px;
+            }
+            .country-select-wrapper {
+                min-width: 65px;
+            }
+            .country-select-wrapper select {
+                padding: 10px 4px 10px 20px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR OVERLAY ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" id="sidebar">
+    <div class="logo">
+        <i class="fas fa-tooth"></i> <span>Clinic</span>Pro
+    </div>
+    <div class="user-info">
+        <div class="avatar"><i class="fas fa-user"></i></div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="navigateTo('dashboard.html')">
+            <i class="fas fa-chart-pie"></i> الرئيسية
+        </li>
+        <li onclick="navigateTo('patients.html')">
+            <i class="fas fa-users"></i> المرضى
+        </li>
+        <li onclick="navigateTo('treatments.html')">
+            <i class="fas fa-tooth"></i> المعالجات
+        </li>
+        <li onclick="navigateTo('services.html')">
+            <i class="fas fa-list"></i> الخدمات
+        </li>
+        <li class="active">
+            <i class="fas fa-user-md"></i> الأطباء
+        </li>
+        <li onclick="navigateTo('secretaries.html')">
+            <i class="fas fa-user-tie"></i> السكرتيرات
+        </li>
+        <li onclick="navigateTo('lab.html')">
+            <i class="fas fa-flask"></i> المعمل
+        </li>
+        <li onclick="navigateTo('reports.html')">
+            <i class="fas fa-chart-bar"></i> التقارير
+        </li>
+        <li onclick="navigateTo('notifications.html')">
+            <i class="fas fa-bell"></i> الإشعارات
+        </li>
+        <li onclick="navigateTo('settings.html')">
+            <i class="fas fa-cog"></i> الإعدادات
+        </li>
+        <li onclick="navigateTo('profile.html')">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li onclick="navigateTo('subscription-plans.html')">
+            <i class="fas fa-crown"></i> باقات الاشتراك
+        </li>
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </li>
+    </ul>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
+            <h1><i class="fas fa-user-plus"></i> إضافة طبيب جديد</h1>
+        </div>
+    </div>
+
+    <!-- ===== FORM ===== -->
+    <div class="form-card">
+        <!-- ===== رسالة الخطأ ===== -->
+        <div id="errorMessage" class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">حدث خطأ</span>
+        </div>
+
+        <!-- ===== العنوان ===== -->
+        <div class="section-title">
+            <i class="fas fa-user-md"></i> بيانات الطبيب
+        </div>
+
+        <!-- ===== اسم الطبيب ===== -->
+        <div class="form-group">
+            <label>اسم الطبيب <span class="required">*</span></label>
+            <input class="form-control" id="doctorName" placeholder="مثال: د. خالد أحمد" maxlength="50">
+        </div>
+
+        <!-- ===== رقم الجوال ===== -->
+        <div class="form-group">
+            <label>رقم الجوال</label>
+            <div class="input-row">
+                <div class="country-select-wrapper">
+                    <select id="countryCode" dir="ltr">
+                        <option value="+967">🇾🇪 +967</option>
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+20">🇪🇬 +20</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+965">🇰🇼 +965</option>
+                        <option value="+974">🇶🇦 +974</option>
+                        <option value="+973">🇧🇭 +973</option>
+                        <option value="+968">🇴🇲 +968</option>
+                        <option value="+962">🇯🇴 +962</option>
+                        <option value="+961">🇱🇧 +961</option>
+                        <option value="+218">🇱🇾 +218</option>
+                        <option value="+249">🇸🇩 +249</option>
+                        <option value="+970">🇵🇸 +970</option>
+                    </select>
+                    <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <input class="form-control" id="doctorPhone" placeholder="7xxxxxxxx" dir="ltr" maxlength="12">
+            </div>
+        </div>
+
+        <!-- ===== نسبة الطبيب ===== -->
+        <div class="form-group">
+            <label>نسبة الطبيب (%) <span class="required">*</span></label>
+            <div class="percentage-wrapper">
+                <input class="form-control" id="doctorPercentage" type="number" placeholder="مثال: 40" min="0" max="100">
+                <span class="percent-icon">%</span>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px;">النسبة يجب أن تكون بين 0 و 100</div>
+        </div>
+
+        <!-- ===== زر الحفظ ===== -->
+        <button class="btn-save" id="saveBtn" onclick="saveDoctor()">
+            <i class="fas fa-save"></i>
+            <span id="saveText">حفظ الطبيب</span>
+        </button>
+    </div>
+</div>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://clinicprosystem.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let isLoading = false;
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+            return null;
+        }
+        return await response.json();
+    } catch (e) {
+        console.error('❌ API Error:', e);
+        return null;
+    }
+}
+
+// ============================================
+// ✅ التنقل
+// ============================================
+function navigateTo(page) {
+    if (window.innerWidth <= 768) toggleSidebar(false);
+    window.location.href = page;
+}
+
+function goBack() {
+    window.location.href = 'doctors.html';
+}
+
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (typeof forceState === 'boolean') {
+        sidebar.classList.toggle('open', forceState);
+        overlay.classList.toggle('show', forceState);
+    } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ عرض الرسائل
+// ============================================
+function showError(msg) {
+    const el = document.getElementById('errorMessage');
+    document.getElementById('errorText').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 6000);
+}
+
+function hideError() {
+    document.getElementById('errorMessage').classList.remove('show');
+}
+
+// ============================================
+// ✅ الحصول على رقم الهاتف الكامل
+// ============================================
+function getFullPhone() {
+    const code = document.getElementById('countryCode').value;
+    const phone = document.getElementById('doctorPhone').value.trim();
+    return code + phone;
+}
+
+// ============================================
+// ✅ التحقق من صحة الإدخال
+// ============================================
+function validateForm() {
+    const name = document.getElementById('doctorName').value.trim();
+    const phone = document.getElementById('doctorPhone').value.trim();
+    const percentage = document.getElementById('doctorPercentage').value.trim();
+
+    if (!name) {
+        showError('⚠️ الرجاء إدخال اسم الطبيب');
+        document.getElementById('doctorName').focus();
+        return false;
+    }
+    if (!phone || phone.length < 9) {
+        showError('⚠️ الرجاء إدخال رقم جوال صحيح (9 أرقام على الأقل)');
+        document.getElementById('doctorPhone').focus();
+        return false;
+    }
+    if (!percentage) {
+        showError('⚠️ الرجاء إدخال نسبة الطبيب');
+        document.getElementById('doctorPercentage').focus();
+        return false;
+    }
+    const percentNum = parseInt(percentage);
+    if (isNaN(percentNum) || percentNum < 0 || percentNum > 100) {
+        showError('⚠️ النسبة يجب أن تكون بين 0 و 100');
+        document.getElementById('doctorPercentage').focus();
+        return false;
+    }
+    return true;
+}
+
+// ============================================
+// ✅ ✅ ✅ حفظ الطبيب (مثل التطبيق)
+// ============================================
+async function saveDoctor() {
+    hideError();
+
+    // ✅ 1. التحقق من صحة الإدخال
+    if (!validateForm()) return;
+
+    const name = document.getElementById('doctorName').value.trim();
+    const fullPhone = getFullPhone();
+    const percentage = parseInt(document.getElementById('doctorPercentage').value.trim());
+    const localId = Date.now().toString();
+
+    // ✅ 2. حالة التحميل
+    const btn = document.getElementById('saveBtn');
+    const btnText = document.getElementById('saveText');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> جاري الحفظ...';
+
+    try {
+        // ✅ 3. إرسال إلى السيرفر
+        const response = await apiCall('/clinics/add-doctor', 'POST', {
+            name: name,
+            phone: fullPhone,
+            percentage: percentage
+        });
+
+        console.log('📡 رد السيرفر:', response);
+
+        if (response?.success) {
+            // ✅ حفظ في localStorage للتخزين المؤقت
+            const cachedDoctors = JSON.parse(localStorage.getItem('cachedDoctors') || '[]');
+            cachedDoctors.push({
+                id: response.doctor?._id || localId,
+                name: name,
+                phone: fullPhone,
+                percentage: percentage
+            });
+            localStorage.setItem('cachedDoctors', JSON.stringify(cachedDoctors));
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> <span id="saveText">حفظ الطبيب</span>';
+            
+            alert('✅ تم إضافة الطبيب بنجاح');
+            window.location.href = 'doctors.html';
+        } else {
+            showError(response?.error || '❌ فشل في إضافة الطبيب');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> <span id="saveText">حفظ الطبيب</span>';
+        }
+    } catch (error) {
+        console.error('❌ Error saving doctor:', error);
+        showError('❌ حدث خطأ: ' + (error.message || 'فشل حفظ الطبيب'));
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> <span id="saveText">حفظ الطبيب</span>';
+    }
+}
+
+// ============================================
+// ✅ الضغط على Enter
+// ============================================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const activeElement = document.activeElement;
+        if (activeElement.id === 'doctorName' ||
+            activeElement.id === 'doctorPhone' ||
+            activeElement.id === 'doctorPercentage') {
+            e.preventDefault();
+            saveDoctor();
+        }
+    }
+});
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+// ✅ التحقق من التوكن
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+// ✅ تحديث معلومات المستخدم
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    const roleMap = {
+        'clinic_owner': 'صاحب عيادة',
+        'university_student': 'طالب جامعي',
+        'secretary': 'سكرتير',
+        'doctor': 'طبيب'
+    };
+    document.getElementById('userRole').textContent = roleMap[userData.role] || 'مستخدم';
+}
+
+// ✅ تحديد التركيز على حقل اسم الطبيب
+setTimeout(() => {
+    document.getElementById('doctorName').focus();
+}, 100);
+
+// ✅ إغلاق القائمة الجانبية عند تغيير الحجم
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+// ✅ إغلاق القائمة عند الضغط على ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+console.log('🚀 ClinicPro - Add Doctor Screen Loaded');
+console.log('📱 Flutter to HTML - تم التحويل بنجاح!');
+</script>
+
+</body>
+</html>
