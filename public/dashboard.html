@@ -49,7 +49,6 @@
             box-shadow: -4px 0 20px rgba(0,0,0,0.1);
         }
 
-        /* ✅ على الشاشات الصغيرة، القائمة تكون مخفية */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(100%);
@@ -629,49 +628,51 @@
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <li class="active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <!-- ✅ الرئيسية - تبقى في نفس الصفحة -->
+        <li class="active" onclick="renderDashboard()">
             <i class="fas fa-chart-pie"></i> الرئيسية
         </li>
-        <li data-page="patients" onclick="navigateTo('patients')">
+        <!-- ✅ باقي الروابط مباشرة إلى صفحات HTML -->
+        <li onclick="window.location.href='patients.html'">
             <i class="fas fa-users"></i> المرضى
             <span class="badge" id="patientsBadge">0</span>
         </li>
-        <li data-page="treatments" onclick="navigateTo('treatments')">
+        <li onclick="window.location.href='treatments.html'">
             <i class="fas fa-tooth"></i> المعالجات
             <span class="badge" id="treatmentsBadge">0</span>
         </li>
-        <li data-page="services" onclick="navigateTo('services')">
+        <li onclick="window.location.href='services.html'">
             <i class="fas fa-list"></i> الخدمات والأسعار
         </li>
 
         <!-- ✅ قسم الإدارة - يظهر لصاحب العيادة فقط -->
         <li class="section-label" id="adminLabel">الإدارة</li>
-        <li data-page="doctors" onclick="navigateTo('doctors')" id="menuDoctors">
+        <li onclick="window.location.href='doctors.html'" id="menuDoctors">
             <i class="fas fa-user-md"></i> الأطباء
         </li>
-        <li data-page="secretaries" onclick="navigateTo('secretaries')" id="menuSecretaries">
+        <li onclick="window.location.href='secretaries.html'" id="menuSecretaries">
             <i class="fas fa-user-tie"></i> السكرتيرات
         </li>
 
-        <li data-page="lab" onclick="navigateTo('lab')">
+        <li onclick="window.location.href='lab.html'">
             <i class="fas fa-flask"></i> المعمل
         </li>
-        <li data-page="reports" onclick="navigateTo('reports')">
+        <li onclick="window.location.href='reports.html'">
             <i class="fas fa-chart-bar"></i> التقارير
         </li>
-        <li data-page="notifications" onclick="navigateTo('notifications')">
+        <li onclick="window.location.href='notifications.html'">
             <i class="fas fa-bell"></i> الإشعارات
             <span class="badge" id="notifBadgeSidebar">0</span>
         </li>
-        <li data-page="settings" onclick="navigateTo('settings')">
+        <li onclick="window.location.href='settings.html'">
             <i class="fas fa-cog"></i> الإعدادات
         </li>
-        <li data-page="profile" onclick="navigateTo('profile')">
+        <li onclick="window.location.href='profile.html'">
             <i class="fas fa-user-circle"></i> الملف الشخصي
         </li>
 
-        <!-- ✅ باقات الاشتراك - تظهر للجميع -->
-        <li data-page="subscription-plans" onclick="navigateTo('subscription-plans')">
+        <!-- ✅ باقات الاشتراك -->
+        <li onclick="window.location.href='subscription-plans.html'">
             <i class="fas fa-crown"></i> باقات الاشتراك
         </li>
 
@@ -691,10 +692,10 @@
             <h1 id="pageTitle">لوحة التحكم</h1>
         </div>
         <div class="actions">
-            <button onclick="refreshData()" title="تحديث">
+            <button onclick="renderDashboard()" title="تحديث">
                 <i class="fas fa-sync-alt"></i>
             </button>
-            <button onclick="navigateTo('notifications')" title="الإشعارات">
+            <button onclick="window.location.href='notifications.html'" title="الإشعارات">
                 <i class="fas fa-bell"></i>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
             </button>
@@ -714,7 +715,6 @@ const API_BASE = 'https://clinicprosystem.koyeb.app/api';
 let token = localStorage.getItem('token') || '';
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
 let clinicId = userData?.clinicId || '';
-let currentPage = 'dashboard';
 
 // ✅ صلاحيات المستخدم
 const userRole = userData?.role || '';
@@ -724,17 +724,15 @@ const isUniversityStudent = userRole === 'university_student';
 const isMasterAdmin = userData?.isMasterAdmin === true;
 
 // ============================================
-// ✅ وظائف القائمة الجانبية (المُصلحة)
+// ✅ وظائف القائمة الجانبية
 // ============================================
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     
-    // تبديل حالة القائمة
     sidebar.classList.toggle('open');
     overlay.classList.toggle('show');
     
-    // منع تمرير الخلفية
     if (sidebar.classList.contains('open')) {
         document.body.style.overflow = 'hidden';
     } else {
@@ -783,12 +781,12 @@ function updateSidebarVisibility() {
     if (menuDoctors) menuDoctors.style.display = showAdmin ? 'flex' : 'none';
     if (menuSecretaries) menuSecretaries.style.display = showAdmin ? 'flex' : 'none';
     
-    const reportsItem = document.querySelector('[data-page="reports"]');
+    const reportsItem = document.querySelector('[onclick*="reports.html"]');
     if (reportsItem) {
         reportsItem.style.display = (isSecretary || isUniversityStudent) ? 'none' : 'flex';
     }
     
-    const labItem = document.querySelector('[data-page="lab"]');
+    const labItem = document.querySelector('[onclick*="lab.html"]');
     if (labItem) {
         labItem.style.display = isUniversityStudent ? 'none' : 'flex';
     }
@@ -827,66 +825,6 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // ============================================
-// ✅ التنقل بين الصفحات
-// ============================================
-function navigateTo(page) {
-    currentPage = page;
-    document.querySelectorAll('.sidebar ul li').forEach(el => el.classList.remove('active'));
-    const activeItem = document.querySelector(`[data-page="${page}"]`);
-    if (activeItem) activeItem.classList.add('active');
-
-    const titles = {
-        dashboard: 'لوحة التحكم',
-        patients: 'المرضى',
-        treatments: 'المعالجات',
-        doctors: 'الأطباء',
-        secretaries: 'السكرتيرات',
-        services: 'الخدمات والأسعار',
-        lab: 'المعمل',
-        reports: 'التقارير',
-        notifications: 'الإشعارات',
-        settings: 'الإعدادات',
-        profile: 'الملف الشخصي',
-        'subscription-plans': 'باقات الاشتراك'
-    };
-    document.getElementById('pageTitle').textContent = titles[page] || 'الصفحة';
-
-    if (page === 'dashboard') {
-        renderDashboard();
-    } else {
-        renderPlaceholder(page);
-    }
-}
-
-function renderPlaceholder(page) {
-    const container = document.getElementById('dynamicContent');
-    const names = {
-        patients: 'المرضى',
-        treatments: 'المعالجات',
-        doctors: 'الأطباء',
-        secretaries: 'السكرتيرات',
-        services: 'الخدمات والأسعار',
-        lab: 'المعمل',
-        reports: 'التقارير',
-        notifications: 'الإشعارات',
-        settings: 'الإعدادات',
-        profile: 'الملف الشخصي',
-        'subscription-plans': 'باقات الاشتراك'
-    };
-    container.innerHTML = `
-        <div class="empty-state" style="background:white;border-radius:16px;padding:60px 20px;box-shadow:var(--shadow);">
-            <i class="fas fa-${page === 'patients' ? 'users' : page === 'treatments' ? 'tooth' : page === 'reports' ? 'chart-bar' : page === 'settings' ? 'cog' : page === 'profile' ? 'user-circle' : page === 'subscription-plans' ? 'crown' : 'file'}"></i>
-            <h3 style="font-size:20px;color:#1e293b;margin-bottom:8px;">${names[page] || 'الصفحة'}</h3>
-            <p>تم تحويل هذه الصفحة من تطبيق Flutter إلى HTML</p>
-            <p style="font-size:13px;color:#94a3b8;margin-top:4px;">🔹 ${page === 'patients' ? 'عرض وإدارة المرضى' : page === 'treatments' ? 'عرض وإدارة المعالجات' : 'قريباً...'}</p>
-            <button onclick="navigateTo('dashboard')" style="margin-top:20px;background:var(--primary);color:white;border:none;padding:10px 32px;border-radius:12px;font-size:15px;cursor:pointer;font-weight:700;">
-                <i class="fas fa-arrow-right"></i> العودة للرئيسية
-            </button>
-        </div>
-    `;
-}
-
-// ============================================
 // ✅ لوحة التحكم (Dashboard)
 // ============================================
 async function renderDashboard() {
@@ -914,7 +852,7 @@ async function renderDashboard() {
         let subscriptionHtml = '';
         if (subscriptionType === 'trial' || subscriptionType === 'expired') {
             subscriptionHtml = `
-                <div class="subscription-banner" onclick="navigateTo('subscription-plans')">
+                <div class="subscription-banner" onclick="window.location.href='subscription-plans.html'">
                     <div class="left">
                         <i class="fas fa-crown"></i>
                         <div>
@@ -939,22 +877,22 @@ async function renderDashboard() {
             </div>
             ${subscriptionHtml}
             <div class="stats-grid">
-                <div class="stat-card" onclick="navigateTo('patients')">
+                <div class="stat-card" onclick="window.location.href='patients.html'">
                     <div class="icon blue"><i class="fas fa-users"></i></div>
                     <div class="value">${pCount}</div>
                     <div class="label">المرضى</div>
                 </div>
-                <div class="stat-card" onclick="navigateTo('treatments')">
+                <div class="stat-card" onclick="window.location.href='treatments.html'">
                     <div class="icon green"><i class="fas fa-tooth"></i></div>
                     <div class="value">${tCount}</div>
                     <div class="label">المعالجات</div>
                 </div>
-                <div class="stat-card" onclick="navigateTo('doctors')">
+                <div class="stat-card" onclick="window.location.href='doctors.html'">
                     <div class="icon orange"><i class="fas fa-user-md"></i></div>
                     <div class="value">${dCount}</div>
                     <div class="label">الأطباء</div>
                 </div>
-                <div class="stat-card" onclick="navigateTo('reports')">
+                <div class="stat-card" onclick="window.location.href='reports.html'">
                     <div class="icon purple"><i class="fas fa-coins"></i></div>
                     <div class="value">--</div>
                     <div class="label">الإيرادات</div>
@@ -964,7 +902,7 @@ async function renderDashboard() {
             <div class="recent-section">
                 <div class="header-row">
                     <h3>آخر المعالجات</h3>
-                    <a onclick="navigateTo('treatments')">عرض الكل ←</a>
+                    <a onclick="window.location.href='treatments.html'">عرض الكل ←</a>
                 </div>
                 ${recentTreats.length === 0 ? `
                     <div class="empty-state">
@@ -978,8 +916,9 @@ async function renderDashboard() {
                     const doctorName = t.doctorName || t.doctor?.name || 'طبيب';
                     const price = t.finalPrice || t.price || 0;
                     const date = t.date ? t.date.substring(0, 10) : '-';
+                    const id = t._id || t.id || '';
                     return `
-                        <div class="treatment-item" onclick="navigateTo('treatments')">
+                        <div class="treatment-item" onclick="window.location.href='treatment-details.html?id=${id}'">
                             <div class="icon-circle"><i class="fas fa-tooth"></i></div>
                             <div class="info">
                                 <div class="name">${mainService} - ${subService}</div>
@@ -1030,14 +969,6 @@ async function renderDashboard() {
 // ============================================
 // ✅ وظائف مساعدة
 // ============================================
-function refreshData() {
-    if (currentPage === 'dashboard') {
-        renderDashboard();
-    } else {
-        navigateTo(currentPage);
-    }
-}
-
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -1065,7 +996,7 @@ if (userData?.name) {
 updateSidebarVisibility();
 renderDashboard();
 
-// ✅ إغلاق القائمة عند تغيير حجم النافذة إلى كبيرة
+// ✅ إغلاق القائمة عند تغيير حجم النافذة
 window.addEventListener('resize', function() {
     if (window.innerWidth > 768) {
         const sidebar = document.getElementById('sidebar');
