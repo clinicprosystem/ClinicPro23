@@ -2,160 +2,529 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>ClinicPro - إنشاء حساب</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f0f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
 
         .signup-container {
-            width: 100%; max-width: 480px; background: white; border-radius: 24px;
-            padding: 32px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            animation: fadeIn 0.5s ease;
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border-radius: 28px;
+            padding: 32px 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
+        /* ===== الشعار ===== */
         .logo {
-            text-align: center; margin-bottom: 24px;
+            text-align: center;
+            margin-bottom: 24px;
         }
+
         .logo .icon {
-            width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 10px;
-            background: rgba(26,95,122,0.1); display: flex; align-items: center; justify-content: center;
-            font-size: 30px; color: #1A5F7A;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background: rgba(26, 95, 122, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #1A5F7A;
+            transition: transform 0.3s ease;
         }
-        .logo h1 { font-size: 22px; color: #1A5F7A; }
-        .logo p { font-size: 14px; color: #64748b; }
 
+        .logo .icon:hover {
+            transform: scale(1.05);
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 900;
+            color: #1A5F7A;
+        }
+
+        .logo h1 span {
+            color: #57C0E8;
+        }
+
+        .logo p {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* ===== عنوان القسم ===== */
         .section-title {
-            font-size: 16px; font-weight: 700; color: #1A5F7A; margin: 16px 0 10px 0;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #1A5F7A;
+            margin: 20px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .section-title i { font-size: 14px; }
 
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 4px; }
-        .form-group .required { color: #ef4444; }
+        .section-title i {
+            font-size: 16px;
+            color: #57C0E8;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #57C0E8, transparent);
+            border-radius: 10px;
+        }
+
+        /* ===== الحقول ===== */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            margin-right: 2px;
+        }
 
         .form-control {
-            width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 12px;
-            font-size: 14px; transition: border-color 0.3s; text-align: right;
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            text-align: right;
+            background: white;
+            color: #1e293b;
         }
-        .form-control:focus { border-color: #1A5F7A; outline: none; }
-        .form-control:disabled { background: #f1f5f9; }
 
-        .input-row { display: flex; gap: 8px; align-items: center; }
-        .country-select {
-            padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px;
-            background: white; min-width: 70px; text-align: center;
+        .form-control:focus {
+            border-color: #1A5F7A;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
         }
-        .country-select:focus { border-color: #1A5F7A; outline: none; }
-        .input-row .form-control { flex: 1; }
 
-        .password-wrapper { position: relative; }
-        .password-wrapper .form-control { padding-left: 46px; }
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-control:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        /* ===== حقل رقم الجوال ===== */
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .country-select-wrapper {
+            position: relative;
+            min-width: 85px;
+        }
+
+        .country-select-wrapper select {
+            width: 100%;
+            padding: 12px 8px 12px 28px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s ease;
+            color: #1e293b;
+            direction: ltr;
+        }
+
+        .country-select-wrapper select:focus {
+            border-color: #1A5F7A;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+
+        .country-select-wrapper .arrow-down {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .input-row .form-control {
+            flex: 1;
+            direction: ltr;
+        }
+
+        /* ===== حقل كلمة السر ===== */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper .form-control {
+            padding-left: 48px;
+            direction: ltr;
+        }
+
         .password-wrapper .toggle {
-            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; font-size: 18px; cursor: pointer; color: #94a3b8;
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 4px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
 
-        .btn-submit {
-            width: 100%; padding: 14px; background: #57C0E8; color: white; border: none;
-            border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer;
-            transition: background 0.3s; margin-top: 8px;
+        .password-wrapper .toggle:hover {
+            color: #1A5F7A;
+            background: #f1f5f9;
         }
-        .btn-submit:hover { background: #4aadcc; }
-        .btn-submit:disabled { background: #b0d4e0; cursor: not-allowed; }
-        .btn-submit .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .login-link { text-align: center; margin-top: 16px; font-size: 14px; color: #64748b; }
-        .login-link a { color: #1A5F7A; text-decoration: none; font-weight: 700; cursor: pointer; }
+        .password-hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
 
+        /* ===== رسالة الخطأ ===== */
         .error-message {
-            background: #fee2e2; color: #dc2626; padding: 10px 14px; border-radius: 10px;
-            font-size: 14px; margin-bottom: 12px; display: none; text-align: center;
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            border-right: 4px solid #dc2626;
+            animation: slideDown 0.4s ease;
         }
-        .error-message.show { display: block; }
 
+        .error-message.show {
+            display: flex;
+        }
+
+        .error-message i {
+            font-size: 18px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== زر إنشاء حساب ===== */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #57C0E8, #4aadcc);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-submit:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(87, 192, 232, 0.4);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-submit i {
+            font-size: 18px;
+        }
+
+        .btn-submit .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== رابط تسجيل الدخول ===== */
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 15px;
+            color: #64748b;
+        }
+
+        .login-link a {
+            color: #1A5F7A;
+            text-decoration: none;
+            font-weight: 800;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .login-link a:hover {
+            color: #57C0E8;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
-            .signup-container { padding: 20px 16px; }
+            .signup-container {
+                padding: 24px 16px;
+                border-radius: 20px;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .logo .icon {
+                width: 54px;
+                height: 54px;
+                font-size: 26px;
+            }
+
+            .section-title {
+                font-size: 14px;
+                margin: 16px 0 10px 0;
+            }
+
+            .form-control {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+
+            .country-select-wrapper {
+                min-width: 75px;
+            }
+
+            .country-select-wrapper select {
+                padding: 10px 6px 10px 24px;
+                font-size: 13px;
+            }
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 16px;
+            }
+
+            .password-wrapper .form-control {
+                padding-left: 44px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .signup-container {
+                padding: 16px 12px;
+            }
+
+            .country-select-wrapper {
+                min-width: 65px;
+            }
+
+            .country-select-wrapper select {
+                padding: 9px 4px 9px 20px;
+                font-size: 12px;
+            }
+
+            .input-row {
+                gap: 6px;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="signup-container">
+    <!-- ===== الشعار ===== -->
     <div class="logo">
-        <div class="icon">🏥</div>
-        <h1>ClinicPro</h1>
-        <p>نظام إدارة العيادة</p>
+        <div class="icon"><i class="fas fa-tooth"></i></div>
+        <h1>Clinic<span>Pro</span></h1>
+        <p>نظام إدارة العيادة الذكي</p>
     </div>
 
-    <div id="errorMessage" class="error-message"></div>
+    <!-- ===== رسالة الخطأ ===== -->
+    <div id="errorMessage" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorText">حدث خطأ</span>
+    </div>
 
-    <!-- بيانات العيادة -->
-    <div class="section-title"><i class="fas fa-clinic-medical"></i> بيانات العيادة</div>
+    <!-- ===== بيانات العيادة ===== -->
+    <div class="section-title">
+        <i class="fas fa-clinic-medical"></i> بيانات العيادة
+    </div>
 
     <div class="form-group">
         <label>اسم العيادة <span class="required">*</span></label>
-        <input class="form-control" id="clinicName" placeholder="مثال: عيادة الابتسامة">
+        <input class="form-control" id="clinicName" placeholder="مثال: عيادة الابتسامة" maxlength="50">
     </div>
 
     <div class="form-group">
         <label>اسم صاحب العيادة <span class="required">*</span></label>
-        <input class="form-control" id="ownerName" placeholder="الاسم الكامل">
+        <input class="form-control" id="ownerName" placeholder="الاسم الكامل" maxlength="50">
     </div>
 
     <div class="form-group">
         <label>رقم الجوال <span class="required">*</span></label>
         <div class="input-row">
-            <select class="country-select" id="countryCode">
-                <option value="+967">🇾🇪 +967</option>
-                <option value="+966">🇸🇦 +966</option>
-                <option value="+20">🇪🇬 +20</option>
-                <option value="+971">🇦🇪 +971</option>
-                <option value="+965">🇰🇼 +965</option>
-                <option value="+974">🇶🇦 +974</option>
-                <option value="+973">🇧🇭 +973</option>
-                <option value="+968">🇴🇲 +968</option>
-                <option value="+962">🇯🇴 +962</option>
-            </select>
-            <input class="form-control" id="phone" placeholder="7xxxxxxxx" dir="ltr" style="text-align:left;">
+            <div class="country-select-wrapper">
+                <select id="countryCode" dir="ltr">
+                    <option value="+967">🇾🇪 +967</option>
+                    <option value="+966">🇸🇦 +966</option>
+                    <option value="+20">🇪🇬 +20</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+965">🇰🇼 +965</option>
+                    <option value="+974">🇶🇦 +974</option>
+                    <option value="+973">🇧🇭 +973</option>
+                    <option value="+968">🇴🇲 +968</option>
+                    <option value="+962">🇯🇴 +962</option>
+                    <option value="+961">🇱🇧 +961</option>
+                    <option value="+218">🇱🇾 +218</option>
+                    <option value="+249">🇸🇩 +249</option>
+                    <option value="+970">🇵🇸 +970</option>
+                </select>
+                <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <input class="form-control" id="phone" placeholder="7xxxxxxxx" dir="ltr" maxlength="12">
         </div>
     </div>
 
-    <!-- كلمة السر -->
-    <div class="section-title"><i class="fas fa-lock"></i> كلمة السر</div>
+    <!-- ===== كلمة السر ===== -->
+    <div class="section-title">
+        <i class="fas fa-lock"></i> كلمة السر
+    </div>
 
     <div class="form-group">
         <label>كلمة السر <span class="required">*</span></label>
         <div class="password-wrapper">
-            <input class="form-control" id="password" type="password" placeholder="****" dir="ltr">
-            <button class="toggle" onclick="togglePassword('password', this)">👁️</button>
+            <input class="form-control" id="password" type="password" placeholder="أدخل كلمة السر" dir="ltr">
+            <button class="toggle" type="button" onclick="togglePassword('password', this)" aria-label="إظهار/إخفاء كلمة السر">
+                <i class="fas fa-eye"></i>
+            </button>
         </div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:4px;">يجب أن تكون 6 أحرف على الأقل</div>
+        <div class="password-hint">يجب أن تكون 6 أحرف على الأقل</div>
     </div>
 
     <div class="form-group">
         <label>تأكيد كلمة السر <span class="required">*</span></label>
         <div class="password-wrapper">
-            <input class="form-control" id="confirmPassword" type="password" placeholder="****" dir="ltr">
-            <button class="toggle" onclick="togglePassword('confirmPassword', this)">👁️</button>
+            <input class="form-control" id="confirmPassword" type="password" placeholder="أعد كتابة كلمة السر" dir="ltr">
+            <button class="toggle" type="button" onclick="togglePassword('confirmPassword', this)" aria-label="إظهار/إخفاء تأكيد كلمة السر">
+                <i class="fas fa-eye"></i>
+            </button>
         </div>
     </div>
 
+    <!-- ===== زر إنشاء حساب ===== -->
     <button class="btn-submit" id="signupBtn" onclick="signup()">
-        إنشاء حساب
+        <i class="fas fa-user-plus"></i>
+        <span id="signupText">إنشاء حساب</span>
     </button>
 
+    <!-- ===== رابط تسجيل الدخول ===== -->
     <div class="login-link">
-        لديك حساب بالفعل؟ <a onclick="goToLogin()">تسجيل الدخول</a>
+        لديك حساب بالفعل؟ <a onclick="goToLogin()"><i class="fas fa-arrow-left"></i> تسجيل الدخول</a>
     </div>
 </div>
 
@@ -163,109 +532,221 @@
 // ============================================
 // ✅ الإعدادات الأساسية
 // ============================================
-const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+const API_BASE = 'https://clinicprosystem.koyeb.app/api';
 
 // ============================================
-// ✅ دوال API
+// ✅ عناصر DOM
 // ============================================
-async function apiCall(endpoint, method = 'POST', body = null) {
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
-    const options = { method, headers };
-    if (body) options.body = JSON.stringify(body);
-    try {
-        const response = await fetch(`${API_BASE}${endpoint}`, options);
-        return await response.json();
-    } catch (e) { console.error('❌ API Error:', e); return { success: false, error: 'فشل الاتصال' }; }
+const clinicNameInput = document.getElementById('clinicName');
+const ownerNameInput = document.getElementById('ownerName');
+const countryCodeSelect = document.getElementById('countryCode');
+const phoneInput = document.getElementById('phone');
+const passwordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+const signupBtn = document.getElementById('signupBtn');
+const signupText = document.getElementById('signupText');
+const errorMsg = document.getElementById('errorMessage');
+const errorText = document.getElementById('errorText');
+
+// ============================================
+// ✅ دوال عرض الرسائل
+// ============================================
+function showError(msg) {
+    errorText.textContent = msg;
+    errorMsg.classList.add('show');
+    setTimeout(() => errorMsg.classList.remove('show'), 6000);
+}
+
+function hideError() {
+    errorMsg.classList.remove('show');
 }
 
 // ============================================
-// ✅ دوال المساعدة
+// ✅ إظهار/إخفاء كلمة السر
 // ============================================
 function togglePassword(id, btn) {
     const input = document.getElementById(id);
+    const icon = btn.querySelector('i');
     if (input.type === 'password') {
         input.type = 'text';
-        btn.textContent = '👁️‍🗨️';
+        icon.className = 'fas fa-eye-slash';
     } else {
         input.type = 'password';
-        btn.textContent = '👁️';
+        icon.className = 'fas fa-eye';
     }
 }
 
-function showError(msg) {
-    const el = document.getElementById('errorMessage');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 5000);
+// ============================================
+// ✅ الحصول على رقم الهاتف الكامل
+// ============================================
+function getFullPhone() {
+    const code = countryCodeSelect.value;
+    const phone = phoneInput.value.trim();
+    return code + phone;
 }
 
 // ============================================
-// ✅ إنشاء الحساب
+// ✅ التحقق من صحة الإدخال (مثل التطبيق)
+// ============================================
+function validateForm() {
+    const clinicName = clinicNameInput.value.trim();
+    const ownerName = ownerNameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+
+    if (!clinicName) {
+        showError('⚠️ الرجاء إدخال اسم العيادة');
+        clinicNameInput.focus();
+        return false;
+    }
+    if (!ownerName) {
+        showError('⚠️ الرجاء إدخال اسم صاحب العيادة');
+        ownerNameInput.focus();
+        return false;
+    }
+    if (!phone || phone.length < 9) {
+        showError('⚠️ الرجاء إدخال رقم جوال صحيح (9 أرقام على الأقل)');
+        phoneInput.focus();
+        return false;
+    }
+    if (!password || password.length < 6) {
+        showError('⚠️ كلمة السر يجب أن تكون 6 أحرف على الأقل');
+        passwordInput.focus();
+        return false;
+    }
+    if (password !== confirmPassword) {
+        showError('⚠️ كلمة السر غير متطابقة');
+        confirmPasswordInput.focus();
+        return false;
+    }
+    return true;
+}
+
+// ============================================
+// ✅ ✅ ✅ دالة إنشاء حساب (مثل التطبيق)
 // ============================================
 async function signup() {
-    const clinicName = document.getElementById('clinicName').value.trim();
-    const ownerName = document.getElementById('ownerName').value.trim();
-    const countryCode = document.getElementById('countryCode').value;
-    const phone = document.getElementById('phone').value.trim();
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    hideError();
 
-    const errorEl = document.getElementById('errorMessage');
-    errorEl.classList.remove('show');
+    // ✅ 1. التحقق من صحة الإدخال
+    if (!validateForm()) return;
 
-    // ✅ التحقق من صحة الإدخال
-    if (!clinicName) { showError('الرجاء إدخال اسم العيادة'); return; }
-    if (!ownerName) { showError('الرجاء إدخال اسم صاحب العيادة'); return; }
-    if (!phone || phone.length < 9) { showError('الرجاء إدخال رقم جوال صحيح'); return; }
-    if (!password || password.length < 6) { showError('كلمة السر يجب أن تكون 6 أحرف على الأقل'); return; }
-    if (password !== confirmPassword) { showError('كلمة السر غير متطابقة'); return; }
+    const clinicName = clinicNameInput.value.trim();
+    const ownerName = ownerNameInput.value.trim();
+    const fullPhone = getFullPhone();
+    const password = passwordInput.value;
 
-    const fullPhone = countryCode + phone;
-
-    const btn = document.getElementById('signupBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> جاري إنشاء الحساب...';
+    // ✅ 2. حالة التحميل
+    signupBtn.disabled = true;
+    signupBtn.innerHTML = '<span class="spinner"></span> جاري إنشاء الحساب...';
 
     try {
-        const response = await apiCall('/auth/register', 'POST', {
-            clinicName: clinicName,
-            ownerName: ownerName,
-            phone: fullPhone,
-            password: password
+        console.log('📤 محاولة إنشاء حساب:', { clinicName, ownerName, phone: fullPhone });
+
+        // ✅ 3. إرسال طلب التسجيل إلى API
+        const response = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                clinicName: clinicName,
+                ownerName: ownerName,
+                phone: fullPhone,
+                password: password
+            })
         });
 
-        if (response.success) {
-            localStorage.setItem('token', response.token);
-            if (response.user) {
-                localStorage.setItem('user', JSON.stringify(response.user));
+        // ✅ 4. قراءة الرد
+        const data = await response.json();
+        console.log('📡 رد السيرفر:', data);
+
+        // ✅ 5. معالجة الاستجابة
+        if (response.ok && data.success) {
+            // ✅ حفظ البيانات
+            if (data.token) {
+                localStorage.setItem('token', data.token);
             }
-            alert('✅ تم إنشاء الحساب بنجاح!');
-            window.location.href = 'dashboard.html';
+            if (data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
+
+            // ✅ عرض رسالة نجاح (مثل SnackBar)
+            alert('✅ تم إنشاء الحساب بنجاح! جاري تحويلك إلى لوحة التحكم...');
+
+            // ✅ التوجه إلى لوحة التحكم بعد 1.5 ثانية
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+
         } else {
-            showError(response.error || '❌ فشل إنشاء الحساب. الرقم قد يكون مسجلاً مسبقاً');
-            btn.disabled = false;
-            btn.innerHTML = 'إنشاء حساب';
+            // ✅ عرض رسالة الخطأ من السيرفر
+            const errorMsgText = data.error || data.message || '❌ فشل إنشاء الحساب. الرقم قد يكون مسجلاً مسبقاً';
+            showError(errorMsgText);
+            resetSignupButton();
         }
-    } catch (e) {
-        showError('❌ فشل الاتصال بالسيرفر');
-        btn.disabled = false;
-        btn.innerHTML = 'إنشاء حساب';
+
+    } catch (error) {
+        console.error('❌ خطأ في الاتصال:', error);
+        showError('❌ خطأ في الاتصال بالسيرفر. تأكد من اتصالك بالإنترنت.');
+        resetSignupButton();
     }
 }
 
 // ============================================
-// ✅ التنقل
+// ✅ إعادة زر إنشاء حساب للحالة الطبيعية
+// ============================================
+function resetSignupButton() {
+    signupBtn.disabled = false;
+    signupBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span id="signupText">إنشاء حساب</span>';
+}
+
+// ============================================
+// ✅ الانتقال إلى صفحة تسجيل الدخول
 // ============================================
 function goToLogin() {
     window.location.href = 'index.html';
 }
 
 // ============================================
-// ✅ الضغط على Enter
+// ✅ إنشاء حساب عند الضغط على Enter
 // ============================================
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') signup();
+    if (e.key === 'Enter') {
+        const activeElement = document.activeElement;
+        if (activeElement === clinicNameInput ||
+            activeElement === ownerNameInput ||
+            activeElement === phoneInput ||
+            activeElement === passwordInput ||
+            activeElement === confirmPasswordInput) {
+            e.preventDefault();
+            signup();
+        }
+    }
 });
+
+// ============================================
+// ✅ تحسين تجربة المستخدم
+// ============================================
+// ✅ تحديد التركيز على حقل اسم العيادة عند تحميل الصفحة
+setTimeout(() => {
+    if (!localStorage.getItem('token')) {
+        clinicNameInput.focus();
+    }
+}, 100);
+
+// ✅ معالجة الأخطاء غير المتوقعة
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('⚠️ خطأ غير متوقع:', e.reason);
+    if (signupBtn.disabled) {
+        resetSignupButton();
+    }
+});
+
+console.log('🚀 ClinicPro - Signup Screen Loaded');
+console.log('📱 Flutter to HTML - تم التحويل بنجاح!');
 </script>
 
 </body>
