@@ -2,268 +2,932 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>ClinicPro - إضافة معالجة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
 
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        :root {
+            --primary: #1A5F7A;
+            --primary-light: #57C0E8;
+            --secondary: #57C0E8;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --sidebar-width: 270px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
-            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
-            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
-            transition: transform 0.3s ease; overflow-y: auto;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
         }
-        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
-        .sidebar .logo span { color: #57C0E8; }
-        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
-        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
-        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
-        .sidebar ul { list-style: none; padding: 12px 0; }
-        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
-        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
-        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
-        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
-        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
 
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+        .sidebar .logo {
+            padding: 24px 20px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
 
-        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+        .sidebar .logo span { color: var(--primary-light); }
+        .sidebar .logo i { margin-left: 8px; }
 
+        .sidebar .user-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar .user-info .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar .user-info .role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar ul li {
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255,255,255,0.06);
+            border-right-color: rgba(255,255,255,0.3);
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.1);
+            border-right-color: var(--primary-light);
+        }
+
+        .sidebar ul li i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar ul li.logout {
+            color: #fca5a5;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 16px;
+        }
+
+        .sidebar ul li.logout:hover {
+            background: rgba(239, 68, 68, 0.12);
+            border-right-color: #ef4444;
+        }
+
+        .sidebar ul li.logout i { color: #fca5a5; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: 20px 24px;
+            min-height: 100vh;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        /* ===== HEADER ===== */
         .header {
-            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+            background: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .header .left { display: flex; align-items: center; gap: 12px; }
-        .header .left h1 { font-size: 20px; color: #1A5F7A; }
-        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
-        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
-        .header .actions button:hover { background: #f0f4f8; }
 
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .left .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .header .left .back-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .header .left h1 {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .header .left h1 i {
+            margin-left: 8px;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px;
+        }
+
+        /* ===== FORM CARD ===== */
         .form-card {
-            background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
             margin-bottom: 16px;
         }
+
         .form-card .section-title {
-            font-size: 16px; font-weight: 700; color: #1A5F7A; margin-bottom: 12px;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 4px; }
-        .form-group .required { color: #ef4444; }
+
+        .form-card .section-title i {
+            color: var(--primary-light);
+            font-size: 18px;
+        }
+
+        .form-card .section-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #57C0E8, transparent);
+            border-radius: 10px;
+        }
+
+        /* ===== FORM FIELDS ===== */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            margin-right: 2px;
+        }
 
         .form-control {
-            width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px;
-            font-size: 14px; transition: border-color 0.3s; text-align: right;
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-align: right;
+            background: white;
+            color: #1e293b;
         }
-        .form-control:focus { border-color: #1A5F7A; outline: none; }
-        .form-control:disabled { background: #f1f5f9; }
 
-        .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .form-row .form-group { flex: 1; min-width: 120px; }
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
 
-        .search-box {
-            margin-bottom: 16px;
+        .form-control::placeholder {
+            color: #94a3b8;
         }
-        .search-box input {
-            width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
-            font-size: 14px; padding-right: 40px; background: white;
-        }
-        .search-box input:focus { border-color: #1A5F7A; outline: none; }
-        .search-box .wrapper { position: relative; }
-        .search-box .wrapper i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        .filters {
-            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+        .form-control:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
         }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 12px center;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 14px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* ===== SEARCH ===== */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 11px 44px 11px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #1e293b;
+        }
+
+        .search-wrapper input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+
+        /* ===== FILTERS ===== */
+        .filters-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
         .filter-chip {
-            padding: 4px 14px; border-radius: 20px; border: 2px solid #1A5F7A;
-            font-size: 12px; cursor: pointer; transition: all 0.3s;
-            background: white; color: #1A5F7A;
+            padding: 6px 18px;
+            border-radius: 20px;
+            border: 2px solid var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            color: var(--primary);
+            white-space: nowrap;
+            user-select: none;
         }
-        .filter-chip:hover { background: #f0f7fa; }
-        .filter-chip.active { background: #1A5F7A; color: white; }
 
+        .filter-chip:hover {
+            background: #f0f7fa;
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 2px 12px rgba(26, 95, 122, 0.3);
+        }
+
+        /* ===== SERVICE CARD ===== */
         .service-card {
-            border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
             overflow: hidden;
+            transition: border-color 0.3s ease;
         }
+
+        .service-card:hover {
+            border-color: var(--primary-light);
+        }
+
         .service-card .service-header {
-            padding: 12px 16px; background: #f8fafc; cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px;
+            background: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
         }
-        .service-card .service-header .left { display: flex; align-items: center; gap: 10px; }
+
+        .service-card .service-header:hover {
+            background: #f1f5f9;
+        }
+
+        .service-card .service-header .left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .service-card .service-header .left .icon {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: rgba(26,95,122,0.1); display: flex; align-items: center; justify-content: center;
-            color: #1A5F7A;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(26, 95, 122, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 16px;
         }
-        .service-card .service-header .left .name { font-weight: 700; font-size: 14px; }
-        .service-card .service-header .left .count { font-size: 12px; color: #94a3b8; }
 
-        .service-card .sub-items { padding: 8px; }
+        .service-card .service-header .left .name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .service-card .service-header .left .count {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .service-card .service-header .arrow {
+            color: #94a3b8;
+            transition: transform 0.3s ease;
+            font-size: 14px;
+        }
+
+        .service-card .service-header .arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .service-card .sub-items {
+            padding: 8px;
+            display: none;
+        }
+
+        .service-card .sub-items.open {
+            display: block;
+        }
+
         .service-card .sub-item {
-            display: flex; align-items: center; padding: 8px 12px; border-radius: 8px;
-            cursor: pointer; transition: background 0.2s; border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            margin-bottom: 4px;
         }
-        .service-card .sub-item:hover { background: #f8fafc; }
-        .service-card .sub-item.selected { border-color: #1A5F7A; background: rgba(26,95,122,0.05); }
+
+        .service-card .sub-item:hover {
+            background: #f8fafc;
+        }
+
+        .service-card .sub-item.selected {
+            border-color: var(--primary);
+            background: rgba(26, 95, 122, 0.05);
+        }
+
         .service-card .sub-item .radio {
-            width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1;
-            display: flex; align-items: center; justify-content: center; margin-left: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 12px;
             flex-shrink: 0;
+            transition: all 0.2s ease;
         }
-        .service-card .sub-item .radio.active { border-color: #1A5F7A; background: #1A5F7A; }
+
+        .service-card .sub-item .radio.active {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
         .service-card .sub-item .radio.active::after {
-            content: ''; width: 8px; height: 8px; border-radius: 50%; background: white;
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
         }
-        .service-card .sub-item .info { flex: 1; }
-        .service-card .sub-item .info .name { font-size: 14px; }
-        .service-card .sub-item .info .price { font-size: 12px; color: #94a3b8; }
-        .service-card .sub-item .info .no-price { font-size: 12px; color: #94a3b8; }
 
+        .service-card .sub-item .info {
+            flex: 1;
+        }
+
+        .service-card .sub-item .info .name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .service-card .sub-item .info .price {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .service-card .sub-item .info .no-price {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* ===== SELECTED SERVICE ===== */
         .selected-service {
-            background: rgba(26,95,122,0.08); border-radius: 12px; padding: 12px 16px;
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+            background: rgba(26, 95, 122, 0.06);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-right: 4px solid var(--primary);
         }
-        .selected-service .left { display: flex; align-items: center; gap: 8px; }
-        .selected-service .left i { color: #1A5F7A; }
-        .selected-service .left .name { font-weight: 700; }
-        .selected-service .close { color: #94a3b8; cursor: pointer; font-size: 18px; }
 
-        .doctor-select {
+        .selected-service .left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .selected-service .left i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .selected-service .left .name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .selected-service .close {
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .selected-service .close:hover {
+            background: #f1f5f9;
+            color: #ef4444;
+        }
+
+        /* ===== DOCTOR SECTION ===== */
+        .doctor-auto {
+            background: rgba(26, 95, 122, 0.06);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 16px;
         }
-        .doctor-select select {
-            width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px;
-            font-size: 14px; text-align: right;
-        }
-        .doctor-select select:focus { border-color: #1A5F7A; outline: none; }
-        .doctor-auto {
-            background: rgba(26,95,122,0.08); border-radius: 10px; padding: 12px 16px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .doctor-auto i { color: #1A5F7A; }
-        .doctor-auto .label { font-size: 12px; color: #94a3b8; }
-        .doctor-auto .name { font-weight: 700; }
 
-        .price-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-        .price-row .form-group { flex: 1; min-width: 100px; }
+        .doctor-auto i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .doctor-auto .label {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .doctor-auto .name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        /* ===== PRICE SECTION ===== */
+        .price-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .price-row .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
 
         .final-price {
-            background: rgba(26,95,122,0.1); border-radius: 12px; padding: 12px 16px;
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(26, 95, 122, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
         }
-        .final-price .label { font-size: 16px; }
-        .final-price .value { font-size: 20px; font-weight: 800; color: #1A5F7A; }
+
+        .final-price .label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .final-price .value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+        }
 
         .no-price-banner {
-            background: rgba(5, 150, 105, 0.1); border-radius: 12px; padding: 12px 16px;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            color: #059669; font-weight: 700;
+            background: rgba(5, 150, 105, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: #059669;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 12px;
+            border: 2px dashed #059669;
         }
 
+        .no-price-banner i {
+            font-size: 20px;
+        }
+
+        /* ===== BUTTONS ===== */
         .btn-save {
-            width: 100%; padding: 14px; background: #57C0E8; color: white;
-            border: none; border-radius: 12px; font-size: 18px; font-weight: 700;
-            cursor: pointer; transition: background 0.3s;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #57C0E8, #4aadcc);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-save:hover { background: #4aadcc; }
-        .btn-save:disabled { background: #b0d4e0; cursor: not-allowed; }
-        .btn-save .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
-        .empty-state i { font-size: 48px; margin-bottom: 12px; color: #cbd5e1; }
-        .empty-state h3 { font-size: 18px; color: #64748b; }
+        .btn-save:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(87, 192, 232, 0.4);
+        }
 
-        .loader { display: flex; justify-content: center; padding: 40px; }
-        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .btn-save:active:not(:disabled) {
+            transform: scale(0.97);
+        }
 
+        .btn-save:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-save .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* ===== LOADER ===== */
+        .loader {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ===== MESSAGE ===== */
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            border-right: 4px solid #dc2626;
+            animation: slideDown 0.4s ease;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .error-message i {
+            font-size: 18px;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
             .sidebar.open { transform: translateX(0); }
             .sidebar-overlay.show { display: block; }
-            .main-content { margin-right: 0; }
-            .header .left .hamburger { display: block; }
-            .form-row { flex-direction: column; }
-            .price-row { flex-direction: column; }
-        }
-        @media (max-width: 480px) {
-            .header .left h1 { font-size: 16px; }
-            .form-card { padding: 14px; }
+            .main-content {
+                margin-right: 0;
+                max-width: 100%;
+                padding: 16px;
+            }
+            .hamburger { display: block; }
+            .form-card {
+                padding: 18px 14px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .price-row {
+                flex-direction: column;
+            }
+            .header .left h1 {
+                font-size: 17px;
+            }
         }
 
-        .hidden { display: none !important; }
-        .error-message { background: #fee2e2; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 16px; display: none; text-align: center; }
-        .error-message.show { display: block; }
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 16px;
+            }
+            .header .left h1 {
+                font-size: 15px;
+            }
+            .form-card {
+                padding: 14px 12px;
+                border-radius: 12px;
+            }
+            .form-card .section-title {
+                font-size: 15px;
+            }
+            .form-control {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+            .btn-save {
+                padding: 13px;
+                font-size: 15px;
+            }
+            .filter-chip {
+                font-size: 12px;
+                padding: 4px 14px;
+            }
+            .final-price .value {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<!-- القائمة الجانبية -->
+<!-- ===== SIDEBAR OVERLAY ===== -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar" id="sidebar">
-    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="logo">
+        <i class="fas fa-tooth"></i> <span>Clinic</span>Pro
+    </div>
     <div class="user-info">
-        <div class="avatar">👤</div>
+        <div class="avatar"><i class="fas fa-user"></i></div>
         <div class="name" id="userName">طبيب الأسنان</div>
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
-        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
-        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
-        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
-        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
-        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
-        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
-        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
-        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
-        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
-        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
-        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+        <li onclick="navigateTo('dashboard.html')">
+            <i class="fas fa-chart-pie"></i> الرئيسية
+        </li>
+        <li onclick="navigateTo('patients.html')">
+            <i class="fas fa-users"></i> المرضى
+        </li>
+        <li onclick="navigateTo('treatments.html')">
+            <i class="fas fa-tooth"></i> المعالجات
+        </li>
+        <li onclick="navigateTo('services.html')">
+            <i class="fas fa-list"></i> الخدمات
+        </li>
+        <li onclick="navigateTo('doctors.html')">
+            <i class="fas fa-user-md"></i> الأطباء
+        </li>
+        <li onclick="navigateTo('secretaries.html')">
+            <i class="fas fa-user-tie"></i> السكرتيرات
+        </li>
+        <li onclick="navigateTo('lab.html')">
+            <i class="fas fa-flask"></i> المعمل
+        </li>
+        <li onclick="navigateTo('reports.html')">
+            <i class="fas fa-chart-bar"></i> التقارير
+        </li>
+        <li onclick="navigateTo('notifications.html')">
+            <i class="fas fa-bell"></i> الإشعارات
+        </li>
+        <li onclick="navigateTo('settings.html')">
+            <i class="fas fa-cog"></i> الإعدادات
+        </li>
+        <li onclick="navigateTo('profile.html')">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li onclick="navigateTo('subscription-plans.html')">
+            <i class="fas fa-crown"></i> باقات الاشتراك
+        </li>
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </li>
     </ul>
 </div>
 
-<!-- المحتوى الرئيسي -->
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
+    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="left">
-            <button class="hamburger" onclick="toggleSidebar()">☰</button>
-            <h1 id="pageTitle">➕ إضافة معالجة</h1>
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
+            <h1><i class="fas fa-plus-circle"></i> <span id="pageTitle">إضافة معالجة</span></h1>
         </div>
-        <div class="actions"></div>
     </div>
 
-    <div id="errorMessage" class="error-message"></div>
+    <!-- ===== ERROR MESSAGE ===== -->
+    <div id="errorMessage" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorText">حدث خطأ</span>
+    </div>
 
-    <!-- الخدمات -->
+    <!-- ===== SERVICES SECTION ===== -->
     <div class="form-card">
-        <div class="section-title"><i class="fas fa-list"></i> اختيار الخدمة</div>
-
-        <div class="search-box">
-            <div class="wrapper">
-                <i class="fas fa-search"></i>
-                <input id="searchInput" placeholder="بحث عن خدمة..." oninput="filterServices()">
-            </div>
+        <div class="section-title">
+            <i class="fas fa-list"></i> اختيار الخدمة
         </div>
 
-        <div class="filters" id="filtersContainer">
-            <span class="filter-chip active" onclick="filterByCategory('الكل', this)">الكل</span>
-            <span class="filter-chip" onclick="filterByCategory('أسنان', this)">أسنان</span>
-            <span class="filter-chip" onclick="filterByCategory('فكين', this)">فكين</span>
+        <!-- Search -->
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" placeholder="بحث عن خدمة..." oninput="filterServices()">
         </div>
 
+        <!-- Filters -->
+        <div class="filters-container" id="filtersContainer">
+            <span class="filter-chip active" data-filter="الكل" onclick="filterByCategory('الكل', this)">الكل</span>
+            <span class="filter-chip" data-filter="أسنان" onclick="filterByCategory('أسنان', this)">أسنان</span>
+            <span class="filter-chip" data-filter="فكين" onclick="filterByCategory('فكين', this)">فكين</span>
+        </div>
+
+        <!-- Services List -->
         <div id="servicesList">
             <div class="loader"><div class="spinner"></div></div>
         </div>
     </div>
 
-    <!-- تفاصيل المعالجة -->
+    <!-- ===== DETAILS SECTION ===== -->
     <div class="form-card hidden" id="detailsForm">
+        <!-- Selected Service -->
         <div class="selected-service">
             <div class="left">
                 <i class="fas fa-check-circle"></i>
@@ -272,34 +936,36 @@
             <span class="close" onclick="clearSelection()">✕</span>
         </div>
 
-        <!-- الطبيب -->
-        <div class="doctor-select" id="doctorSection">
-            <label>الطبيب المعالج <span class="required">*</span></label>
-            <select id="doctorSelect">
-                <option value="">اختر الطبيب</option>
-            </select>
+        <!-- Doctor Selection -->
+        <div id="doctorSection">
+            <div class="form-group">
+                <label>الطبيب المعالج <span class="required">*</span></label>
+                <select class="form-control" id="doctorSelect">
+                    <option value="">اختر الطبيب</option>
+                </select>
+            </div>
         </div>
+
+        <!-- Auto Doctor (University Student) -->
         <div class="doctor-auto hidden" id="doctorAuto">
-            <i class="fas fa-hospital"></i>
+            <i class="fas fa-user-md"></i>
             <div>
                 <div class="label">الطبيب المعالج (تلقائي)</div>
                 <div class="name" id="autoDoctorName">جاري التحميل...</div>
             </div>
         </div>
 
-        <!-- السعر -->
+        <!-- Price Section -->
         <div id="priceSection">
-            <div class="price-row">
-                <div class="form-group">
-                    <label>المبلغ المدفوع (اختياري)</label>
-                    <input class="form-control" id="paidAmount" type="number" placeholder="0" min="0">
-                </div>
+            <div class="form-group">
+                <label>المبلغ المدفوع (اختياري)</label>
+                <input class="form-control" id="paidAmount" type="number" placeholder="0" min="0" value="0">
             </div>
 
             <div class="price-row">
                 <div class="form-group">
                     <label>الخصم</label>
-                    <input class="form-control" id="discountAmount" type="number" placeholder="0" min="0">
+                    <input class="form-control" id="discountAmount" type="number" placeholder="0" min="0" value="0">
                 </div>
                 <div class="form-group">
                     <label>نوع الخصم</label>
@@ -316,19 +982,22 @@
             </div>
         </div>
 
+        <!-- No Price Banner (University Student) -->
         <div class="no-price-banner hidden" id="noPriceBanner">
             <i class="fas fa-school"></i>
             <span>باقة طالب جامعي - بدون أسعار</span>
         </div>
 
-        <!-- تفاصيل إضافية -->
-        <div class="form-group" style="margin-top:12px;">
+        <!-- Notes -->
+        <div class="form-group">
             <label>ملاحظات إضافية (اختياري)</label>
             <textarea class="form-control" id="notesInput" rows="2" placeholder="أي ملاحظات عن المعالجة..."></textarea>
         </div>
 
+        <!-- Save Button -->
         <button class="btn-save" id="saveBtn" onclick="saveTreatment()">
-            حفظ المعالجة
+            <i class="fas fa-save"></i>
+            <span id="saveText">حفظ المعالجة</span>
         </button>
     </div>
 </div>
@@ -337,41 +1006,108 @@
 // ============================================
 // ✅ الإعدادات الأساسية
 // ============================================
-const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+const API_BASE = 'https://clinicprosystem.koyeb.app/api';
 let token = localStorage.getItem('token') || '';
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
-let patientId = new URLSearchParams(window.location.search).get('patientId') || '';
-let patientName = new URLSearchParams(window.location.search).get('patientName') || 'المريض';
+
+// ✅ الحصول على بيانات المريض من URL
+const urlParams = new URLSearchParams(window.location.search);
+const patientId = urlParams.get('patientId') || '';
+const patientName = urlParams.get('patientName') || 'المريض';
+
 let selectedCategory = 'الكل';
-let selectedService = null;
+let selectedMainService = null;
 let selectedSubService = null;
 let isUniversityStudent = false;
+let isLoading = false;
+
 let doctors = [];
 let mainServices = [];
 let subServices = {};
-
-document.getElementById('pageTitle').textContent = `➕ إضافة معالجة لـ ${patientName}`;
 
 // ============================================
 // ✅ دوال API
 // ============================================
 async function apiCall(endpoint, method = 'GET', body = null) {
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
     if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
+
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, options);
-        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+            return null;
+        }
         return await response.json();
-    } catch (e) { console.error('❌ API Error:', e); return null; }
+    } catch (e) {
+        console.error('❌ API Error:', e);
+        return null;
+    }
+}
+
+// ============================================
+// ✅ التنقل
+// ============================================
+function navigateTo(page) {
+    if (window.innerWidth <= 768) toggleSidebar(false);
+    window.location.href = page;
+}
+
+function goBack() {
+    window.location.href = 'patients.html';
+}
+
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (typeof forceState === 'boolean') {
+        sidebar.classList.toggle('open', forceState);
+        overlay.classList.toggle('show', forceState);
+    } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ عرض الرسائل
+// ============================================
+function showError(msg) {
+    const el = document.getElementById('errorMessage');
+    document.getElementById('errorText').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 6000);
+}
+
+function hideError() {
+    document.getElementById('errorMessage').classList.remove('show');
 }
 
 // ============================================
 // ✅ تحميل البيانات
 // ============================================
 async function loadData() {
-    await Promise.all([loadServices(), loadDoctors(), checkSubscription()]);
+    document.getElementById('pageTitle').textContent = `إضافة معالجة لـ ${patientName}`;
+    
+    await Promise.all([
+        loadServices(),
+        loadDoctors(),
+        checkSubscription()
+    ]);
 }
 
 async function checkSubscription() {
@@ -379,16 +1115,18 @@ async function checkSubscription() {
         const response = await apiCall('/clinics/subscription/status');
         if (response) {
             isUniversityStudent = response.subscriptionType === 'university_student';
+            
             if (isUniversityStudent) {
                 document.getElementById('priceSection').classList.add('hidden');
                 document.getElementById('noPriceBanner').classList.remove('hidden');
-                // تعيين الطبيب تلقائياً
                 document.getElementById('doctorSection').classList.add('hidden');
                 document.getElementById('doctorAuto').classList.remove('hidden');
                 document.getElementById('autoDoctorName').textContent = userData?.name || 'طبيب الأسنان';
             }
         }
-    } catch(e) { console.warn('⚠️ Subscription check failed:', e); }
+    } catch (e) {
+        console.warn('⚠️ Subscription check failed:', e);
+    }
 }
 
 async function loadServices() {
@@ -396,13 +1134,23 @@ async function loadServices() {
         const response = await apiCall('/clinics/main-services');
         if (response?.services) {
             mainServices = response.services;
+            
             for (let i = 0; i < mainServices.length; i++) {
                 const subRes = await apiCall(`/clinics/sub-services?mainServiceId=${mainServices[i]._id}`);
                 subServices[mainServices[i]._id] = subRes?.services || [];
             }
             renderServices();
         }
-    } catch(e) { console.warn('⚠️ Failed to load services:', e); }
+    } catch (e) {
+        console.warn('⚠️ Failed to load services:', e);
+        document.getElementById('servicesList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>فشل تحميل الخدمات</h3>
+                <p>يرجى المحاولة مرة أخرى</p>
+            </div>
+        `;
+    }
 }
 
 async function loadDoctors() {
@@ -416,7 +1164,9 @@ async function loadDoctors() {
                 select.innerHTML += `<option value="${d._id}">${d.name}</option>`;
             });
         }
-    } catch(e) { console.warn('⚠️ Failed to load doctors:', e); }
+    } catch (e) {
+        console.warn('⚠️ Failed to load doctors:', e);
+    }
 }
 
 // ============================================
@@ -427,38 +1177,54 @@ function renderServices() {
     const query = document.getElementById('searchInput').value.trim().toLowerCase();
 
     let filtered = mainServices;
-    if (selectedCategory === 'أسنان') filtered = mainServices.filter(s => s.category === 'teeth');
-    else if (selectedCategory === 'فكين') filtered = mainServices.filter(s => s.category === 'arch');
+    if (selectedCategory === 'أسنان') {
+        filtered = mainServices.filter(s => s.category === 'teeth');
+    } else if (selectedCategory === 'فكين') {
+        filtered = mainServices.filter(s => s.category === 'arch');
+    }
 
-    if (query) filtered = filtered.filter(s => s.name.toLowerCase().includes(query));
+    if (query) {
+        filtered = filtered.filter(s => s.name.toLowerCase().includes(query));
+    }
 
     if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><h3>لا توجد خدمات</h3></div>`;
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>لا توجد خدمات</h3>
+                <p>${mainServices.length === 0 ? 'لم يتم تحميل الخدمات بعد' : 'لا توجد خدمات مطابقة للبحث'}</p>
+            </div>
+        `;
         return;
     }
 
     container.innerHTML = filtered.map(main => {
         const subs = subServices[main._id] || [];
         const icon = main.category === 'teeth' ? 'fa-tooth' : 'fa-face-smile';
+        const isOpen = selectedMainService?._id === main._id;
 
         return `
             <div class="service-card">
-                <div class="service-header" onclick="toggleSubs(this)">
+                <div class="service-header" onclick="toggleSubItems(this)">
                     <div class="left">
                         <div class="icon"><i class="fas ${icon}"></i></div>
                         <span class="name">${main.name}</span>
                         <span class="count">(${subs.length} معالجة)</span>
                     </div>
-                    <i class="fas fa-chevron-down"></i>
+                    <span class="arrow ${isOpen ? 'open' : ''}"><i class="fas fa-chevron-down"></i></span>
                 </div>
-                <div class="sub-items">
+                <div class="sub-items ${isOpen ? 'open' : ''}">
                     ${subs.length === 0 ? '<div style="padding:12px;text-align:center;color:#94a3b8;font-size:13px;">لا توجد معالجات</div>' : ''}
                     ${subs.map(sub => `
-                        <div class="sub-item ${selectedSubService?._id === sub._id ? 'selected' : ''}" onclick="selectSubService('${main._id}','${sub._id}','${sub.name}','${sub.price}','${main.name}')">
+                        <div class="sub-item ${selectedSubService?._id === sub._id ? 'selected' : ''}" 
+                             onclick="selectSubService('${main._id}','${sub._id}','${sub.name}','${sub.price}','${main.name}')">
                             <div class="radio ${selectedSubService?._id === sub._id ? 'active' : ''}"></div>
                             <div class="info">
                                 <div class="name">${sub.name}</div>
-                                ${isUniversityStudent ? `<div class="no-price">السعر غير محدد لهذه الباقة</div>` : `<div class="price">${sub.price} ريال</div>`}
+                                ${isUniversityStudent ? 
+                                    `<div class="no-price">السعر غير محدد لهذه الباقة</div>` : 
+                                    `<div class="price">${sub.price} ريال</div>`
+                                }
                             </div>
                         </div>
                     `).join('')}
@@ -471,19 +1237,18 @@ function renderServices() {
 // ============================================
 // ✅ دوال التفاعل
 // ============================================
-function toggleSubs(el) {
-    const subItems = el.closest('.service-card').querySelector('.sub-items');
-    const icon = el.querySelector('.fa-chevron-down');
-    if (subItems.style.display === 'none') {
-        subItems.style.display = 'block';
-        icon.style.transform = 'rotate(180deg)';
-    } else {
-        subItems.style.display = 'none';
-        icon.style.transform = 'rotate(0)';
-    }
+function toggleSubItems(el) {
+    const card = el.closest('.service-card');
+    const subItems = card.querySelector('.sub-items');
+    const arrow = card.querySelector('.arrow');
+    
+    subItems.classList.toggle('open');
+    arrow.classList.toggle('open');
 }
 
-function filterServices() { renderServices(); }
+function filterServices() {
+    renderServices();
+}
 
 function filterByCategory(category, el) {
     selectedCategory = category;
@@ -493,69 +1258,73 @@ function filterByCategory(category, el) {
 }
 
 function selectSubService(mainId, subId, subName, price, mainName) {
+    selectedMainService = mainServices.find(m => m._id === mainId);
     selectedSubService = { _id: subId, name: subName, price: price, mainId: mainId, mainName: mainName };
+    
     document.getElementById('selectedServiceName').textContent = `${mainName} - ${subName}`;
     document.getElementById('detailsForm').classList.remove('hidden');
-    document.getElementById('finalPriceDisplay').textContent = `${price} ريال`;
-    if (isUniversityStudent) {
-        document.getElementById('finalPriceDisplay').textContent = '0 ريال';
-    }
+    
+    calculateFinalPrice();
     renderServices();
-    // إغلاق جميع الخدمات المفتوحة
-    document.querySelectorAll('.sub-items').forEach(el => {
-        el.style.display = 'none';
-        const icon = el.closest('.service-card').querySelector('.fa-chevron-down');
-        if (icon) icon.style.transform = 'rotate(0)';
-    });
 }
 
 function clearSelection() {
+    selectedMainService = null;
     selectedSubService = null;
     document.getElementById('detailsForm').classList.add('hidden');
     renderServices();
 }
 
 // ============================================
-// ✅ دوال مساعدة إضافية
+// ✅ حساب السعر النهائي
 // ============================================
-
-// ✅ حساب السعر النهائي تلقائياً
 function calculateFinalPrice() {
-    const price = parseInt(selectedSubService?.price) || 0;
+    if (!selectedSubService) return;
+    
+    const basePrice = parseInt(selectedSubService.price) || 0;
     const discount = parseInt(document.getElementById('discountAmount').value) || 0;
     const discountType = document.getElementById('discountType').value;
     
-    let finalPrice = price;
+    let finalPrice = basePrice;
     if (discountType === 'ريال') {
-        finalPrice = Math.max(0, price - discount);
+        finalPrice = Math.max(0, basePrice - discount);
     } else {
-        finalPrice = Math.max(0, price - (price * discount / 100));
+        finalPrice = Math.max(0, basePrice - (basePrice * discount / 100));
     }
+    
     if (isUniversityStudent) finalPrice = 0;
     
     document.getElementById('finalPriceDisplay').textContent = `${finalPrice} ريال`;
 }
 
-// ✅ إضافة مستمعين لتحديث السعر تلقائياً
+// ✅ مستمعين لتحديث السعر تلقائياً
 document.getElementById('discountAmount').addEventListener('input', calculateFinalPrice);
 document.getElementById('discountType').addEventListener('change', calculateFinalPrice);
+document.getElementById('paidAmount').addEventListener('input', function() {
+    const finalPriceText = document.getElementById('finalPriceDisplay').textContent;
+    const finalPrice = parseInt(finalPriceText) || 0;
+    const paid = parseInt(this.value) || 0;
+    if (paid > finalPrice) {
+        this.value = finalPrice;
+    }
+});
+
 // ============================================
 // ✅ حفظ المعالجة
 // ============================================
-function showError(msg) {
-    const el = document.getElementById('errorMessage');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 5000);
-}
-
-// ============================================
-// ✅ حفظ المعالجة (إرسال إلى السيرفر)
-// ============================================
 async function saveTreatment() {
-    if (!selectedSubService) { showError('الرجاء اختيار الخدمة'); return; }
-    if (!patientId) { showError('بيانات المريض غير مكتملة'); return; }
-
+    hideError();
+    
+    if (!selectedSubService) {
+        showError('⚠️ الرجاء اختيار الخدمة');
+        return;
+    }
+    
+    if (!patientId) {
+        showError('⚠️ بيانات المريض غير مكتملة');
+        return;
+    }
+    
     let doctorId = document.getElementById('doctorSelect').value;
     let doctorName = '';
     
@@ -563,25 +1332,28 @@ async function saveTreatment() {
         doctorId = userData?.id || '';
         doctorName = userData?.name || 'طبيب الأسنان';
     } else {
-        if (!doctorId) { showError('الرجاء اختيار الطبيب المعالج'); return; }
+        if (!doctorId) {
+            showError('⚠️ الرجاء اختيار الطبيب المعالج');
+            return;
+        }
         const doc = doctors.find(d => d._id === doctorId);
         doctorName = doc?.name || '';
     }
-
-    const paidAmount = parseInt(document.getElementById('paidAmount').value) || 0;
+    
     const discount = parseInt(document.getElementById('discountAmount').value) || 0;
     const discountType = document.getElementById('discountType').value;
-    let finalPrice = parseInt(selectedSubService.price) || 0;
+    const paidAmount = parseInt(document.getElementById('paidAmount').value) || 0;
+    const notes = document.getElementById('notesInput').value.trim();
     
+    const basePrice = parseInt(selectedSubService.price) || 0;
+    let finalPrice = basePrice;
     if (discountType === 'ريال') {
-        finalPrice = Math.max(0, finalPrice - discount);
+        finalPrice = Math.max(0, basePrice - discount);
     } else {
-        finalPrice = Math.max(0, finalPrice - (finalPrice * discount / 100));
+        finalPrice = Math.max(0, basePrice - (basePrice * discount / 100));
     }
     if (isUniversityStudent) finalPrice = 0;
-
-    const notes = document.getElementById('notesInput').value.trim();
-
+    
     const treatmentData = {
         patientId: patientId,
         patientName: patientName,
@@ -591,7 +1363,7 @@ async function saveTreatment() {
         mainServiceName: selectedSubService.mainName,
         subServiceId: selectedSubService._id,
         subServiceName: selectedSubService.name,
-        originalPrice: parseInt(selectedSubService.price) || 0,
+        originalPrice: basePrice,
         discount: discount,
         discountType: discountType,
         finalPrice: finalPrice,
@@ -600,72 +1372,94 @@ async function saveTreatment() {
         notes: notes,
         date: new Date().toISOString()
     };
-
+    
     console.log('📤 إرسال بيانات المعالجة:', treatmentData);
-
+    
     const btn = document.getElementById('saveBtn');
+    const btnText = document.getElementById('saveText');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> جاري الحفظ...';
-
+    
     try {
-        // ✅ إرسال إلى API
         const response = await apiCall('/treatments', 'POST', treatmentData);
         console.log('📡 رد السيرفر:', response);
-
+        
         if (response?.success) {
             alert('✅ تم إضافة المعالجة بنجاح');
-            window.location.href = `treatments.html`;
+            window.location.href = 'treatments.html';
         } else {
             showError(response?.error || '❌ فشل في إضافة المعالجة');
             btn.disabled = false;
-            btn.innerHTML = 'حفظ المعالجة';
+            btn.innerHTML = '<i class="fas fa-save"></i> <span id="saveText">حفظ المعالجة</span>';
         }
-    } catch(e) {
-        console.error('❌ خطأ:', e);
-        showError('❌ حدث خطأ: ' + e.message);
+    } catch (error) {
+        console.error('❌ خطأ:', error);
+        showError('❌ حدث خطأ: ' + (error.message || 'فشل حفظ المعالجة'));
         btn.disabled = false;
-        btn.innerHTML = 'حفظ المعالجة';
+        btn.innerHTML = '<i class="fas fa-save"></i> <span id="saveText">حفظ المعالجة</span>';
     }
 }
 
 // ============================================
-// ✅ دوال مساعدة
+// ✅ الضغط على Enter
 // ============================================
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-}
-
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = 'index.html';
-}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const activeElement = document.activeElement;
+        if (activeElement.id === 'searchInput' ||
+            activeElement.id === 'discountAmount' ||
+            activeElement.id === 'paidAmount') {
+            e.preventDefault();
+            if (selectedSubService) {
+                saveTreatment();
+            }
+        }
+    }
+});
 
 // ============================================
 // ✅ بدء التشغيل
 // ============================================
+// ✅ التحقق من التوكن
 if (!token || token === 'null' || token === 'undefined') {
     window.location.href = 'index.html';
 }
 
+// ✅ تحديث معلومات المستخدم
 if (userData?.name) {
     document.getElementById('userName').textContent = userData.name;
-    document.getElementById('userRole').textContent =
-        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
-        userData.role === 'university_student' ? 'طالب جامعي' :
-        userData.role === 'secretary' ? 'سكرتير' :
-        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+    const roleMap = {
+        'clinic_owner': 'صاحب عيادة',
+        'university_student': 'طالب جامعي',
+        'secretary': 'سكرتير',
+        'doctor': 'طبيب'
+    };
+    document.getElementById('userRole').textContent = roleMap[userData.role] || 'مستخدم';
 }
 
+// ✅ تحميل البيانات
 loadData();
 
+// ✅ إغلاق القائمة الجانبية عند تغيير الحجم
 window.addEventListener('resize', () => {
     if (window.innerWidth > 768) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('show');
     }
 });
+
+// ✅ إغلاق القائمة عند الضغط على ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+console.log('🚀 ClinicPro - Add Treatment Screen Loaded');
+console.log('📱 Flutter to HTML - تم التحويل بنجاح!');
+console.log('👤 Patient ID:', patientId);
+console.log('👤 Patient Name:', patientName);
 </script>
 
 </body>
