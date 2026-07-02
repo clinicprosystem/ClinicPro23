@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ClinicPro - تفاصيل المريض</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        :root {
+            --primary: #1A5F7A;
+            --primary-light: #57C0E8;
+            --secondary: #57C0E8;
+            --primary-gradient: linear-gradient(135deg, #1A5F7A, #57C0E8);
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --sidebar-width: 270px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .logo {
+            padding: 24px 20px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .sidebar .logo span { color: var(--primary-light); }
+        .sidebar .logo i { margin-left: 8px; }
+
+        .sidebar .user-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar .user-info .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar .user-info .role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar ul li {
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255,255,255,0.06);
+            border-right-color: rgba(255,255,255,0.3);
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.1);
+            border-right-color: var(--primary-light);
+        }
+
+        .sidebar ul li i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar ul li .badge {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 1px 8px;
+            border-radius: 12px;
+            margin-right: auto;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .sidebar ul li.logout {
+            color: #fca5a5;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 16px;
+        }
+
+        .sidebar ul li.logout:hover {
+            background: rgba(239, 68, 68, 0.12);
+            border-right-color: #ef4444;
+        }
+
+        .sidebar ul li.logout i { color: #fca5a5; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: 20px 24px;
+            min-height: 100vh;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .left .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .header .left .back-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .header .left h1 {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px;
+        }
+
+        .header .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .actions button {
+            background: none;
+            border: none;
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+            cursor: pointer;
+            color: #64748b;
+            border-radius: 50%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header .actions button:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        /* ===== PATIENT INFO CARD ===== */
+        .patient-info {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            border-right: 4px solid var(--primary-light);
+        }
+
+        .patient-info .avatar-lg {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(26, 95, 122, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .patient-info .details {
+            flex: 1;
+        }
+
+        .patient-info .details .name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .patient-info .details .info-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .patient-info .details .info-row span {
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .patient-info .details .info-row span i {
+            color: var(--primary-light);
+            width: 16px;
+        }
+
+        /* ===== TREATMENTS SECTION ===== */
+        .treatments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .treatments-header h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .treatments-header .count-badge {
+            background: rgba(26, 95, 122, 0.1);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* ===== TREATMENT CARD ===== */
+        .treatment-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .treatment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            border-color: var(--primary-light);
+        }
+
+        .treatment-card .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .treatment-card .top-row .date-badge {
+            background: rgba(26, 95, 122, 0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .treatment-card .top-row .sync-status {
+            font-size: 10px;
+            color: #f59e0b;
+            background: #fef3c7;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .treatment-card .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .treatment-card .service-info i {
+            font-size: 18px;
+            color: var(--primary);
+            width: 24px;
+        }
+
+        .treatment-card .service-info .main-service {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .treatment-card .service-info .sub-service {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .treatment-card .doctor-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .treatment-card .doctor-row i {
+            color: #94a3b8;
+            width: 16px;
+        }
+
+        /* ===== TEETH CHIPS ===== */
+        .teeth-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .teeth-container i {
+            color: var(--primary);
+            font-size: 16px;
+            margin-top: 2px;
+        }
+
+        .teeth-container .teeth-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .teeth-container .tooth-chip {
+            background: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: var(--primary);
+            border: 1px solid rgba(26, 95, 122, 0.2);
+        }
+
+        .arch-badge {
+            background: rgba(26, 95, 122, 0.05);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        /* ===== PRICE ROW ===== */
+        .price-row {
+            border-top: 1px solid #f1f5f9;
+            padding-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .price-row .original-price {
+            font-size: 12px;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+
+        .price-row .discount-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            padding: 2px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .price-row .final-price {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--secondary);
+        }
+
+        .price-row .final-price-label {
+            font-size: 10px;
+            color: #94a3b8;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .empty-state .btn-primary {
+            margin-top: 16px;
+            padding: 10px 32px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state .btn-primary:hover {
+            background: #4aadcc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(87, 192, 232, 0.3);
+        }
+
+        /* ===== LOADER ===== */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .loader .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== FAB ===== */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #57C0E8, #4aadcc);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(87, 192, 232, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:hover {
+            transform: scale(1.08) rotate(90deg);
+            box-shadow: 0 6px 32px rgba(87, 192, 232, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content {
+                margin-right: 0;
+                max-width: 100%;
+                padding: 16px;
+            }
+            .hamburger { display: block; }
+            .patient-info {
+                flex-direction: column;
+                text-align: center;
+                padding: 16px;
+            }
+            .patient-info .details .info-row {
+                justify-content: center;
+            }
+            .fab {
+                bottom: 20px;
+                left: 20px;
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+            }
+            .header .left h1 {
+                font-size: 18px;
+            }
+            .treatment-card {
+                padding: 14px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 16px;
+            }
+            .header .left h1 {
+                font-size: 16px;
+            }
+            .patient-info .details .name {
+                font-size: 18px;
+            }
+            .patient-info .details .info-row {
+                gap: 10px;
+                font-size: 13px;
+            }
+            .treatment-card .service-info .sub-service {
+                font-size: 14px;
+            }
+            .price-row .final-price {
+                font-size: 17px;
+            }
+            .fab {
+                bottom: 16px;
+                left: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR OVERLAY ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" id="sidebar">
+    <div class="logo">
+        <i class="fas fa-tooth"></i> <span>Clinic</span>Pro
+    </div>
+    <div class="user-info">
+        <div class="avatar"><i class="fas fa-user"></i></div>
+        <div class="name" id="userName">طبيب الأسنان</div>
+        <div class="role" id="userRole">صاحب عيادة</div>
+    </div>
+    <ul>
+        <li onclick="navigateTo('dashboard.html')">
+            <i class="fas fa-chart-pie"></i> الرئيسية
+        </li>
+        <li onclick="navigateTo('patients.html')">
+            <i class="fas fa-users"></i> المرضى
+        </li>
+        <li onclick="navigateTo('treatments.html')">
+            <i class="fas fa-tooth"></i> المعالجات
+        </li>
+        <li onclick="navigateTo('services.html')">
+            <i class="fas fa-list"></i> الخدمات
+        </li>
+        <li onclick="navigateTo('doctors.html')">
+            <i class="fas fa-user-md"></i> الأطباء
+        </li>
+        <li onclick="navigateTo('secretaries.html')">
+            <i class="fas fa-user-tie"></i> السكرتيرات
+        </li>
+        <li onclick="navigateTo('lab.html')">
+            <i class="fas fa-flask"></i> المعمل
+        </li>
+        <li onclick="navigateTo('reports.html')">
+            <i class="fas fa-chart-bar"></i> التقارير
+        </li>
+        <li onclick="navigateTo('notifications.html')">
+            <i class="fas fa-bell"></i> الإشعارات
+        </li>
+        <li onclick="navigateTo('settings.html')">
+            <i class="fas fa-cog"></i> الإعدادات
+        </li>
+        <li onclick="navigateTo('profile.html')">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </li>
+    </ul>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
+            <h1 id="pageTitle">تفاصيل المريض</h1>
+        </div>
+        <div class="actions">
+            <button onclick="fetchFromServer()" title="جلب من السيرفر">
+                <i class="fas fa-cloud-download-alt"></i>
+            </button>
+            <button onclick="refreshData()" title="تحديث">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== PATIENT INFO ===== -->
+    <div id="patientInfo">
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+
+    <!-- ===== TREATMENTS ===== -->
+    <div id="treatmentsContainer">
+        <div class="loader"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<!-- ===== FAB ===== -->
+<button class="fab" onclick="addTreatment()">
+    <i class="fas fa-plus"></i>
+</button>
+
+<script>
+// ============================================
+// ✅ الإعدادات الأساسية
+// ============================================
+const API_BASE = 'https://clinicprosystem.koyeb.app/api';
+let token = localStorage.getItem('token') || '';
+let userData = JSON.parse(localStorage.getItem('user') || '{}');
+let patientData = null;
+let treatments = [];
+let isLoading = false;
+let isOnline = true;
+
+// ============================================
+// ✅ الحصول على patientId من URL
+// ============================================
+function getPatientIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id') || params.get('patientId') || '';
+}
+
+const patientId = getPatientIdFromUrl();
+
+// ============================================
+// ✅ دوال API
+// ============================================
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+            return null;
+        }
+        return await response.json();
+    } catch (e) {
+        console.error('❌ API Error:', e);
+        return null;
+    }
+}
+
+// ============================================
+// ✅ التنقل
+// ============================================
+function navigateTo(page) {
+    if (window.innerWidth <= 768) toggleSidebar(false);
+    window.location.href = page;
+}
+
+function goBack() {
+    window.location.href = 'patients.html';
+}
+
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (typeof forceState === 'boolean') {
+        sidebar.classList.toggle('open', forceState);
+        overlay.classList.toggle('show', forceState);
+    } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ تحميل بيانات المريض
+// ============================================
+async function loadPatientData() {
+    if (!patientId) {
+        document.getElementById('patientInfo').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>معرف المريض غير موجود</h3>
+                <p>يرجى العودة إلى صفحة المرضى</p>
+                <button class="btn-primary" onclick="goBack()">العودة إلى المرضى</button>
+            </div>
+        `;
+        return;
+    }
+
+    try {
+        // ✅ محاولة جلب من API
+        const response = await apiCall(`/patients/${patientId}`);
+        if (response?.patient) {
+            patientData = response.patient;
+            isOnline = true;
+            renderPatientInfo();
+            return;
+        }
+
+        // ✅ إذا فشل، حاول من localStorage
+        const cachedPatients = localStorage.getItem('cachedPatients');
+        if (cachedPatients) {
+            const patients = JSON.parse(cachedPatients);
+            patientData = patients.find(p => (p._id || p.id) === patientId);
+            if (patientData) {
+                isOnline = false;
+                renderPatientInfo();
+                return;
+            }
+        }
+
+        // ✅ إذا لم يوجد
+        document.getElementById('patientInfo').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-user-slash"></i>
+                <h3>المريض غير موجود</h3>
+                <p>لم يتم العثور على بيانات هذا المريض</p>
+                <button class="btn-primary" onclick="goBack()">العودة إلى المرضى</button>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('❌ Error loading patient:', error);
+        document.getElementById('patientInfo').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>حدث خطأ</h3>
+                <p>فشل في تحميل بيانات المريض</p>
+                <button class="btn-primary" onclick="loadPatientData()">إعادة المحاولة</button>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// ✅ عرض معلومات المريض
+// ============================================
+function renderPatientInfo() {
+    if (!patientData) return;
+
+    const name = patientData.name || 'غير محدد';
+    const phone = patientData.phone || '-';
+    const age = patientData.age || '?';
+    const gender = patientData.gender || 'غير محدد';
+    const genderIcon = gender === 'ذكر' ? '👨' : gender === 'أنثى' ? '👩' : '👤';
+
+    document.getElementById('pageTitle').textContent = name;
+
+    document.getElementById('patientInfo').innerHTML = `
+        <div class="patient-info">
+            <div class="avatar-lg">${genderIcon}</div>
+            <div class="details">
+                <div class="name">${name}</div>
+                <div class="info-row">
+                    <span><i class="fas fa-phone"></i> ${phone}</span>
+                    <span><i class="fas fa-cake-candles"></i> ${age} سنة</span>
+                    <span><i class="fas fa-venus-mars"></i> ${gender}</span>
+                    ${!isOnline ? '<span style="color:#f59e0b;"><i class="fas fa-wifi-slash"></i> غير متصل</span>' : ''}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // تحميل المعالجات بعد عرض معلومات المريض
+    loadTreatments();
+}
+
+// ============================================
+// ✅ تحميل المعالجات
+// ============================================
+async function loadTreatments() {
+    const container = document.getElementById('treatmentsContainer');
+    container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    try {
+        // ✅ محاولة جلب من API
+        const response = await apiCall(`/treatments/patient/${patientId}`);
+        if (response?.treatments) {
+            treatments = response.treatments;
+            isOnline = true;
+            renderTreatments();
+            return;
+        }
+
+        // ✅ إذا فشل، حاول من localStorage
+        const cachedTreatments = localStorage.getItem(`treatments_${patientId}`);
+        if (cachedTreatments) {
+            treatments = JSON.parse(cachedTreatments);
+            if (treatments.length > 0) {
+                isOnline = false;
+                renderTreatments();
+                return;
+            }
+        }
+
+        // ✅ لا توجد معالجات
+        treatments = [];
+        renderTreatments();
+
+    } catch (error) {
+        console.error('❌ Error loading treatments:', error);
+        treatments = [];
+        renderTreatments();
+    }
+}
+
+// ============================================
+// ✅ عرض المعالجات
+// ============================================
+function renderTreatments() {
+    const container = document.getElementById('treatmentsContainer');
+
+    // ✅ حفظ في localStorage للتخزين المؤقت
+    if (treatments.length > 0) {
+        localStorage.setItem(`treatments_${patientId}`, JSON.stringify(treatments));
+    }
+
+    // ✅ عنوان المعالجات
+    let html = `
+        <div class="treatments-header">
+            <h2><i class="fas fa-notes-medical"></i> المعالجات السابقة</h2>
+            <span class="count-badge">${treatments.length} معالجة</span>
+        </div>
+    `;
+
+    if (treatments.length === 0) {
+        html += `
+            <div class="empty-state">
+                <i class="fas fa-notes-medical"></i>
+                <h3>لا توجد معالجات سابقة</h3>
+                <p>اضغط على زر + لإضافة معالجة جديدة</p>
+                <button class="btn-primary" onclick="fetchFromServer()">
+                    <i class="fas fa-cloud-download-alt"></i> جلب من السيرفر
+                </button>
+            </div>
+        `;
+        container.innerHTML = html;
+        return;
+    }
+
+    // ✅ ترتيب حسب التاريخ (الأحدث أولاً)
+    const sorted = [...treatments].sort((a, b) => {
+        const dateA = new Date(a.date || a.createdAt || 0);
+        const dateB = new Date(b.date || b.createdAt || 0);
+        return dateB - dateA;
+    });
+
+    // ✅ بناء بطاقات المعالجات
+    let cardsHtml = '';
+    sorted.forEach(treatment => {
+        const mainService = treatment.mainServiceName || 'خدمة رئيسية';
+        const subService = treatment.subServiceName || treatment.serviceName || 'خدمة فرعية';
+        const doctorName = treatment.doctorName || treatment.doctor?.name || 'طبيب غير محدد';
+        const price = treatment.finalPrice || treatment.price || 0;
+        const originalPrice = treatment.originalPrice || price;
+        const discount = treatment.discount || 0;
+        const date = treatment.date ? treatment.date.substring(0, 10) : 'تاريخ غير محدد';
+        const isSynced = treatment.isSynced === 1 || treatment.synced === true;
+        const teeth = treatment.teeth || treatment.teethDetails || [];
+        const archType = treatment.archType || treatment.jawDetails?.jawType || '';
+
+        cardsHtml += `
+            <div class="treatment-card" onclick="viewTreatment('${treatment._id || treatment.id || ''}')">
+                <div class="top-row">
+                    <span class="date-badge"><i class="fas fa-calendar-day"></i> ${date}</span>
+                    ${!isSynced ? '<span class="sync-status"><i class="fas fa-sync-alt"></i> لم تتم المزامنة</span>' : ''}
+                </div>
+
+                <div class="service-info">
+                    <i class="fas fa-tooth"></i>
+                    <div>
+                        <div class="main-service">${mainService}</div>
+                        <div class="sub-service">${subService}</div>
+                    </div>
+                </div>
+
+                <div class="doctor-row">
+                    <i class="fas fa-user-md"></i>
+                    <span>الطبيب المعالج: ${doctorName}</span>
+                </div>
+
+                ${teeth.length > 0 ? `
+                    <div class="teeth-container">
+                        <i class="fas fa-teeth"></i>
+                        <div class="teeth-chips">
+                            ${teeth.map(t => {
+                                const num = t.number || t || '';
+                                return `<span class="tooth-chip">السن ${num}</span>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${archType ? `
+                    <div class="arch-badge">
+                        <i class="fas fa-archway"></i> الفك: ${archType}
+                    </div>
+                ` : ''}
+
+                <div class="price-row">
+                    <div>
+                        ${discount > 0 ? `
+                            <span class="original-price">${originalPrice} ريال</span>
+                            <span class="discount-badge">خصم ${discount} ريال</span>
+                        ` : ''}
+                    </div>
+                    <div>
+                        <span class="final-price-label">السعر النهائي</span>
+                        <span class="final-price">${price} ريال</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html + cardsHtml;
+}
+
+// ============================================
+// ✅ جلب من السيرفر
+// ============================================
+async function fetchFromServer() {
+    if (!patientId) return;
+
+    const container = document.getElementById('treatmentsContainer');
+    container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    try {
+        const response = await apiCall(`/treatments/patient/${patientId}`);
+        if (response?.treatments) {
+            treatments = response.treatments;
+            isOnline = true;
+            renderTreatments();
+            showToast('✅ تم جلب المعالجات من السيرفر', 'success');
+        } else {
+            showToast('❌ لا توجد معالجات في السيرفر', 'info');
+            renderTreatments();
+        }
+    } catch (error) {
+        console.error('❌ Error fetching from server:', error);
+        showToast('❌ فشل جلب البيانات من السيرفر', 'error');
+        renderTreatments();
+    }
+}
+
+// ============================================
+// ✅ عرض تفاصيل المعالجة
+// ============================================
+function viewTreatment(treatmentId) {
+    if (treatmentId) {
+        window.location.href = `treatment-details.html?id=${treatmentId}`;
+    } else {
+        showToast('⚠️ لا يمكن عرض تفاصيل هذه المعالجة', 'error');
+    }
+}
+
+// ============================================
+// ✅ إضافة معالجة جديدة
+// ============================================
+function addTreatment() {
+    window.location.href = `add-treatment.html?patientId=${patientId}`;
+}
+
+// ============================================
+// ✅ تحديث البيانات
+// ============================================
+function refreshData() {
+    loadPatientData();
+    showToast('🔄 جاري تحديث البيانات...', 'info');
+}
+
+// ============================================
+// ✅ عرض رسائل
+// ============================================
+function showToast(message, type = 'info') {
+    const colors = {
+        success: '#16a34a',
+        error: '#dc2626',
+        info: '#3b82f6',
+        warning: '#f59e0b'
+    };
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${colors[type] || '#333'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 9999;
+        animation: fadeInUp 0.3s ease;
+        font-family: 'Tajawal', sans-serif;
+        max-width: 90%;
+        text-align: center;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ============================================
+// ✅ بدء التشغيل
+// ============================================
+// ✅ التحقق من التوكن
+if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = 'index.html';
+}
+
+// ✅ تحديث معلومات المستخدم
+if (userData?.name) {
+    document.getElementById('userName').textContent = userData.name;
+    const roleMap = {
+        'clinic_owner': 'صاحب عيادة',
+        'university_student': 'طالب جامعي',
+        'secretary': 'سكرتير',
+        'doctor': 'طبيب'
+    };
+    document.getElementById('userRole').textContent = roleMap[userData.role] || 'مستخدم';
+}
+
+// ✅ تحميل بيانات المريض
+loadPatientData();
+
+// ✅ إغلاق القائمة الجانبية عند تغيير الحجم
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+// ✅ إغلاق القائمة عند الضغط على ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+console.log('🚀 ClinicPro - Patient Details Screen Loaded');
+console.log('📱 Flutter to HTML - تم التحويل بنجاح!');
+console.log('👤 Patient ID:', patientId);
+</script>
+
+</body>
+</html>
