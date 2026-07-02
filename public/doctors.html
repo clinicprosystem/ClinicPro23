@@ -2,185 +2,731 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>ClinicPro - الأطباء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
 
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        :root {
+            --primary: #1A5F7A;
+            --primary-light: #57C0E8;
+            --secondary: #57C0E8;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --sidebar-width: 270px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
-            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
-            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
-            transition: transform 0.3s ease; overflow-y: auto;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
         }
-        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
-        .sidebar .logo span { color: #57C0E8; }
-        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
-        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
-        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
-        .sidebar ul { list-style: none; padding: 12px 0; }
-        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
-        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
-        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
-        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
-        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
 
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+        .sidebar .logo {
+            padding: 24px 20px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
 
-        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+        .sidebar .logo span { color: var(--primary-light); }
+        .sidebar .logo i { margin-left: 8px; }
 
+        .sidebar .user-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar .user-info .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar .user-info .role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar ul li {
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255,255,255,0.06);
+            border-right-color: rgba(255,255,255,0.3);
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.1);
+            border-right-color: var(--primary-light);
+        }
+
+        .sidebar ul li i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar ul li.logout {
+            color: #fca5a5;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 16px;
+        }
+
+        .sidebar ul li.logout:hover {
+            background: rgba(239, 68, 68, 0.12);
+            border-right-color: #ef4444;
+        }
+
+        .sidebar ul li.logout i { color: #fca5a5; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: 20px 24px;
+            min-height: 100vh;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        /* ===== HEADER ===== */
         .header {
-            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+            background: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .header .left { display: flex; align-items: center; gap: 12px; }
-        .header .left h1 { font-size: 20px; color: #1A5F7A; }
-        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
-        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
-        .header .actions button:hover { background: #f0f4f8; }
 
-        .doctor-card {
-            background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex; align-items: center; gap: 14px;
-            transition: transform 0.2s, box-shadow 0.2s;
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .doctor-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+        .header .left h1 {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .header .left h1 i {
+            margin-left: 8px;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px;
+        }
+
+        .header .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .actions button {
+            background: none;
+            border: none;
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+            cursor: pointer;
+            color: #64748b;
+            border-radius: 50%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header .actions button:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        /* ===== DOCTOR CARD ===== */
+        .doctor-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            border-color: var(--primary-light);
+        }
 
         .doctor-card .avatar {
-            width: 50px; height: 50px; border-radius: 50%;
-            background: rgba(26,95,122,0.1); display: flex; align-items: center; justify-content: center;
-            font-size: 24px; color: #1A5F7A; flex-shrink: 0;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(26, 95, 122, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: var(--primary);
+            flex-shrink: 0;
         }
-        .doctor-card .info { flex: 1; }
-        .doctor-card .info .name { font-weight: 700; font-size: 16px; color: #1e293b; }
-        .doctor-card .info .phone { font-size: 13px; color: #64748b; }
+
+        .doctor-card .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .doctor-card .info .name {
+            font-weight: 800;
+            font-size: 16px;
+            color: #0f172a;
+        }
+
+        .doctor-card .info .phone {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .doctor-card .info .phone i {
+            margin-left: 4px;
+            color: #94a3b8;
+        }
 
         .doctor-card .percentage {
-            background: rgba(5, 150, 105, 0.1); color: #059669;
-            padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 14px;
+            background: rgba(5, 150, 105, 0.08);
+            color: #059669;
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            white-space: nowrap;
+            border: 1px solid rgba(5, 150, 105, 0.15);
         }
-        .doctor-card .actions { display: flex; gap: 4px; }
+
+        .doctor-card .actions {
+            display: flex;
+            gap: 2px;
+        }
+
         .doctor-card .actions button {
-            background: none; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer;
-            transition: background 0.2s; font-size: 16px;
+            background: none;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            color: #64748b;
         }
-        .doctor-card .actions button:hover { background: #f1f5f9; }
-        .doctor-card .actions button.delete { color: #ef4444; }
 
-        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
-        .empty-state i { font-size: 64px; margin-bottom: 16px; color: #cbd5e1; }
-        .empty-state h3 { font-size: 18px; color: #64748b; }
-        .empty-state p { font-size: 14px; }
+        .doctor-card .actions button:hover {
+            background: #f1f5f9;
+            transform: scale(1.05);
+        }
 
-        .loader { display: flex; justify-content: center; align-items: center; min-height: 200px; }
-        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .doctor-card .actions button.edit:hover {
+            background: #dbeafe;
+            color: #2563eb;
+        }
 
+        .doctor-card .actions button.delete:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .empty-state .retry-btn {
+            margin-top: 16px;
+            padding: 10px 32px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state .retry-btn:hover {
+            background: #0f4c5c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(26, 95, 122, 0.3);
+        }
+
+        /* ===== LOADER ===== */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .loader .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== FAB ===== */
         .fab {
-            position: fixed; bottom: 30px; left: 30px; width: 56px; height: 56px;
-            border-radius: 50%; background: #57C0E8; color: white; border: none;
-            font-size: 28px; cursor: pointer; box-shadow: 0 4px 16px rgba(87,192,232,0.4);
-            transition: transform 0.2s; z-index: 100;
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #57C0E8, #4aadcc);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(87, 192, 232, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .fab:hover { transform: scale(1.05); }
 
-        /* ===== مودال تعديل النسبة ===== */
+        .fab:hover {
+            transform: scale(1.08) rotate(90deg);
+            box-shadow: 0 6px 32px rgba(87, 192, 232, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== MODAL ===== */
         .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); z-index: 2000;
-            justify-content: center; align-items: center;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
         }
-        .modal-overlay.show { display: flex; }
-        .modal-content {
-            background: white; border-radius: 16px; padding: 30px; max-width: 400px; width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-        }
-        .modal-content h3 { color: #1A5F7A; margin-bottom: 16px; text-align: center; }
-        .modal-content .doctor-name { text-align: center; font-size: 16px; color: #64748b; margin-bottom: 16px; }
-        .modal-content input {
-            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px;
-            font-size: 16px; text-align: center; margin-bottom: 16px;
-        }
-        .modal-content input:focus { border-color: #1A5F7A; outline: none; }
-        .modal-content .buttons { display: flex; gap: 12px; }
-        .modal-content .buttons button {
-            flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.3s;
-        }
-        .modal-content .buttons button:hover { opacity: 0.85; }
-        .modal-content .buttons .cancel { background: #f1f5f9; color: #475569; }
-        .modal-content .buttons .save { background: #1A5F7A; color: white; }
 
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px 28px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-content .modal-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .modal-content h3 {
+            color: var(--primary);
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .modal-content .doctor-name {
+            text-align: center;
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 18px;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-content .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .modal-content .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+
+        .modal-content .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .modal-content .buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content .buttons button:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-content .buttons .cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .modal-content .buttons .cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-content .buttons .save {
+            background: var(--primary);
+            color: white;
+        }
+
+        .modal-content .buttons .save:hover {
+            background: #0f4c5c;
+            box-shadow: 0 4px 16px rgba(26, 95, 122, 0.3);
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
             .sidebar.open { transform: translateX(0); }
             .sidebar-overlay.show { display: block; }
-            .main-content { margin-right: 0; }
-            .header .left .hamburger { display: block; }
-            .fab { bottom: 20px; left: 20px; width: 48px; height: 48px; font-size: 22px; }
-            .doctor-card { flex-wrap: wrap; }
+            .main-content {
+                margin-right: 0;
+                max-width: 100%;
+                padding: 16px;
+            }
+            .hamburger { display: block; }
+            .doctor-card {
+                flex-wrap: wrap;
+                padding: 14px 16px;
+            }
+            .doctor-card .info {
+                flex: 1 1 100%;
+                order: 2;
+            }
+            .doctor-card .avatar {
+                order: 1;
+            }
+            .doctor-card .percentage {
+                order: 3;
+            }
+            .doctor-card .actions {
+                order: 4;
+                flex: 1 1 100%;
+                justify-content: flex-start;
+            }
+            .fab {
+                bottom: 20px;
+                left: 20px;
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+            }
+            .header .left h1 {
+                font-size: 18px;
+            }
+            .modal-content {
+                padding: 24px 20px;
+            }
         }
+
         @media (max-width: 480px) {
-            .header .left h1 { font-size: 16px; }
+            .main-content {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 16px;
+            }
+            .header .left h1 {
+                font-size: 16px;
+            }
+            .doctor-card .info .name {
+                font-size: 14px;
+            }
+            .doctor-card .percentage {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+            .fab {
+                bottom: 16px;
+                left: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+            }
+            .modal-content {
+                padding: 20px 16px;
+            }
+            .modal-content .buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- القائمة الجانبية -->
+<!-- ===== SIDEBAR OVERLAY ===== -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar" id="sidebar">
-    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="logo">
+        <i class="fas fa-tooth"></i> <span>Clinic</span>Pro
+    </div>
     <div class="user-info">
-        <div class="avatar">👤</div>
+        <div class="avatar"><i class="fas fa-user"></i></div>
         <div class="name" id="userName">طبيب الأسنان</div>
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
-        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
-        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
-        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
-        <li class="active"><i class="fas fa-user-md"></i> الأطباء</li>
-        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
-        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
-        <li onclick="window.location.href='reports.html'"><i class="fas fa-chart-bar"></i> التقارير</li>
-        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
-        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
-        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
-        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+        <li onclick="navigateTo('dashboard.html')">
+            <i class="fas fa-chart-pie"></i> الرئيسية
+        </li>
+        <li onclick="navigateTo('patients.html')">
+            <i class="fas fa-users"></i> المرضى
+        </li>
+        <li onclick="navigateTo('treatments.html')">
+            <i class="fas fa-tooth"></i> المعالجات
+        </li>
+        <li onclick="navigateTo('services.html')">
+            <i class="fas fa-list"></i> الخدمات
+        </li>
+        <li class="active">
+            <i class="fas fa-user-md"></i> الأطباء
+        </li>
+        <li onclick="navigateTo('secretaries.html')">
+            <i class="fas fa-user-tie"></i> السكرتيرات
+        </li>
+        <li onclick="navigateTo('lab.html')">
+            <i class="fas fa-flask"></i> المعمل
+        </li>
+        <li onclick="navigateTo('reports.html')">
+            <i class="fas fa-chart-bar"></i> التقارير
+        </li>
+        <li onclick="navigateTo('notifications.html')">
+            <i class="fas fa-bell"></i> الإشعارات
+        </li>
+        <li onclick="navigateTo('settings.html')">
+            <i class="fas fa-cog"></i> الإعدادات
+        </li>
+        <li onclick="navigateTo('profile.html')">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li onclick="navigateTo('subscription-plans.html')">
+            <i class="fas fa-crown"></i> باقات الاشتراك
+        </li>
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </li>
     </ul>
 </div>
 
-<!-- المحتوى الرئيسي -->
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
+    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="left">
-            <button class="hamburger" onclick="toggleSidebar()">☰</button>
-            <h1>👨‍⚕️ الأطباء</h1>
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h1><i class="fas fa-user-md"></i> الأطباء</h1>
         </div>
         <div class="actions">
-            <button onclick="loadDoctors()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+            <button onclick="loadDoctors()" title="تحديث البيانات">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
     </div>
 
+    <!-- ===== DOCTORS LIST ===== -->
     <div id="doctorsList">
         <div class="loader"><div class="spinner"></div></div>
     </div>
 </div>
 
-<!-- زر الإضافة -->
-<button class="fab" onclick="addDoctor()">+</button>
+<!-- ===== FAB ===== -->
+<button class="fab" onclick="addDoctor()">
+    <i class="fas fa-plus"></i>
+</button>
 
-<!-- مودال تعديل النسبة -->
+<!-- ===== MODAL ===== -->
 <div class="modal-overlay" id="percentageModal">
     <div class="modal-content">
-        <h3>📊 تعديل نسبة الطبيب</h3>
+        <div class="modal-icon">📊</div>
+        <h3>تعديل نسبة الطبيب</h3>
         <div class="doctor-name" id="modalDoctorName">الطبيب</div>
-        <input type="number" id="modalPercentage" placeholder="النسبة المئوية" min="0" max="100">
+        <div class="form-group">
+            <label>النسبة المئوية</label>
+            <input class="form-control" id="modalPercentage" type="number" placeholder="0" min="0" max="100">
+        </div>
         <div class="buttons">
             <button class="cancel" onclick="closeModal()">إلغاء</button>
             <button class="save" onclick="savePercentage()">حفظ</button>
@@ -192,56 +738,114 @@
 // ============================================
 // ✅ الإعدادات الأساسية
 // ============================================
-const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+const API_BASE = 'https://clinicprosystem.koyeb.app/api';
 let token = localStorage.getItem('token') || '';
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
 let doctors = [];
 let editingDoctorId = null;
+let isLoading = false;
 
 // ============================================
 // ✅ دوال API
 // ============================================
 async function apiCall(endpoint, method = 'GET', body = null) {
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
     if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
+
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, options);
-        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+            return null;
+        }
         return await response.json();
-    } catch (e) { console.error('❌ API Error:', e); return null; }
+    } catch (e) {
+        console.error('❌ API Error:', e);
+        return null;
+    }
 }
 
 // ============================================
-// ✅ تحميل الأطباء (بدون بيانات افتراضية)
+// ✅ التنقل
+// ============================================
+function navigateTo(page) {
+    if (window.innerWidth <= 768) toggleSidebar(false);
+    window.location.href = page;
+}
+
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (typeof forceState === 'boolean') {
+        sidebar.classList.toggle('open', forceState);
+        overlay.classList.toggle('show', forceState);
+    } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ تحميل الأطباء
 // ============================================
 async function loadDoctors() {
+    if (isLoading) return;
+    isLoading = true;
+
     const list = document.getElementById('doctorsList');
     list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
 
     try {
         const response = await apiCall('/clinics/doctors');
+        
         if (response?.doctors) {
             doctors = response.doctors;
             renderDoctors();
+            isLoading = false;
             return;
         }
-    } catch(e) {
-        console.warn('⚠️ Failed to fetch from server:', e);
-    }
+        
+        // ✅ إذا فشل جلب البيانات
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>فشل في تحميل البيانات</h3>
+                <p>يرجى التحقق من اتصالك بالإنترنت</p>
+                <button class="retry-btn" onclick="loadDoctors()">
+                    <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
+        isLoading = false;
 
-    // ❌ لا توجد بيانات افتراضية - عرض خطأ فقط
-    list.innerHTML = `
-        <div class="empty-state">
-            <i class="fas fa-exclamation-circle"></i>
-            <h3>فشل في تحميل البيانات</h3>
-            <p>يرجى التحقق من اتصالك بالإنترنت</p>
-            <button onclick="loadDoctors()" style="margin-top:12px;padding:8px 24px;background:#1A5F7A;color:white;border:none;border-radius:8px;cursor:pointer;">
-                <i class="fas fa-sync-alt"></i> إعادة المحاولة
-            </button>
-        </div>
-    `;
+    } catch (error) {
+        console.error('❌ Error loading doctors:', error);
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>حدث خطأ</h3>
+                <p>فشل في تحميل بيانات الأطباء</p>
+                <button class="retry-btn" onclick="loadDoctors()">
+                    <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
+        isLoading = false;
+    }
 }
 
 // ============================================
@@ -261,20 +865,39 @@ function renderDoctors() {
         return;
     }
 
-    list.innerHTML = doctors.map(d => `
-        <div class="doctor-card">
-            <div class="avatar">👨‍⚕️</div>
-            <div class="info">
-                <div class="name">${d.name || 'غير محدد'}</div>
-                <div class="phone">📞 ${d.phone || '-'}</div>
+    list.innerHTML = doctors.map(d => {
+        const id = d._id || d.id || '';
+        const name = d.name || 'غير محدد';
+        const phone = d.phone || '-';
+        const percentage = d.percentage || 0;
+
+        return `
+            <div class="doctor-card">
+                <div class="avatar"><i class="fas fa-user-md"></i></div>
+                <div class="info">
+                    <div class="name">${name}</div>
+                    <div class="phone"><i class="fas fa-phone"></i> ${phone}</div>
+                </div>
+                <div class="percentage">نسبة ${percentage}%</div>
+                <div class="actions">
+                    <button class="edit" onclick="openEditModal('${id}','${name}','${percentage}')" title="تعديل النسبة">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete" onclick="deleteDoctor('${id}','${name}')" title="حذف">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
-            <div class="percentage">نسبة ${d.percentage || 0}%</div>
-            <div class="actions">
-                <button onclick="openEditModal('${d._id}','${d.name}','${d.percentage || 0}')" title="تعديل النسبة"><i class="fas fa-edit"></i></button>
-                <button class="delete" onclick="deleteDoctor('${d._id}','${d.name}')" title="حذف"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+// ============================================
+// ✅ إضافة طبيب جديد
+// ============================================
+async function addDoctor() {
+    // ✅ الانتقال إلى صفحة إضافة طبيب
+    window.location.href = 'add-doctor.html';
 }
 
 // ============================================
@@ -292,91 +915,27 @@ function closeModal() {
     editingDoctorId = null;
 }
 
-function savePercentage() {
-    const percentage = parseInt(document.getElementById('modalPercentage').value);
-    if (isNaN(percentage) || percentage < 0 || percentage > 100) {
-        alert('⚠️ النسبة يجب أن تكون بين 0 و 100');
-        return;
-    }
-    const doctor = doctors.find(d => d._id === editingDoctorId);
-    if (doctor) {
-        doctor.percentage = percentage;
-        renderDoctors();
-    }
-    closeModal();
-    alert('✅ تم تحديث النسبة');
-}
-
 // ============================================
-// ✅ إضافة طبيب جديد (إرسال إلى السيرفر)
-// ============================================
-async function addDoctor() {
-    const name = prompt('👨‍⚕️ أدخل اسم الطبيب:');
-    if (!name || name.trim() === '') return;
-    
-    const phone = prompt('📞 أدخل رقم الجوال:');
-    if (!phone || phone.trim() === '') return;
-    
-    const percentage = prompt('📊 أدخل نسبة الطبيب (0-100):', '0');
-    const percentageNum = parseInt(percentage) || 0;
-    
-    if (percentageNum < 0 || percentageNum > 100) {
-        alert('⚠️ النسبة يجب أن تكون بين 0 و 100');
-        return;
-    }
-    
-    try {
-        const response = await apiCall('/clinics/add-doctor', 'POST', {
-            name: name.trim(),
-            phone: phone.trim(),
-            percentage: percentageNum
-        });
-        
-        if (response?.success) {
-            alert('✅ تم إضافة الطبيب بنجاح');
-            loadDoctors();
-        } else {
-            alert('❌ فشل في إضافة الطبيب: ' + (response?.error || 'خطأ غير معروف'));
-        }
-    } catch(e) {
-        alert('❌ حدث خطأ: ' + e.message);
-    }
-}
-
-// ============================================
-// ✅ حذف طبيب
-// ============================================
-async function deleteDoctor(id, name) {
-    if (!confirm(`🗑️ هل أنت متأكد من حذف الطبيب "${name}"؟`)) return;
-    
-    try {
-        const response = await apiCall(`/clinics/doctors/${id}`, 'DELETE');
-        if (response?.success) {
-            alert('✅ تم حذف الطبيب بنجاح');
-            loadDoctors();
-        } else {
-            alert('❌ فشل في حذف الطبيب: ' + (response?.error || 'خطأ غير معروف'));
-        }
-    } catch(e) {
-        alert('❌ حدث خطأ: ' + e.message);
-    }
-}
-
-// ============================================
-// ✅ تعديل نسبة الطبيب (إرسال إلى السيرفر)
+// ✅ حفظ النسبة (إرسال إلى السيرفر)
 // ============================================
 async function savePercentage() {
     const percentage = parseInt(document.getElementById('modalPercentage').value);
+    
     if (isNaN(percentage) || percentage < 0 || percentage > 100) {
         alert('⚠️ النسبة يجب أن تكون بين 0 و 100');
         return;
     }
-    
+
+    if (!editingDoctorId) {
+        alert('⚠️ خطأ: لم يتم تحديد الطبيب');
+        return;
+    }
+
     try {
         const response = await apiCall(`/clinics/doctors/${editingDoctorId}/percentage`, 'PUT', {
             percentage: percentage
         });
-        
+
         if (response?.success) {
             alert('✅ تم تحديث النسبة بنجاح');
             closeModal();
@@ -384,49 +943,87 @@ async function savePercentage() {
         } else {
             alert('❌ فشل في تحديث النسبة: ' + (response?.error || 'خطأ غير معروف'));
         }
-    } catch(e) {
-        alert('❌ حدث خطأ: ' + e.message);
+    } catch (error) {
+        console.error('❌ Error updating percentage:', error);
+        alert('❌ حدث خطأ: ' + (error.message || 'فشل تحديث النسبة'));
     }
 }
 
 // ============================================
-// ✅ دوال مساعدة
+// ✅ حذف طبيب
 // ============================================
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-}
+async function deleteDoctor(id, name) {
+    if (!id) {
+        alert('⚠️ لا يمكن حذف هذا الطبيب');
+        return;
+    }
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    if (!confirm(`🗑️ هل أنت متأكد من حذف الطبيب "${name}"؟`)) return;
+
+    try {
+        const response = await apiCall(`/clinics/doctors/${id}`, 'DELETE');
+
+        if (response?.success) {
+            alert('✅ تم حذف الطبيب بنجاح');
+            loadDoctors();
+        } else {
+            alert('❌ فشل في حذف الطبيب: ' + (response?.error || 'خطأ غير معروف'));
+        }
+    } catch (error) {
+        console.error('❌ Error deleting doctor:', error);
+        alert('❌ حدث خطأ: ' + (error.message || 'فشل حذف الطبيب'));
+    }
 }
 
 // ============================================
 // ✅ بدء التشغيل
 // ============================================
+// ✅ التحقق من التوكن
 if (!token || token === 'null' || token === 'undefined') {
     window.location.href = 'index.html';
 }
 
+// ✅ تحديث معلومات المستخدم
 if (userData?.name) {
     document.getElementById('userName').textContent = userData.name;
-    document.getElementById('userRole').textContent =
-        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
-        userData.role === 'university_student' ? 'طالب جامعي' :
-        userData.role === 'secretary' ? 'سكرتير' :
-        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+    const roleMap = {
+        'clinic_owner': 'صاحب عيادة',
+        'university_student': 'طالب جامعي',
+        'secretary': 'سكرتير',
+        'doctor': 'طبيب'
+    };
+    document.getElementById('userRole').textContent = roleMap[userData.role] || 'مستخدم';
 }
 
+// ✅ تحميل الأطباء
 loadDoctors();
 
+// ✅ إغلاق القائمة الجانبية عند تغيير الحجم
 window.addEventListener('resize', () => {
     if (window.innerWidth > 768) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('show');
     }
 });
+
+// ✅ إغلاق القائمة عند الضغط على ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+        closeModal();
+    }
+});
+
+// ✅ إغلاق المودال عند الضغط خارج المحتوى
+document.getElementById('percentageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+console.log('🚀 ClinicPro - Doctors Screen Loaded');
+console.log('📱 Flutter to HTML - تم التحويل بنجاح!');
 </script>
 
 </body>
