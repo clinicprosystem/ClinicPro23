@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>ClinicPro - لوحة التحكم</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -17,33 +18,48 @@
         body {
             background: #f0f4f8;
             min-height: 100vh;
+            color: #1e293b;
         }
 
+        :root {
+            --primary: #1A5F7A;
+            --primary-light: #57C0E8;
+            --primary-gradient: linear-gradient(135deg, #1A5F7A, #57C0E8);
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
             position: fixed;
             right: 0;
             top: 0;
             bottom: 0;
-            width: 260px;
-            background: #1A5F7A;
+            width: 270px;
+            background: var(--primary);
             color: white;
-            padding: 0;
             z-index: 1000;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
         }
 
         .sidebar .logo {
-            padding: 20px;
+            padding: 24px 20px 16px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 24px;
             font-weight: 800;
+            letter-spacing: 1px;
         }
 
-        .sidebar .logo span {
-            color: #57C0E8;
-        }
+        .sidebar .logo span { color: var(--primary-light); }
+        .sidebar .logo i { margin-left: 8px; }
 
         .sidebar .user-info {
             padding: 16px 20px;
@@ -52,15 +68,16 @@
         }
 
         .sidebar .user-info .avatar {
-            width: 50px;
-            height: 50px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
         }
 
         .sidebar .user-info .name {
@@ -71,33 +88,49 @@
         .sidebar .user-info .role {
             font-size: 12px;
             color: rgba(255,255,255,0.6);
+            margin-top: 2px;
         }
 
         .sidebar ul {
             list-style: none;
-            padding: 12px 0;
+            padding: 8px 0;
+        }
+
+        .sidebar ul .section-label {
+            padding: 12px 24px 4px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .sidebar ul li {
-            padding: 12px 24px;
+            padding: 11px 24px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-right: 4px solid transparent;
+            gap: 14px;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+            position: relative;
         }
 
-        .sidebar ul li:hover,
+        .sidebar ul li:hover {
+            background: rgba(255,255,255,0.06);
+            border-right-color: rgba(255,255,255,0.3);
+        }
+
         .sidebar ul li.active {
-            background: rgba(255,255,255,0.08);
-            border-right-color: #57C0E8;
+            background: rgba(255,255,255,0.1);
+            border-right-color: var(--primary-light);
         }
 
         .sidebar ul li i {
             width: 20px;
             text-align: center;
             font-size: 16px;
+            color: rgba(255,255,255,0.7);
         }
 
         .sidebar ul li .badge {
@@ -107,30 +140,52 @@
             padding: 1px 8px;
             border-radius: 12px;
             margin-right: auto;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
         }
 
         .sidebar ul li.logout {
-            color: #f87171;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            color: #fca5a5;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
             padding-top: 16px;
         }
 
         .sidebar ul li.logout:hover {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(239, 68, 68, 0.12);
+            border-right-color: #ef4444;
         }
 
+        .sidebar ul li.logout i { color: #fca5a5; }
+
+        /* ===== SIDEBAR OVERLAY ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== MAIN CONTENT ===== */
         .main-content {
-            margin-right: 260px;
-            padding: 20px;
+            margin-right: 270px;
+            padding: 20px 24px;
             min-height: 100vh;
+            max-width: calc(100% - 270px);
         }
 
+        /* ===== HEADER ===== */
         .header {
             background: white;
-            padding: 16px 24px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -139,111 +194,143 @@
             gap: 12px;
         }
 
-        .header h1 {
-            font-size: 22px;
-            color: #1A5F7A;
-        }
-
-        .header .actions {
+        .header .left {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
+        .header .left h1 {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px;
+        }
+
+        .header .actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .header .actions button {
             background: none;
             border: none;
-            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
             cursor: pointer;
-            color: #555;
-            padding: 8px;
+            color: #64748b;
             border-radius: 50%;
-            transition: background 0.3s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
         }
 
         .header .actions button:hover {
-            background: #f0f4f8;
+            background: #f1f5f9;
+            color: var(--primary);
         }
 
         .header .actions .notif-badge {
             position: absolute;
-            top: 2px;
-            right: 2px;
+            top: 4px;
+            right: 4px;
             background: #ef4444;
             color: white;
             font-size: 9px;
             padding: 1px 6px;
             border-radius: 10px;
             font-weight: 700;
+            min-width: 16px;
+            text-align: center;
         }
 
+        /* ===== WELCOME CARD ===== */
         .welcome-card {
-            background: linear-gradient(135deg, #1A5F7A, #57C0E8);
-            padding: 24px;
+            background: var(--primary-gradient);
+            padding: 24px 28px;
             border-radius: 20px;
             color: white;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
             margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(26, 95, 122, 0.25);
         }
 
         .welcome-card .avatar-lg {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 32px;
             flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.3);
         }
 
         .welcome-card h2 {
             font-size: 20px;
+            font-weight: 800;
         }
 
         .welcome-card p {
-            opacity: 0.8;
+            opacity: 0.85;
             font-size: 14px;
+            margin-top: 2px;
         }
 
+        /* ===== STATS GRID ===== */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
 
         .stat-card {
             background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 20px 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
         }
 
         .stat-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            border-color: var(--primary-light);
         }
 
         .stat-card .icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            margin-bottom: 8px;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
 
-        .stat-card .icon.blue { background: #dbeafe; color: #1A5F7A; }
+        .stat-card .icon.blue { background: #dbeafe; color: var(--primary); }
         .stat-card .icon.green { background: #d1fae5; color: #059669; }
         .stat-card .icon.orange { background: #fef3c7; color: #d97706; }
         .stat-card .icon.purple { background: #ede9fe; color: #7c3aed; }
@@ -251,14 +338,17 @@
         .stat-card .value {
             font-size: 28px;
             font-weight: 800;
-            color: #1e293b;
+            color: #0f172a;
+            line-height: 1.2;
         }
 
         .stat-card .label {
             font-size: 14px;
             color: #64748b;
+            margin-top: 2px;
         }
 
+        /* ===== SUBSCRIPTION BANNER ===== */
         .subscription-banner {
             background: linear-gradient(135deg, #f59e0b, #ea580c);
             border-radius: 12px;
@@ -269,13 +359,13 @@
             justify-content: space-between;
             margin-bottom: 24px;
             cursor: pointer;
-            transition: opacity 0.3s;
-            flex-wrap: wrap;
-            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 12px rgba(245, 158, 11, 0.3);
         }
 
         .subscription-banner:hover {
-            opacity: 0.9;
+            transform: scale(1.01);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
         }
 
         .subscription-banner .left {
@@ -285,27 +375,30 @@
         }
 
         .subscription-banner .left i {
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .subscription-banner .left .title {
             font-weight: 700;
+            font-size: 15px;
         }
 
         .subscription-banner .left .sub {
             font-size: 12px;
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
         .subscription-banner .arrow {
-            font-size: 18px;
+            font-size: 16px;
+            opacity: 0.7;
         }
 
+        /* ===== RECENT TREATMENTS ===== */
         .recent-section {
             background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
         }
 
         .recent-section .header-row {
@@ -317,26 +410,36 @@
 
         .recent-section .header-row h3 {
             font-size: 18px;
-            color: #1e293b;
+            color: #0f172a;
+            font-weight: 700;
         }
 
         .recent-section .header-row a {
-            color: #1A5F7A;
+            color: var(--primary);
             text-decoration: none;
             font-size: 14px;
             cursor: pointer;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .recent-section .header-row a:hover {
+            color: var(--primary-light);
         }
 
         .treatment-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 8px;
-            padding: 10px 12px;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .treatment-item:last-child {
+            border-bottom: none;
         }
 
         .treatment-item:hover {
@@ -344,61 +447,63 @@
         }
 
         .treatment-item .icon-circle {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(26, 95, 122, 0.1);
+            background: rgba(26, 95, 122, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1A5F7A;
+            color: var(--primary);
             flex-shrink: 0;
+            font-size: 18px;
         }
 
         .treatment-item .info {
             flex: 1;
+            min-width: 0;
         }
 
         .treatment-item .info .name {
             font-weight: 700;
             font-size: 14px;
-            color: #1e293b;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .treatment-item .info .details {
             font-size: 12px;
             color: #64748b;
             display: flex;
-            gap: 12px;
+            gap: 14px;
             flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        .treatment-item .info .details span {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
         }
 
         .treatment-item .info .details i {
-            margin-left: 3px;
+            font-size: 11px;
+            color: #94a3b8;
         }
 
         .treatment-item .price {
             font-weight: 700;
-            color: #1A5F7A;
-            font-size: 13px;
-            background: rgba(26, 95, 122, 0.08);
-            padding: 4px 12px;
-            border-radius: 8px;
+            color: var(--primary);
+            font-size: 14px;
+            background: rgba(26, 95, 122, 0.07);
+            padding: 4px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
         }
 
-        .table-container {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            overflow-x: auto;
-        }
-
-        .table-container h3 {
-            color: #1A5F7A;
-            margin-bottom: 16px;
-        }
-
+        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -407,187 +512,156 @@
 
         .empty-state i {
             font-size: 48px;
-            margin-bottom: 12px;
             color: #cbd5e1;
-        }
-
-        .empty-state h3 {
-            font-size: 18px;
-            color: #64748b;
+            margin-bottom: 12px;
+            display: block;
         }
 
         .empty-state p {
-            font-size: 14px;
+            font-size: 15px;
+            color: #94a3b8;
         }
 
-        .hamburger {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #1A5F7A;
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 999;
-        }
-
+        /* ===== LOADER ===== */
         .loader {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 200px;
+            min-height: 300px;
         }
 
         .loader .spinner {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border: 4px solid #e2e8f0;
-            border-top-color: #1A5F7A;
+            border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 0.7s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .badge-status {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-
-        .badge-status.green { background: #d1fae5; color: #059669; }
-        .badge-status.orange { background: #fef3c7; color: #d97706; }
-        .badge-status.red { background: #fee2e2; color: #dc2626; }
-        .badge-status.blue { background: #dbeafe; color: #2563eb; }
 
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(100%);
                 width: 280px;
             }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .sidebar-overlay.show {
-                display: block;
-            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
             .main-content {
                 margin-right: 0;
+                max-width: 100%;
+                padding: 16px;
             }
-            .hamburger {
-                display: block;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .welcome-card {
-                flex-direction: column;
-                text-align: center;
-            }
+            .hamburger { display: block; }
+            .welcome-card { flex-direction: column; text-align: center; padding: 20px; }
+            .welcome-card .avatar-lg { width: 56px; height: 56px; font-size: 26px; }
+            .stats-grid { gap: 12px; }
+            .stat-card { padding: 16px 12px; }
+            .stat-card .value { font-size: 22px; }
+            .header .left h1 { font-size: 18px; }
         }
 
         @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            .stat-card {
-                padding: 14px;
-            }
-            .stat-card .value {
-                font-size: 20px;
-            }
-            .header h1 {
-                font-size: 18px;
-            }
-            .treatment-item {
-                flex-wrap: wrap;
-            }
-            .treatment-item .price {
-                margin-right: auto;
-            }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card .icon { width: 40px; height: 40px; font-size: 18px; }
+            .stat-card .value { font-size: 20px; }
+            .treatment-item { flex-wrap: wrap; padding: 10px; }
+            .treatment-item .price { margin-right: auto; font-size: 12px; padding: 2px 12px; }
+            .recent-section { padding: 16px; }
+            .subscription-banner { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
 
+<!-- ===== SIDEBAR OVERLAY ===== -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar" id="sidebar">
-    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="logo">
+        <i class="fas fa-tooth"></i> <span>Clinic</span>Pro
+    </div>
     <div class="user-info">
-        <div class="avatar">👤</div>
+        <div class="avatar"><i class="fas fa-user"></i></div>
         <div class="name" id="userName">طبيب الأسنان</div>
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <li class="active" onclick="window.location.href='dashboard.html'">
+        <li class="active" data-page="dashboard" onclick="navigateTo('dashboard')">
             <i class="fas fa-chart-pie"></i> الرئيسية
         </li>
-        <li onclick="window.location.href='patients.html'">
+        <li data-page="patients" onclick="navigateTo('patients')">
             <i class="fas fa-users"></i> المرضى
             <span class="badge" id="patientsBadge">0</span>
         </li>
-        <li onclick="window.location.href='treatments.html'">
+        <li data-page="treatments" onclick="navigateTo('treatments')">
             <i class="fas fa-tooth"></i> المعالجات
             <span class="badge" id="treatmentsBadge">0</span>
         </li>
-        <li onclick="window.location.href='services.html'">
+        <li data-page="services" onclick="navigateTo('services')">
             <i class="fas fa-list"></i> الخدمات والأسعار
         </li>
-        <li onclick="window.location.href='doctors.html'">
+
+        <!-- ✅ قسم الإدارة - يظهر لصاحب العيادة فقط -->
+        <li class="section-label" id="adminLabel">الإدارة</li>
+        <li data-page="doctors" onclick="navigateTo('doctors')" id="menuDoctors">
             <i class="fas fa-user-md"></i> الأطباء
         </li>
-        <li onclick="window.location.href='secretaries.html'">
+        <li data-page="secretaries" onclick="navigateTo('secretaries')" id="menuSecretaries">
             <i class="fas fa-user-tie"></i> السكرتيرات
         </li>
-        <li onclick="window.location.href='lab.html'">
+
+        <li data-page="lab" onclick="navigateTo('lab')">
             <i class="fas fa-flask"></i> المعمل
         </li>
-        <li onclick="window.location.href='reports.html'">
+        <li data-page="reports" onclick="navigateTo('reports')">
             <i class="fas fa-chart-bar"></i> التقارير
         </li>
-        <li onclick="window.location.href='notifications.html'">
+        <li data-page="notifications" onclick="navigateTo('notifications')">
             <i class="fas fa-bell"></i> الإشعارات
+            <span class="badge" id="notifBadgeSidebar">0</span>
         </li>
-        <li onclick="window.location.href='settings.html'">
+        <li data-page="settings" onclick="navigateTo('settings')">
             <i class="fas fa-cog"></i> الإعدادات
         </li>
-        <li onclick="window.location.href='profile.html'">
+        <li data-page="profile" onclick="navigateTo('profile')">
             <i class="fas fa-user-circle"></i> الملف الشخصي
         </li>
-        <li onclick="window.location.href='subscription-plans.html'">
+
+        <!-- ✅ باقات الاشتراك - تظهر للجميع -->
+        <li data-page="subscription-plans" onclick="navigateTo('subscription-plans')">
             <i class="fas fa-crown"></i> باقات الاشتراك
         </li>
+
         <li class="logout" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> تسجيل خروج
         </li>
     </ul>
 </div>
 
+<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content" id="mainContent">
     <div class="header">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div class="left">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <h1 id="pageTitle">لوحة التحكم</h1>
         </div>
         <div class="actions">
             <button onclick="refreshData()" title="تحديث">
                 <i class="fas fa-sync-alt"></i>
             </button>
-            <button onclick="window.location.href='notifications.html'" title="الإشعارات">
+            <button onclick="navigateTo('notifications')" title="الإشعارات">
                 <i class="fas fa-bell"></i>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
             </button>
@@ -601,35 +675,139 @@
 
 <script>
 // ============================================
-// ✅ الإعدادات الأساسية
+// ✅ البيانات والإعدادات
 // ============================================
 const API_BASE = 'https://clinicprosystem.koyeb.app/api';
 let token = localStorage.getItem('token') || '';
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
 let clinicId = userData?.clinicId || '';
+let currentPage = 'dashboard';
+
+// ✅ صلاحيات المستخدم
+const userRole = userData?.role || '';
+const isClinicOwner = userRole === 'clinic_owner';
+const isSecretary = userRole === 'secretary';
+const isUniversityStudent = userRole === 'university_student';
+const isMasterAdmin = userData?.isMasterAdmin === true;
+
+// ✅ التحكم في ظهور عناصر القائمة حسب الصلاحيات
+function updateSidebarVisibility() {
+    // الإدارة (أطباء + سكرتيرات) - فقط لصاحب العيادة أو الماستر أدمن
+    const adminLabel = document.getElementById('adminLabel');
+    const menuDoctors = document.getElementById('menuDoctors');
+    const menuSecretaries = document.getElementById('menuSecretaries');
+    
+    const showAdmin = isClinicOwner || isMasterAdmin;
+    
+    if (adminLabel) adminLabel.style.display = showAdmin ? 'block' : 'none';
+    if (menuDoctors) menuDoctors.style.display = showAdmin ? 'flex' : 'none';
+    if (menuSecretaries) menuSecretaries.style.display = showAdmin ? 'flex' : 'none';
+    
+    // التقارير - لا تظهر للسكرتير ولا لطالب جامعي
+    const reportsItem = document.querySelector('[data-page="reports"]');
+    if (reportsItem) {
+        reportsItem.style.display = (isSecretary || isUniversityStudent) ? 'none' : 'flex';
+    }
+    
+    // المعمل - لا يظهر لطالب جامعي
+    const labItem = document.querySelector('[data-page="lab"]');
+    if (labItem) {
+        labItem.style.display = isUniversityStudent ? 'none' : 'flex';
+    }
+}
 
 // ============================================
 // ✅ دوال API
 // ============================================
 async function apiCall(endpoint, method = 'GET', body = null) {
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    
+
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
-    
+
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, options);
         if (response.status === 401) {
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.href = 'index.html';
             return null;
         }
-        return await response.json();
+        const data = await response.json();
+        if (!response.ok) {
+            console.warn('⚠️ API Warning:', data);
+        }
+        return data;
     } catch (e) {
         console.error('❌ API Error:', e);
         return null;
     }
+}
+
+// ============================================
+// ✅ التنقل بين الصفحات
+// ============================================
+function navigateTo(page) {
+    currentPage = page;
+    document.querySelectorAll('.sidebar ul li').forEach(el => el.classList.remove('active'));
+    const activeItem = document.querySelector(`[data-page="${page}"]`);
+    if (activeItem) activeItem.classList.add('active');
+
+    const titles = {
+        dashboard: 'لوحة التحكم',
+        patients: 'المرضى',
+        treatments: 'المعالجات',
+        doctors: 'الأطباء',
+        secretaries: 'السكرتيرات',
+        services: 'الخدمات والأسعار',
+        lab: 'المعمل',
+        reports: 'التقارير',
+        notifications: 'الإشعارات',
+        settings: 'الإعدادات',
+        profile: 'الملف الشخصي',
+        'subscription-plans': 'باقات الاشتراك'
+    };
+    document.getElementById('pageTitle').textContent = titles[page] || 'الصفحة';
+
+    if (page === 'dashboard') {
+        renderDashboard();
+    } else {
+        renderPlaceholder(page);
+    }
+
+    if (window.innerWidth <= 768) toggleSidebar(false);
+}
+
+function renderPlaceholder(page) {
+    const container = document.getElementById('dynamicContent');
+    const names = {
+        patients: 'المرضى',
+        treatments: 'المعالجات',
+        doctors: 'الأطباء',
+        secretaries: 'السكرتيرات',
+        services: 'الخدمات والأسعار',
+        lab: 'المعمل',
+        reports: 'التقارير',
+        notifications: 'الإشعارات',
+        settings: 'الإعدادات',
+        profile: 'الملف الشخصي',
+        'subscription-plans': 'باقات الاشتراك'
+    };
+    container.innerHTML = `
+        <div class="empty-state" style="background:white;border-radius:16px;padding:60px 20px;box-shadow:var(--shadow);">
+            <i class="fas fa-${page === 'patients' ? 'users' : page === 'treatments' ? 'tooth' : page === 'reports' ? 'chart-bar' : page === 'settings' ? 'cog' : page === 'profile' ? 'user-circle' : page === 'subscription-plans' ? 'crown' : 'file'}"></i>
+            <h3 style="font-size:20px;color:#1e293b;margin-bottom:8px;">${names[page] || 'الصفحة'}</h3>
+            <p>تم تحويل هذه الصفحة من تطبيق Flutter إلى HTML</p>
+            <p style="font-size:13px;color:#94a3b8;margin-top:4px;">🔹 ${page === 'patients' ? 'عرض وإدارة المرضى' : page === 'treatments' ? 'عرض وإدارة المعالجات' : 'قريباً...'}</p>
+            <button onclick="navigateTo('dashboard')" style="margin-top:20px;background:var(--primary);color:white;border:none;padding:10px 32px;border-radius:12px;font-size:15px;cursor:pointer;font-weight:700;">
+                <i class="fas fa-arrow-right"></i> العودة للرئيسية
+            </button>
+        </div>
+    `;
 }
 
 // ============================================
@@ -638,112 +816,169 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 async function renderDashboard() {
     const container = document.getElementById('dynamicContent');
     container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-    
+
     try {
-        const [patients, treatments, doctors] = await Promise.all([
+        // جلب البيانات من API
+        const [patientsRes, treatmentsRes, doctorsRes, subRes] = await Promise.all([
             apiCall('/patients'),
             apiCall('/treatments'),
-            apiCall('/clinics/doctors')
+            apiCall('/clinics/doctors'),
+            apiCall('/clinics/subscription/status')
         ]);
 
-        const pCount = patients?.patients?.length || 0;
-        const tCount = treatments?.treatments?.length || 0;
-        const dCount = doctors?.doctors?.length || 0;
-        const recentTreats = treatments?.treatments?.slice(0, 5) || [];
+        const pCount = patientsRes?.patients?.length || 0;
+        const tCount = treatmentsRes?.treatments?.length || 0;
+        const dCount = doctorsRes?.doctors?.length || 0;
+        const recentTreats = treatmentsRes?.treatments?.slice(0, 5) || [];
 
+        // تحديث البادجات
         document.getElementById('patientsBadge').textContent = pCount;
         document.getElementById('treatmentsBadge').textContent = tCount;
 
+        // ✅ التحقق من نوع الاشتراك
+        const subscriptionType = subRes?.subscriptionType || 'trial';
+        const isSubActive = subscriptionType === 'active' || subscriptionType === 'university_student';
+
+        // ✅ عرض بنر الاشتراك فقط إذا كان trial أو expired
         let subscriptionHtml = '';
-        try {
-            const sub = await apiCall('/clinics/subscription/status');
-            const subType = sub?.subscriptionType || 'trial';
-            if (subType === 'trial' || subType === 'expired') {
-                subscriptionHtml = `
-                    <div class="subscription-banner" onclick="window.location.href='subscription-plans.html'">
-                        <div class="left">
-                            <i class="fas fa-subscriptions"></i>
-                            <div>
-                                <div class="title">تجديد الاشتراك</div>
-                                <div class="sub">${subType === 'trial' ? 'فترة تجريبية - قم بترقية اشتراكك' : 'انتهت صلاحية الاشتراك - جدد الآن'}</div>
-                            </div>
+        if (subscriptionType === 'trial' || subscriptionType === 'expired') {
+            subscriptionHtml = `
+                <div class="subscription-banner" onclick="navigateTo('subscription-plans')">
+                    <div class="left">
+                        <i class="fas fa-crown"></i>
+                        <div>
+                            <div class="title">تجديد الاشتراك</div>
+                            <div class="sub">${subscriptionType === 'trial' ? 'فترة تجريبية - قم بترقية اشتراكك' : 'انتهت صلاحية الاشتراك - جدد الآن'}</div>
                         </div>
-                        <div class="arrow"><i class="fas fa-arrow-left"></i></div>
                     </div>
-                `;
-            }
-        } catch(e) { console.warn('Subscription check failed:', e); }
+                    <div class="arrow"><i class="fas fa-arrow-left"></i></div>
+                </div>
+            `;
+        }
+
+        // ✅ عرض اسم المستخدم مع الترحيب
+        const userName = userData?.name || 'طبيب الأسنان';
 
         container.innerHTML = `
             <div class="welcome-card">
-                <div class="avatar-lg">👤</div>
+                <div class="avatar-lg"><i class="fas fa-user"></i></div>
                 <div>
-                    <h2>مرحباً، ${userData?.name || 'طبيب الأسنان'}</h2>
+                    <h2>مرحباً، ${userName}</h2>
                     <p>يسعدنا وجودك معنا اليوم</p>
                 </div>
             </div>
             ${subscriptionHtml}
             <div class="stats-grid">
-                <div class="stat-card" onclick="window.location.href='patients.html'">
+                <div class="stat-card" onclick="navigateTo('patients')">
                     <div class="icon blue"><i class="fas fa-users"></i></div>
                     <div class="value">${pCount}</div>
                     <div class="label">المرضى</div>
                 </div>
-                <div class="stat-card" onclick="window.location.href='treatments.html'">
+                <div class="stat-card" onclick="navigateTo('treatments')">
                     <div class="icon green"><i class="fas fa-tooth"></i></div>
                     <div class="value">${tCount}</div>
                     <div class="label">المعالجات</div>
                 </div>
-                <div class="stat-card" onclick="window.location.href='doctors.html'">
+                <div class="stat-card" onclick="navigateTo('doctors')">
                     <div class="icon orange"><i class="fas fa-user-md"></i></div>
                     <div class="value">${dCount}</div>
                     <div class="label">الأطباء</div>
                 </div>
-                <div class="stat-card" onclick="window.location.href='reports.html'">
+                <div class="stat-card" onclick="navigateTo('reports')">
                     <div class="icon purple"><i class="fas fa-coins"></i></div>
                     <div class="value">--</div>
                     <div class="label">الإيرادات</div>
                 </div>
             </div>
+
             <div class="recent-section">
                 <div class="header-row">
                     <h3>آخر المعالجات</h3>
-                    <a onclick="window.location.href='treatments.html'">عرض الكل →</a>
+                    <a onclick="navigateTo('treatments')">عرض الكل ←</a>
                 </div>
                 ${recentTreats.length === 0 ? `
-                    <div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد معالجات حديثة</p></div>
-                ` : recentTreats.map(t => `
-                    <div class="treatment-item" onclick="window.location.href='treatments.html'">
-                        <div class="icon-circle"><i class="fas fa-tooth"></i></div>
-                        <div class="info">
-                            <div class="name">${t.subServiceName || t.serviceName || 'خدمة'}</div>
-                            <div class="details">
-                                <span><i class="fas fa-user"></i> ${t.patientName || 'مريض'}</span>
-                                <span><i class="fas fa-user-md"></i> ${t.doctorName || 'طبيب'}</span>
-                                <span><i class="fas fa-calendar"></i> ${t.date ? t.date.substring(0,10) : '-'}</span>
-                            </div>
-                        </div>
-                        <div class="price">${t.finalPrice || 0} ريال</div>
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>لا توجد معالجات حديثة</p>
                     </div>
-                `).join('')}
+                ` : recentTreats.map(t => {
+                    const mainService = t.mainServiceName || 'خدمة رئيسية';
+                    const subService = t.subServiceName || t.serviceName || 'خدمة فرعية';
+                    const patientName = t.patientName || t.patient?.name || 'مريض';
+                    const doctorName = t.doctorName || t.doctor?.name || 'طبيب';
+                    const price = t.finalPrice || t.price || 0;
+                    const date = t.date ? t.date.substring(0, 10) : '-';
+                    return `
+                        <div class="treatment-item" onclick="navigateTo('treatments')">
+                            <div class="icon-circle"><i class="fas fa-tooth"></i></div>
+                            <div class="info">
+                                <div class="name">${mainService} - ${subService}</div>
+                                <div class="details">
+                                    <span><i class="fas fa-user"></i> ${patientName}</span>
+                                    <span><i class="fas fa-user-md"></i> ${doctorName}</span>
+                                    <span><i class="fas fa-calendar"></i> ${date}</span>
+                                </div>
+                            </div>
+                            <div class="price">${price} ريال</div>
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
-    } catch(e) {
+
+        // ✅ تحديث الإشعارات (محاكاة)
+        try {
+            const notifRes = await apiCall('/notifications');
+            const unreadCount = notifRes?.notifications?.filter(n => !n.read).length || 0;
+            const badge = document.getElementById('notifBadge');
+            const sidebarBadge = document.getElementById('notifBadgeSidebar');
+            if (unreadCount > 0) {
+                badge.style.display = 'block';
+                badge.textContent = unreadCount;
+                sidebarBadge.textContent = unreadCount;
+                sidebarBadge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+                sidebarBadge.style.display = 'none';
+            }
+        } catch(e) { console.warn('Notif error:', e); }
+
+    } catch (e) {
         console.error('Dashboard error:', e);
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ في تحميل البيانات</p></div>';
+        container.innerHTML = `
+            <div class="empty-state" style="background:white;border-radius:16px;padding:60px 20px;box-shadow:var(--shadow);">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3 style="color:#1e293b;font-size:18px;">حدث خطأ في تحميل البيانات</h3>
+                <p style="color:#94a3b8;">يرجى المحاولة مرة أخرى</p>
+                <button onclick="renderDashboard()" style="margin-top:16px;background:var(--primary);color:white;border:none;padding:8px 24px;border-radius:8px;cursor:pointer;">
+                    <i class="fas fa-redo"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
     }
 }
 
 // ============================================
 // ✅ وظائف مساعدة
 // ============================================
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (typeof forceState === 'boolean') {
+        sidebar.classList.toggle('open', forceState);
+        overlay.classList.toggle('show', forceState);
+    } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
 }
 
 function refreshData() {
-    renderDashboard();
+    if (currentPage === 'dashboard') {
+        renderDashboard();
+    } else {
+        navigateTo(currentPage);
+    }
 }
 
 function logout() {
@@ -759,22 +994,46 @@ if (!token || token === 'null' || token === 'undefined') {
     window.location.href = 'index.html';
 }
 
+// ✅ تحديث معلومات المستخدم في القائمة الجانبية
 if (userData?.name) {
     document.getElementById('userName').textContent = userData.name;
-    document.getElementById('userRole').textContent = 
-        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
-        userData.role === 'university_student' ? 'طالب جامعي' :
-        userData.role === 'secretary' ? 'سكرتير' :
-        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+    const roleMap = {
+        'clinic_owner': 'صاحب عيادة',
+        'university_student': 'طالب جامعي',
+        'secretary': 'سكرتير',
+        'doctor': 'طبيب'
+    };
+    document.getElementById('userRole').textContent = roleMap[userRole] || 'مستخدم';
 }
 
+// ✅ تحديث ظهور عناصر القائمة حسب الصلاحيات
+updateSidebarVisibility();
+
+// ✅ تحميل لوحة التحكم
 renderDashboard();
 
-document.querySelectorAll('.sidebar ul li').forEach(el => {
-    el.addEventListener('click', () => {
-        if (window.innerWidth <= 768) toggleSidebar();
-    });
+// ✅ إغلاق القائمة الجانبية عند الضغط خارجها
+document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && e.target !== overlay) {
+            toggleSidebar(false);
+        }
+    }
 });
+
+// ✅ إغلاق القائمة عند تغيير حجم النافذة
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+console.log('✅ ClinicPro Dashboard - Flutter to HTML Converted Successfully!');
+console.log('👤 User:', userData?.name, '| Role:', userRole);
+console.log('🏥 Clinic ID:', clinicId);
 </script>
 
 </body>
