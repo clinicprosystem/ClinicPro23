@@ -49,6 +49,27 @@
             box-shadow: -4px 0 20px rgba(0,0,0,0.1);
         }
 
+        /* ✅ على الشاشات الصغيرة، القائمة تكون مخفية */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.show {
+                display: block !important;
+            }
+            .main-content {
+                margin-right: 0 !important;
+                max-width: 100% !important;
+            }
+            .hamburger {
+                display: block !important;
+            }
+        }
+
         .sidebar .logo {
             padding: 24px 20px 16px;
             text-align: center;
@@ -167,9 +188,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             z-index: 999;
             backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.show {
+            display: block !important;
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -210,10 +235,16 @@
             display: none;
             background: none;
             border: none;
-            font-size: 22px;
+            font-size: 24px;
             cursor: pointer;
             color: var(--primary);
-            padding: 4px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .hamburger:hover {
+            background: #f1f5f9;
         }
 
         .header .actions {
@@ -654,7 +685,9 @@
 <div class="main-content" id="mainContent">
     <div class="header">
         <div class="left">
-            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
             <h1 id="pageTitle">لوحة التحكم</h1>
         </div>
         <div class="actions">
@@ -690,9 +723,56 @@ const isSecretary = userRole === 'secretary';
 const isUniversityStudent = userRole === 'university_student';
 const isMasterAdmin = userData?.isMasterAdmin === true;
 
+// ============================================
+// ✅ وظائف القائمة الجانبية (المُصلحة)
+// ============================================
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    // تبديل حالة القائمة
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+    
+    // منع تمرير الخلفية
+    if (sidebar.classList.contains('open')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+}
+
+// ✅ إغلاق القائمة عند الضغط على الخلفية
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+    if (window.innerWidth <= 768) {
+        toggleSidebar();
+    }
+});
+
+// ✅ إغلاق القائمة عند الضغط على ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('open')) {
+            toggleSidebar();
+        }
+    }
+});
+
+// ✅ إغلاق القائمة عند اختيار عنصر منها في الشاشات الصغيرة
+document.querySelectorAll('.sidebar ul li').forEach(item => {
+    item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        }
+    });
+});
+
 // ✅ التحكم في ظهور عناصر القائمة حسب الصلاحيات
 function updateSidebarVisibility() {
-    // الإدارة (أطباء + سكرتيرات) - فقط لصاحب العيادة أو الماستر أدمن
     const adminLabel = document.getElementById('adminLabel');
     const menuDoctors = document.getElementById('menuDoctors');
     const menuSecretaries = document.getElementById('menuSecretaries');
@@ -703,13 +783,11 @@ function updateSidebarVisibility() {
     if (menuDoctors) menuDoctors.style.display = showAdmin ? 'flex' : 'none';
     if (menuSecretaries) menuSecretaries.style.display = showAdmin ? 'flex' : 'none';
     
-    // التقارير - لا تظهر للسكرتير ولا لطالب جامعي
     const reportsItem = document.querySelector('[data-page="reports"]');
     if (reportsItem) {
         reportsItem.style.display = (isSecretary || isUniversityStudent) ? 'none' : 'flex';
     }
     
-    // المعمل - لا يظهر لطالب جامعي
     const labItem = document.querySelector('[data-page="lab"]');
     if (labItem) {
         labItem.style.display = isUniversityStudent ? 'none' : 'flex';
@@ -778,8 +856,6 @@ function navigateTo(page) {
     } else {
         renderPlaceholder(page);
     }
-
-    if (window.innerWidth <= 768) toggleSidebar(false);
 }
 
 function renderPlaceholder(page) {
@@ -818,7 +894,6 @@ async function renderDashboard() {
     container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
 
     try {
-        // جلب البيانات من API
         const [patientsRes, treatmentsRes, doctorsRes, subRes] = await Promise.all([
             apiCall('/patients'),
             apiCall('/treatments'),
@@ -831,15 +906,11 @@ async function renderDashboard() {
         const dCount = doctorsRes?.doctors?.length || 0;
         const recentTreats = treatmentsRes?.treatments?.slice(0, 5) || [];
 
-        // تحديث البادجات
         document.getElementById('patientsBadge').textContent = pCount;
         document.getElementById('treatmentsBadge').textContent = tCount;
 
-        // ✅ التحقق من نوع الاشتراك
         const subscriptionType = subRes?.subscriptionType || 'trial';
-        const isSubActive = subscriptionType === 'active' || subscriptionType === 'university_student';
 
-        // ✅ عرض بنر الاشتراك فقط إذا كان trial أو expired
         let subscriptionHtml = '';
         if (subscriptionType === 'trial' || subscriptionType === 'expired') {
             subscriptionHtml = `
@@ -856,7 +927,6 @@ async function renderDashboard() {
             `;
         }
 
-        // ✅ عرض اسم المستخدم مع الترحيب
         const userName = userData?.name || 'طبيب الأسنان';
 
         container.innerHTML = `
@@ -926,7 +996,6 @@ async function renderDashboard() {
             </div>
         `;
 
-        // ✅ تحديث الإشعارات (محاكاة)
         try {
             const notifRes = await apiCall('/notifications');
             const unreadCount = notifRes?.notifications?.filter(n => !n.read).length || 0;
@@ -961,18 +1030,6 @@ async function renderDashboard() {
 // ============================================
 // ✅ وظائف مساعدة
 // ============================================
-function toggleSidebar(forceState) {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (typeof forceState === 'boolean') {
-        sidebar.classList.toggle('open', forceState);
-        overlay.classList.toggle('show', forceState);
-    } else {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('show');
-    }
-}
-
 function refreshData() {
     if (currentPage === 'dashboard') {
         renderDashboard();
@@ -994,7 +1051,6 @@ if (!token || token === 'null' || token === 'undefined') {
     window.location.href = 'index.html';
 }
 
-// ✅ تحديث معلومات المستخدم في القائمة الجانبية
 if (userData?.name) {
     document.getElementById('userName').textContent = userData.name;
     const roleMap = {
@@ -1006,28 +1062,17 @@ if (userData?.name) {
     document.getElementById('userRole').textContent = roleMap[userRole] || 'مستخدم';
 }
 
-// ✅ تحديث ظهور عناصر القائمة حسب الصلاحيات
 updateSidebarVisibility();
-
-// ✅ تحميل لوحة التحكم
 renderDashboard();
 
-// ✅ إغلاق القائمة الجانبية عند الضغط خارجها
-document.addEventListener('click', function(e) {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-        if (!sidebar.contains(e.target) && e.target !== overlay) {
-            toggleSidebar(false);
-        }
-    }
-});
-
-// ✅ إغلاق القائمة عند تغيير حجم النافذة
+// ✅ إغلاق القائمة عند تغيير حجم النافذة إلى كبيرة
 window.addEventListener('resize', function() {
     if (window.innerWidth > 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('show');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
     }
 });
 
