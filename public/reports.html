@@ -2,195 +2,807 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>ClinicPro - التقارير</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
 
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        :root {
+            --primary: #1A5F7A;
+            --primary-light: #57C0E8;
+            --secondary: #57C0E8;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --sidebar-width: 270px;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
-            position: fixed; right: 0; top: 0; bottom: 0; width: 260px;
-            background: #1A5F7A; color: white; padding: 0; z-index: 1000;
-            transition: transform 0.3s ease; overflow-y: auto;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
         }
-        .sidebar .logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; font-weight: 800; }
-        .sidebar .logo span { color: #57C0E8; }
-        .sidebar .user-info { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        .sidebar .user-info .avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px; }
-        .sidebar .user-info .name { font-weight: 700; font-size: 16px; }
-        .sidebar .user-info .role { font-size: 12px; color: rgba(255,255,255,0.6); }
-        .sidebar ul { list-style: none; padding: 12px 0; }
-        .sidebar ul li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border-right: 4px solid transparent; }
-        .sidebar ul li:hover, .sidebar ul li.active { background: rgba(255,255,255,0.08); border-right-color: #57C0E8; }
-        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
-        .sidebar ul li.logout { color: #f87171; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
-        .sidebar ul li.logout:hover { background: rgba(239, 68, 68, 0.15); }
 
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+        .sidebar .logo {
+            padding: 24px 20px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
 
-        .main-content { margin-right: 260px; padding: 20px; min-height: 100vh; }
+        .sidebar .logo span { color: var(--primary-light); }
+        .sidebar .logo i { margin-left: 8px; }
 
+        .sidebar .user-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar .user-info .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar .user-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar .user-info .role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar ul li {
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-right: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255,255,255,0.06);
+            border-right-color: rgba(255,255,255,0.3);
+        }
+
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.1);
+            border-right-color: var(--primary-light);
+        }
+
+        .sidebar ul li i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar ul li.logout {
+            color: #fca5a5;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 16px;
+        }
+
+        .sidebar ul li.logout:hover {
+            background: rgba(239, 68, 68, 0.12);
+            border-right-color: #ef4444;
+        }
+
+        .sidebar ul li.logout i { color: #fca5a5; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: 20px 24px;
+            min-height: 100vh;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        /* ===== HEADER ===== */
         .header {
-            background: white; padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+            background: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .header .left { display: flex; align-items: center; gap: 12px; }
-        .header .left h1 { font-size: 20px; color: #1A5F7A; }
-        .header .left .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1A5F7A; }
-        .header .actions button { background: none; border: none; font-size: 18px; cursor: pointer; color: #555; padding: 8px; border-radius: 50%; transition: background 0.3s; }
-        .header .actions button:hover { background: #f0f4f8; }
 
-        .tabs {
-            display: flex; gap: 4px; margin-bottom: 16px; background: white; border-radius: 12px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .tabs .tab {
-            flex: 1; padding: 10px; text-align: center; border-radius: 10px; cursor: pointer; transition: all 0.3s; font-weight: 700; color: #64748b;
-        }
-        .tabs .tab:hover { background: #f1f5f9; }
-        .tabs .tab.active { background: #1A5F7A; color: white; }
 
+        .header .left h1 {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .header .left h1 i {
+            margin-left: 8px;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 4px;
+        }
+
+        .header .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .actions button {
+            background: none;
+            border: none;
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+            cursor: pointer;
+            color: #64748b;
+            border-radius: 50%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header .actions button:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        /* ===== TABS ===== */
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: var(--shadow);
+        }
+
+        .tabs-container .tab {
+            flex: 1;
+            padding: 10px 16px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            color: #64748b;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .tabs-container .tab:hover {
+            background: #f1f5f9;
+        }
+
+        .tabs-container .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 12px rgba(26, 95, 122, 0.3);
+        }
+
+        /* ===== DATE SELECTOR ===== */
         .date-selector {
-            background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            background: white;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: var(--shadow);
         }
-        .date-selector .label { font-weight: 700; color: #1e293b; }
-        .date-selector .controls { display: flex; align-items: center; gap: 8px; }
+
+        .date-selector .label {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .date-selector .label i {
+            margin-left: 6px;
+            color: var(--primary-light);
+        }
+
+        .date-selector .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .date-selector .controls button {
-            background: none; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;
+            background: none;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .date-selector .controls button:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .date-selector .controls .date-text {
+            font-weight: 600;
+            font-size: 14px;
+            color: #0f172a;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .date-selector .controls select {
+            padding: 6px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            background: white;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-selector .controls select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 18px 14px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            border-color: var(--primary-light);
+        }
+
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .stat-card .value.green { color: #059669; }
+        .stat-card .value.blue { color: #2563eb; }
+        .stat-card .value.orange { color: #d97706; }
+        .stat-card .value.primary { color: var(--primary); }
+
+        /* ===== DOCTORS SECTION ===== */
+        .doctors-section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .doctors-section:hover {
+            border-color: var(--primary-light);
+        }
+
+        .doctors-section .title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doctors-section .title .count {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .doctors-section .title .btn-details {
+            margin-right: auto;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 8px;
             transition: background 0.2s;
         }
-        .date-selector .controls button:hover { background: #f1f5f9; }
-        .date-selector .controls select {
-            padding: 6px 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: white;
-        }
-        .date-selector .controls select:focus { border-color: #1A5F7A; outline: none; }
 
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;
+        .doctors-section .title .btn-details:hover {
+            background: #f1f5f9;
         }
-        .stat-card {
-            background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .stat-card .icon { font-size: 28px; margin-bottom: 6px; }
-        .stat-card .value { font-size: 22px; font-weight: 800; }
-        .stat-card .label { font-size: 12px; color: #64748b; }
 
-        .doctors-section, .treatments-section {
-            background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .doctors-section .title, .treatments-section .title {
-            font-size: 18px; font-weight: 700; color: #1A5F7A; margin-bottom: 12px;
-            display: flex; align-items: center; gap: 8px;
-        }
         .doctor-item {
-            padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
         }
-        .doctor-item:last-child { border-bottom: none; }
-        .doctor-item .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
-        .doctor-item .name { font-weight: 700; }
-        .doctor-item .amount { font-weight: 700; color: #1A5F7A; }
-        .doctor-item .share { font-size: 13px; color: #059669; }
+
+        .doctor-item:last-child {
+            border-bottom: none;
+        }
+
+        .doctor-item .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .doctor-item .name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .doctor-item .amount {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .doctor-item .share {
+            font-size: 12px;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .doctor-item .sub-info {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
         .doctor-item .bar {
-            height: 4px; background: #e2e8f0; border-radius: 4px; margin-top: 4px; overflow: hidden;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
         }
-        .doctor-item .bar .fill { height: 100%; background: #1A5F7A; border-radius: 4px; transition: width 0.5s; }
+
+        .doctor-item .bar .fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+
+        /* ===== TREATMENTS SECTION ===== */
+        .treatments-section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .treatments-section:hover {
+            border-color: var(--primary-light);
+        }
+
+        .treatments-section .title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
         .treatment-item {
-            padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
         }
-        .treatment-item:last-child { border-bottom: none; }
-        .treatment-item .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
-        .treatment-item .service { font-weight: 700; }
-        .treatment-item .patient { font-size: 13px; color: #64748b; }
-        .treatment-item .price { font-weight: 700; color: #1A5F7A; }
+
+        .treatment-item:last-child {
+            border-bottom: none;
+        }
+
+        .treatment-item .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .treatment-item .service {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .treatment-item .patient {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .treatment-item .price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
         .treatment-item .status {
-            font-size: 11px; padding: 2px 10px; border-radius: 12px;
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-weight: 600;
         }
-        .treatment-item .status.paid { background: #d1fae5; color: #059669; }
-        .treatment-item .status.pending { background: #fef3c7; color: #d97706; }
 
-        .loader { display: flex; justify-content: center; align-items: center; min-height: 200px; }
-        .loader .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #1A5F7A; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .treatment-item .status.paid {
+            background: #dcfce7;
+            color: #059669;
+        }
 
-        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
-        .empty-state i { font-size: 48px; margin-bottom: 12px; color: #cbd5e1; }
+        .treatment-item .status.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
 
-        .restricted { text-align: center; padding: 60px 20px; }
-        .restricted i { font-size: 80px; color: #cbd5e1; margin-bottom: 16px; }
-        .restricted h3 { font-size: 20px; color: #64748b; }
+        .treatment-item .doctor-tag {
+            font-size: 11px;
+            color: #94a3b8;
+        }
 
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* ===== LOADER ===== */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .loader .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== RESTRICTED ===== */
+        .restricted {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .restricted i {
+            font-size: 80px;
+            color: #cbd5e1;
+            margin-bottom: 16px;
+        }
+
+        .restricted h3 {
+            font-size: 22px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .restricted p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar {
+                transform: translateX(100%);
+                width: 280px;
+            }
             .sidebar.open { transform: translateX(0); }
             .sidebar-overlay.show { display: block; }
-            .main-content { margin-right: 0; }
-            .header .left .hamburger { display: block; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-content {
+                margin-right: 0;
+                max-width: 100%;
+                padding: 16px;
+            }
+            .hamburger { display: block; }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .date-selector {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .date-selector .controls {
+                justify-content: center;
+            }
+            .tabs-container .tab {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            .header .left h1 {
+                font-size: 18px;
+            }
+            .doctors-section, .treatments-section {
+                padding: 14px 16px;
+            }
         }
+
         @media (max-width: 480px) {
-            .header .left h1 { font-size: 16px; }
+            .main-content {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 16px;
+            }
+            .header .left h1 {
+                font-size: 16px;
+            }
+            .stats-grid {
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 14px 10px;
+            }
+            .stat-card .value {
+                font-size: 18px;
+            }
+            .stat-card .icon {
+                font-size: 22px;
+            }
+            .tabs-container .tab {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+            .date-selector .controls select {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            .doctor-item .row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .treatment-item .row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- القائمة الجانبية -->
+<!-- ===== SIDEBAR OVERLAY ===== -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar" id="sidebar">
-    <div class="logo">🏥 <span>Clinic</span>Pro</div>
+    <div class="logo">
+        <i class="fas fa-tooth"></i> <span>Clinic</span>Pro
+    </div>
     <div class="user-info">
-        <div class="avatar">👤</div>
+        <div class="avatar"><i class="fas fa-user"></i></div>
         <div class="name" id="userName">طبيب الأسنان</div>
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <li onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i> الرئيسية</li>
-        <li onclick="window.location.href='patients.html'"><i class="fas fa-users"></i> المرضى</li>
-        <li onclick="window.location.href='treatments.html'"><i class="fas fa-tooth"></i> المعالجات</li>
-        <li onclick="window.location.href='services.html'"><i class="fas fa-list"></i> الخدمات</li>
-        <li onclick="window.location.href='doctors.html'"><i class="fas fa-user-md"></i> الأطباء</li>
-        <li onclick="window.location.href='secretaries.html'"><i class="fas fa-user-tie"></i> السكرتيرات</li>
-        <li onclick="window.location.href='lab.html'"><i class="fas fa-flask"></i> المعمل</li>
-        <li class="active"><i class="fas fa-chart-bar"></i> التقارير</li>
-        <li onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i> الإشعارات</li>
-        <li onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> الإعدادات</li>
-        <li onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i> الملف الشخصي</li>
-        <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</li>
+        <li onclick="navigateTo('dashboard.html')">
+            <i class="fas fa-chart-pie"></i> الرئيسية
+        </li>
+        <li onclick="navigateTo('patients.html')">
+            <i class="fas fa-users"></i> المرضى
+        </li>
+        <li onclick="navigateTo('treatments.html')">
+            <i class="fas fa-tooth"></i> المعالجات
+        </li>
+        <li onclick="navigateTo('services.html')">
+            <i class="fas fa-list"></i> الخدمات
+        </li>
+        <li onclick="navigateTo('doctors.html')">
+            <i class="fas fa-user-md"></i> الأطباء
+        </li>
+        <li onclick="navigateTo('secretaries.html')">
+            <i class="fas fa-user-tie"></i> السكرتيرات
+        </li>
+        <li onclick="navigateTo('lab.html')">
+            <i class="fas fa-flask"></i> المعمل
+        </li>
+        <li class="active">
+            <i class="fas fa-chart-bar"></i> التقارير
+        </li>
+        <li onclick="navigateTo('notifications.html')">
+            <i class="fas fa-bell"></i> الإشعارات
+        </li>
+        <li onclick="navigateTo('settings.html')">
+            <i class="fas fa-cog"></i> الإعدادات
+        </li>
+        <li onclick="navigateTo('profile.html')">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
+        </li>
+        <li onclick="navigateTo('subscription-plans.html')">
+            <i class="fas fa-crown"></i> باقات الاشتراك
+        </li>
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+        </li>
     </ul>
 </div>
 
-<!-- المحتوى الرئيسي -->
-<div class="main-content" id="mainContent">
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="left">
-            <button class="hamburger" onclick="toggleSidebar()">☰</button>
-            <h1>📊 التقارير والإحصائيات</h1>
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h1><i class="fas fa-chart-bar"></i> التقارير والإحصائيات</h1>
         </div>
         <div class="actions">
-            <button onclick="loadReport()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+            <button onclick="loadReport()" title="تحديث التقرير">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
     </div>
 
-    <!-- التبويبات -->
-    <div class="tabs" id="tabsContainer">
+    <!-- ===== TABS ===== -->
+    <div class="tabs-container" id="tabsContainer">
         <div class="tab active" data-tab="daily" onclick="switchTab('daily', this)">يومي</div>
         <div class="tab" data-tab="monthly" onclick="switchTab('monthly', this)">شهري</div>
         <div class="tab" data-tab="yearly" onclick="switchTab('yearly', this)">سنوي</div>
     </div>
 
-    <!-- محدد التاريخ -->
+    <!-- ===== DATE SELECTOR ===== -->
     <div class="date-selector" id="dateSelector">
-        <span class="label" id="dateLabel">📅 اختر التاريخ</span>
-        <div class="controls" id="dateControls">
-            <!-- يتم إنشاؤه بواسطة JS -->
-        </div>
+        <span class="label"><i class="fas fa-calendar-alt"></i> <span id="dateLabel">اختر التاريخ</span></span>
+        <div class="controls" id="dateControls"></div>
     </div>
 
-    <!-- محتوى التقرير -->
+    <!-- ===== REPORT CONTENT ===== -->
     <div id="reportContent">
         <div class="loader"><div class="spinner"></div></div>
     </div>
@@ -200,9 +812,10 @@
 // ============================================
 // ✅ الإعدادات الأساسية
 // ============================================
-const API_BASE = 'https://marginal-addi-1realitylotter1-37028393.koyeb.app/api';
+const API_BASE = 'https://clinicprosystem.koyeb.app/api';
 let token = localStorage.getItem('token') || '';
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
+
 let currentTab = 'daily';
 let selectedDate = new Date();
 let selectedMonth = new Date().getMonth() + 1;
@@ -210,6 +823,7 @@ let selectedYear = new Date().getFullYear();
 let reportData = {};
 let isLoading = false;
 let isUniversityStudent = false;
+let doctorPercentages = {};
 
 const months = ['يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
@@ -217,26 +831,68 @@ const months = ['يناير', 'فبراير', 'مارس', 'إبريل', 'ماي�
 // ✅ دوال API
 // ============================================
 async function apiCall(endpoint, method = 'GET', body = null) {
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
     if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
+
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, options);
-        if (response.status === 401) { localStorage.removeItem('token'); window.location.href = 'index.html'; return null; }
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+            return null;
+        }
         return await response.json();
-    } catch (e) { console.error('❌ API Error:', e); return null; }
+    } catch (e) {
+        console.error('❌ API Error:', e);
+        return null;
+    }
 }
 
 // ============================================
-// ✅ تبديل التبويبات
+// ✅ التنقل
 // ============================================
-function switchTab(tab, element) {
-    currentTab = tab;
-    document.querySelectorAll('.tabs .tab').forEach(el => el.classList.remove('active'));
-    if (element) element.classList.add('active');
-    updateDateSelector();
-    loadReport();
+function navigateTo(page) {
+    if (window.innerWidth <= 768) toggleSidebar(false);
+    window.location.href = page;
+}
+
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (typeof forceState === 'boolean') {
+        sidebar.classList.toggle('open', forceState);
+        overlay.classList.toggle('show', forceState);
+    } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+// ============================================
+// ✅ دوال التاريخ
+// ============================================
+function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function formatDateDisplay(date) {
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
 // ============================================
@@ -247,14 +903,15 @@ function updateDateSelector() {
     const label = document.getElementById('dateLabel');
 
     if (currentTab === 'daily') {
-        label.textContent = '📅 اختر التاريخ';
+        label.textContent = 'اختر التاريخ';
         controls.innerHTML = `
             <button onclick="changeDate(-1)"><i class="fas fa-chevron-right"></i></button>
-            <span>${formatDate(selectedDate)}</span>
+            <span class="date-text">${formatDateDisplay(selectedDate)}</span>
             <button onclick="changeDate(1)"><i class="fas fa-chevron-left"></i></button>
+            <button onclick="setToday()" style="font-size:12px;background:#f1f5f9;padding:4px 12px;border-radius:8px;border:none;cursor:pointer;">اليوم</button>
         `;
     } else if (currentTab === 'monthly') {
-        label.textContent = '📅 اختر الشهر والسنة';
+        label.textContent = 'اختر الشهر والسنة';
         controls.innerHTML = `
             <select id="monthSelect" onchange="updateMonthYear()">
                 ${months.map((m, i) => `<option value="${i+1}" ${i+1 === selectedMonth ? 'selected' : ''}>${m}</option>`).join('')}
@@ -264,7 +921,7 @@ function updateDateSelector() {
             </select>
         `;
     } else {
-        label.textContent = '📅 اختر السنة';
+        label.textContent = 'اختر السنة';
         controls.innerHTML = `
             <select id="yearSelectYearly" onchange="updateYearly()">
                 ${[2023,2024,2025,2026,2027].map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`).join('')}
@@ -273,12 +930,14 @@ function updateDateSelector() {
     }
 }
 
-function formatDate(date) {
-    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-}
-
 function changeDate(delta) {
     selectedDate.setDate(selectedDate.getDate() + delta);
+    updateDateSelector();
+    loadReport();
+}
+
+function setToday() {
+    selectedDate = new Date();
     updateDateSelector();
     loadReport();
 }
@@ -295,6 +954,32 @@ function updateYearly() {
 }
 
 // ============================================
+// ✅ تبديل التبويبات
+// ============================================
+function switchTab(tab, element) {
+    currentTab = tab;
+    document.querySelectorAll('.tabs-container .tab').forEach(el => el.classList.remove('active'));
+    if (element) element.classList.add('active');
+    updateDateSelector();
+    loadReport();
+}
+
+// ============================================
+// ✅ تحميل نسب الأطباء
+// ============================================
+async function loadDoctorPercentages() {
+    try {
+        const response = await apiCall('/clinics/doctors/percentages');
+        if (response?.success) {
+            doctorPercentages = response.doctors || {};
+            console.log('✅ تم جلب نسب الأطباء:', doctorPercentages);
+        }
+    } catch (e) {
+        console.warn('⚠️ فشل جلب نسب الأطباء:', e);
+    }
+}
+
+// ============================================
 // ✅ تحميل التقرير
 // ============================================
 async function loadReport() {
@@ -303,6 +988,7 @@ async function loadReport() {
             <div class="restricted">
                 <i class="fas fa-ban"></i>
                 <h3>التقارير غير متاحة في باقة طالب جامعي</h3>
+                <p>قم بترقية اشتراكك للوصول إلى التقارير والإحصائيات</p>
             </div>
         `;
         return;
@@ -320,18 +1006,38 @@ async function loadReport() {
         } else if (currentTab === 'monthly') {
             response = await apiCall(`/reports/monthly?year=${selectedYear}&month=${selectedMonth}`);
         } else {
-            response = await apiCall(`/reports/profit?start=${selectedYear}-01-01&end=${selectedYear}-12-31`);
+            response = await apiCall(`/reports/yearly?year=${selectedYear}`);
         }
+
+        console.log('📡 رد السيرفر:', response);
 
         if (response?.success !== false) {
             reportData = extractReportData(response);
             renderReport();
         } else {
-            content.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>فشل في تحميل التقرير</p></div>`;
+            content.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                    <h3>فشل في تحميل التقرير</h3>
+                    <p>${response?.error || 'حدث خطأ غير معروف'}</p>
+                    <button onclick="loadReport()" style="margin-top:16px;padding:10px 32px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">
+                        <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                    </button>
+                </div>
+            `;
         }
-    } catch (e) {
-        console.error('❌ Error:', e);
-        content.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ في تحميل التقرير</p></div>`;
+    } catch (error) {
+        console.error('❌ Error loading report:', error);
+        content.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>حدث خطأ</h3>
+                <p>فشل في تحميل بيانات التقرير</p>
+                <button onclick="loadReport()" style="margin-top:16px;padding:10px 32px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">
+                    <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
     }
     isLoading = false;
 }
@@ -341,13 +1047,15 @@ async function loadReport() {
 // ============================================
 function extractReportData(raw) {
     const data = raw?.data || raw?.report || raw?.result || raw || {};
+    
     const total = data.total || data.revenue || data.income || data.profit || data.totalRevenue || 0;
-    const count = data.treatmentsCount || data.count || data.totalTreatments || 0;
+    const count = data.treatmentsCount || data.count || data.totalTreatments || data.treatments_count || 0;
     const totalPaid = data.totalPaid || 0;
     const totalRemaining = data.totalRemaining || 0;
 
     let doctors = {};
-    const doctorsData = data.doctors || data.doctorsReport || data.doctors_summary || data.doctorsStats;
+    const doctorsData = data.doctors || data.doctorsReport || data.doctors_summary || data.doctorsStats || data.doctors_data;
+
     if (doctorsData) {
         if (Array.isArray(doctorsData)) {
             doctorsData.forEach(d => {
@@ -370,14 +1078,13 @@ function extractReportData(raw) {
         }
     }
 
-    // حساب حصة كل طبيب
-    if (Object.keys(doctors).length > 0 && total > 0) {
-        Object.keys(doctors).forEach(name => {
-            const doctorTotal = doctors[name].total;
-            const percentage = doctors[name].percentage || 0;
-            doctors[name].share = Math.round((doctorTotal * percentage) / 100);
-        });
-    }
+    // حساب حصة كل طبيب باستخدام النسبة من جدول الأطباء
+    Object.keys(doctors).forEach(name => {
+        const doctorTotal = doctors[name].total || 0;
+        const percentage = doctorPercentages[name] || doctors[name].percentage || 0;
+        doctors[name].share = Math.round((doctorTotal * percentage) / 100);
+        doctors[name].displayPercentage = percentage;
+    });
 
     const treatments = data.treatments || data.items || data.data || [];
 
@@ -392,12 +1099,46 @@ function renderReport() {
     const { total, count, totalPaid, totalRemaining, doctors, treatments } = reportData;
     const doctorList = Object.keys(doctors);
 
+    // ✅ بطاقات الإحصائيات
+    const statsHtml = `
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">💰</div>
+                <div class="value green">${total} ريال</div>
+                <div class="label">إجمالي الدخل</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🦷</div>
+                <div class="value primary">${count}</div>
+                <div class="label">عدد المعالجات</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💳</div>
+                <div class="value blue">${totalPaid} ريال</div>
+                <div class="label">إجمالي المدفوع</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📊</div>
+                <div class="value orange">${totalRemaining} ريال</div>
+                <div class="label">المتبقي</div>
+            </div>
+        </div>
+    `;
+
+    // ✅ الأطباء
     let doctorsHtml = '';
     if (doctorList.length > 0) {
-        const maxTotal = Math.max(...doctorList.map(d => doctors[d].total), 1);
+        const maxTotal = Math.max(...doctorList.map(d => doctors[d].total || 1), 1);
         doctorsHtml = `
             <div class="doctors-section">
-                <div class="title"><i class="fas fa-user-md"></i> إحصائيات الأطباء (${doctorList.length})</div>
+                <div class="title">
+                    <i class="fas fa-user-md"></i>
+                    إحصائيات الأطباء
+                    <span class="count">(${doctorList.length})</span>
+                    <button class="btn-details" onclick="showDoctorDetails()">
+                        التفاصيل <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
                 ${doctorList.map(name => {
                     const d = doctors[name];
                     const percent = maxTotal > 0 ? Math.round((d.total / maxTotal) * 100) : 0;
@@ -408,8 +1149,8 @@ function renderReport() {
                                 <span class="amount">${d.total} ريال</span>
                             </div>
                             <div class="row">
-                                <span style="font-size:12px;color:#64748b;">${d.count || 0} معالجة</span>
-                                <span class="share">حصة الطبيب: ${d.share || 0} ريال</span>
+                                <span class="sub-info">${d.count || 0} معالجة</span>
+                                <span class="share">حصة الطبيب: ${d.share || 0} ريال (${d.displayPercentage || 0}%)</span>
                             </div>
                             <div class="bar"><div class="fill" style="width:${percent}%;"></div></div>
                         </div>
@@ -419,15 +1160,21 @@ function renderReport() {
         `;
     }
 
+    // ✅ المعالجات
     let treatmentsHtml = '';
     const treatmentsList = Array.isArray(treatments) ? treatments.slice(0, 10) : [];
     if (treatmentsList.length > 0) {
         treatmentsHtml = `
             <div class="treatments-section">
-                <div class="title"><i class="fas fa-list"></i> قائمة المعالجات</div>
+                <div class="title">
+                    <i class="fas fa-list"></i>
+                    قائمة المعالجات
+                    <span class="count">(أحدث ${Math.min(treatmentsList.length, 10)})</span>
+                </div>
                 ${treatmentsList.map(t => {
                     const service = t.serviceName || t.subServiceName || t.name || 'معالجة';
                     const patient = t.patientName || t.patient || 'مريض';
+                    const doctorName = t.doctorName || 'طبيب';
                     const price = t.price || t.finalPrice || 0;
                     const paid = t.paid || 0;
                     const remaining = t.remaining || (price - paid);
@@ -440,89 +1187,108 @@ function renderReport() {
                                 <span class="price">${price} ريال</span>
                             </div>
                             <div class="row">
-                                <span class="patient">👤 ${patient}</span>
+                                <span class="patient"><i class="fas fa-user"></i> ${patient}</span>
+                                <span class="doctor-tag"><i class="fas fa-user-md"></i> ${doctorName}</span>
                                 <span class="status ${status}">${statusText}</span>
                             </div>
                         </div>
                     `;
                 }).join('')}
-                ${treatments.length > 10 ? `<div style="text-align:center;font-size:12px;color:#94a3b8;padding-top:8px;">و ${treatments.length - 10} معالجات أخرى...</div>` : ''}
+                ${treatments.length > 10 ? `<div style="text-align:center;font-size:13px;color:#94a3b8;padding-top:12px;">و ${treatments.length - 10} معالجات أخرى...</div>` : ''}
             </div>
         `;
     }
 
-    content.innerHTML = `
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="icon" style="color:#059669;">💰</div>
-                <div class="value" style="color:#059669;">${total} ريال</div>
-                <div class="label">إجمالي الدخل</div>
+    // ✅ عرض الكل
+    if (doctorList.length === 0 && treatmentsList.length === 0) {
+        content.innerHTML = `
+            ${statsHtml}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>لا توجد بيانات</h3>
+                <p>لا توجد معالجات في هذه الفترة</p>
             </div>
-            <div class="stat-card">
-                <div class="icon" style="color:#1A5F7A;">🦷</div>
-                <div class="value" style="color:#1A5F7A;">${count}</div>
-                <div class="label">عدد المعالجات</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon" style="color:#2563eb;">💳</div>
-                <div class="value" style="color:#2563eb;">${totalPaid} ريال</div>
-                <div class="label">إجمالي المدفوع</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon" style="color:#d97706;">📊</div>
-                <div class="value" style="color:#d97706;">${totalRemaining} ريال</div>
-                <div class="label">المتبقي</div>
-            </div>
-        </div>
-        ${doctorsHtml}
-        ${treatmentsHtml}
-        ${doctorList.length === 0 && treatmentsList.length === 0 ? `<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد بيانات لعرضها</p></div>` : ''}
-    `;
+        `;
+    } else {
+        content.innerHTML = `${statsHtml}${doctorsHtml}${treatmentsHtml}`;
+    }
 }
 
 // ============================================
-// ✅ دوال مساعدة
+// ✅ عرض تفاصيل الأطباء
 // ============================================
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-}
+function showDoctorDetails() {
+    const doctors = reportData.doctors || {};
+    const doctorList = Object.keys(doctors);
+    if (doctorList.length === 0) {
+        alert('⚠️ لا توجد بيانات للأطباء');
+        return;
+    }
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    let message = '📊 إحصائيات الأطباء\n\n';
+    doctorList.forEach(name => {
+        const d = doctors[name];
+        message += `👨‍⚕️ ${name}\n`;
+        message += `   إجمالي المعالجات: ${d.total} ريال\n`;
+        message += `   عدد المعالجات: ${d.count || 0}\n`;
+        message += `   حصة الطبيب: ${d.share || 0} ريال\n`;
+        message += `   النسبة: ${d.displayPercentage || 0}%\n\n`;
+    });
+    alert(message);
 }
 
 // ============================================
 // ✅ بدء التشغيل
 // ============================================
+// ✅ التحقق من التوكن
 if (!token || token === 'null' || token === 'undefined') {
     window.location.href = 'index.html';
 }
 
+// ✅ تحديث معلومات المستخدم
 if (userData?.name) {
     document.getElementById('userName').textContent = userData.name;
-    document.getElementById('userRole').textContent =
-        userData.role === 'clinic_owner' ? 'صاحب عيادة' :
-        userData.role === 'university_student' ? 'طالب جامعي' :
-        userData.role === 'secretary' ? 'سكرتير' :
-        userData.role === 'doctor' ? 'طبيب' : 'مستخدم';
+    const roleMap = {
+        'clinic_owner': 'صاحب عيادة',
+        'university_student': 'طالب جامعي',
+        'secretary': 'سكرتير',
+        'doctor': 'طبيب'
+    };
+    document.getElementById('userRole').textContent = roleMap[userData.role] || 'مستخدم';
 }
 
+// ✅ التحقق من نوع الاشتراك (طالب جامعي)
 if (userData?.role === 'university_student') {
     isUniversityStudent = true;
 }
 
+// ✅ تحميل نسب الأطباء
+loadDoctorPercentages();
+
+// ✅ تحديث محدد التاريخ
 updateDateSelector();
+
+// ✅ تحميل التقرير
 loadReport();
 
+// ✅ إغلاق القائمة الجانبية عند تغيير الحجم
 window.addEventListener('resize', () => {
     if (window.innerWidth > 768) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('show');
     }
 });
+
+// ✅ إغلاق القائمة عند الضغط على ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+});
+
+console.log('🚀 ClinicPro - Reports Screen Loaded');
+console.log('📱 Flutter to HTML - تم التحويل بنجاح!');
 </script>
 
 </body>
