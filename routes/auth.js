@@ -48,7 +48,7 @@ router.post('/register', async (req, res) => {
         // ❌ تم إزالة إضافة الخدمات الافتراضية
         
         // إنشاء توكن
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '100y' });
         
         res.status(201).json({
             success: true,
