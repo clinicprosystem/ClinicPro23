@@ -530,59 +530,67 @@ router.get('/secretaries', async (req, res) => {
   }
 });
 
-// إضافة سكرتير
-// إضافة سكرتير
+// ✅ إضافة سكرتير (مع بيانات الاشتراك)
 router.post('/add-secretary', async (req, res) => {
   try {
-    const { name, phone, password } = req.body;
+    const { name, phone, password, clinicId, subscriptionType, subscriptionStatus } = req.body;
     
-    const existingUser = await User.findOne({ phone });
-    if (existingUser) {
-      return res.status(400).json({ error: 'هذا الرقم مستخدم بالفعل' });
-    }
-    
-    // ✅ جلب العيادة لمعرفة نوع الاشتراك
-    const clinic = await Clinic.findById(req.clinicId);
+    // ✅ التحقق من وجود العيادة
+    const clinic = await Clinic.findById(clinicId || req.clinicId);
     if (!clinic) {
       return res.status(404).json({ error: 'عيادة غير موجودة' });
     }
     
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ✅ التحقق من صلاحية إضافة سكرتير (باقة طالب جامعي لا يمكنها إضافة سكرتير)
+    const isUniversityStudent = subscriptionType === 'university_student' || clinic.subscriptionType === 'university_student';
+    if (isUniversityStudent) {
+      return res.status(403).json({ error: 'غير مسموح بإضافة سكرتيرات في باقة طالب جامعي' });
+    }
     
-    // ✅ إنشاء سكرتير مع نسخ subscriptionType من العيادة
+    // ✅ التحقق من حد 1 سكرتير في الفترة التجريبية
+    if (clinic.subscriptionStatus === 'trial') {
+      const secretaryCount = await User.countDocuments({ 
+        clinicId: clinicId || req.clinicId, 
+        role: 'secretary' 
+      });
+      if (secretaryCount >= 1) {
+        return res.status(403).json({ error: 'في الفترة التجريبية، يمكنك إضافة سكرتير واحد فقط' });
+      }
+    }
+    
+    // ✅ إنشاء حساب السكرتير مع نفس بيانات الاشتراك
+    const hashedPassword = await bcrypt.hash(password, 10);
     const secretary = new User({
       name,
       phone,
       password: hashedPassword,
       role: 'secretary',
-      clinicId: req.clinicId,
-      subscriptionType: clinic.subscriptionType || 'trial',     // ✅ من العيادة
-      subscriptionStatus: clinic.subscriptionStatus || 'trial', // ✅ من العيادة
+      clinicId: clinicId || req.clinicId,
+      subscriptionType: subscriptionType || clinic.subscriptionType || 'trial',  // ✅ نفس نوع الاشتراك
+      subscriptionStatus: subscriptionStatus || clinic.subscriptionStatus || 'trial',  // ✅ نفس حالة الاشتراك
+      subscriptionEndDate: clinic.subscriptionEndDate || null,
+      trialEndDate: clinic.trialEndDate || null,
+      isActive: true,
     });
+    
     await secretary.save();
     
-    // إضافة إلى قائمة السكرتيرات في العيادة
-    clinic.secretaries.push({
-      secretaryId: secretary._id,
-      name: name,
-      phone: phone,
-      isActive: true
-    });
-    await clinic.save();
-    
-    res.json({ 
-      success: true, 
-      secretary: { 
-        _id: secretary._id, 
-        name: secretary.name, 
+    res.status(201).json({
+      success: true,
+      secretary: {
+        id: secretary._id,
+        name: secretary.name,
         phone: secretary.phone,
-        subscriptionType: secretary.subscriptionType,  // ✅ يرسل القيمة
+        role: secretary.role,
+        clinicId: secretary.clinicId,
+        subscriptionType: secretary.subscriptionType,
+        subscriptionStatus: secretary.subscriptionStatus,
       },
-      tempPassword: password
+      tempPassword: password, // ✅ كلمة السر المؤقتة
     });
     
   } catch (error) {
-    console.error('Error adding secretary:', error);
+    console.error('❌ Error adding secretary:', error);
     res.status(500).json({ error: error.message });
   }
 });
