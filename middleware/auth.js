@@ -54,6 +54,21 @@ const authMiddleware = async (req, res, next) => {
                 subscriptionStatus: isSubscriptionActive ? (clinic.subscriptionStatus === 'trial' ? 'trial' : 'active') : 'expired',
                 subscriptionType: clinic.subscriptionType
             });
+            
+            // ✅ ✅ ✅ أضف هذه الأسطر لجلب بيانات العيادة في الطلب
+            req.subscriptionType = clinic.subscriptionType;
+            req.subscriptionStatus = isSubscriptionActive ? (clinic.subscriptionStatus === 'trial' ? 'trial' : 'active') : 'expired';
+            req.clinicData = clinic; // ✅ جلب بيانات العيادة كاملة
+        }
+        
+        // ✅ ✅ ✅ إذا كان المستخدم صاحب عيادة، جلب بيانات العيادة أيضاً
+        if (user.role === 'clinic_owner' || user.role === 'university_student') {
+            const clinic = await Clinic.findById(user.clinicId);
+            if (clinic) {
+                req.clinicData = clinic;
+                req.subscriptionType = clinic.subscriptionType;
+                req.subscriptionStatus = clinic.subscriptionStatus;
+            }
         }
         
         next();
