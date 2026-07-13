@@ -18,12 +18,24 @@ router.get('/labs', authMiddleware, async (req, res) => {
     }
 });
 
-// ✅ إضافة معمل جديد - يسمح للسكرتير أيضاً
+// ✅ إضافة معمل جديد
 router.post('/labs', authMiddleware, secretaryOrOwner, async (req, res) => {
     try {
+        console.log('═══════════════════════════════════════════');
+        console.log('📥 POST /labs - بدء الطلب');
+        console.log('📥 req.body:', req.body);
+        console.log('📥 req.userId:', req.userId);
+        console.log('📥 req.clinicId:', req.clinicId);
+        console.log('📥 req.userRole:', req.userRole);
+        console.log('═══════════════════════════════════════════');
+        
         const { name, phone, address, notes } = req.body;
         
-        console.log('📥 إضافة معمل جديد:', { name, phone, address, notes });
+        // ✅ التحقق من البيانات
+        if (!name) {
+            console.log('❌ name مطلوب');
+            return res.status(400).json({ error: 'اسم المعمل مطلوب' });
+        }
         
         const lab = new Lab({
             clinicId: req.clinicId,
