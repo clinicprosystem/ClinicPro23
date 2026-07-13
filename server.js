@@ -85,7 +85,7 @@ app.use('/api/treatments', treatmentRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/master', masterRoutes);
-app.use('/api/labs', labRoutes);
+app.use('/api/lab', labRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
