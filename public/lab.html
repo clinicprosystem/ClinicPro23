@@ -744,6 +744,55 @@ async function addLab() {
     }
 }
 
+    // ============================================
+// ✅ تحميل المعامل
+// ============================================
+async function loadLabs() {
+    if (isLoading) return;
+    isLoading = true;
+
+    const list = document.getElementById('labsList');
+    list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+    try {
+        const response = await apiCall('/labs', 'GET');
+        
+        if (response?.labs) {
+            labs = response.labs;
+            renderLabs();
+            isLoading = false;
+            return;
+        }
+        
+        // ✅ إذا فشل جلب البيانات
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>فشل في تحميل البيانات</h3>
+                <p>يرجى التحقق من اتصالك بالإنترنت</p>
+                <button class="retry-btn" onclick="loadLabs()">
+                    <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
+        isLoading = false;
+
+    } catch (error) {
+        console.error('❌ Error loading labs:', error);
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                <h3>حدث خطأ</h3>
+                <p>فشل في تحميل بيانات المعامل</p>
+                <button class="retry-btn" onclick="loadLabs()">
+                    <i class="fas fa-sync-alt"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
+        isLoading = false;
+    }
+}
+
 // ============================================
 // ✅ عرض المعامل
 // ============================================
