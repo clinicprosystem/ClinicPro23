@@ -706,7 +706,7 @@ async function addLab() {
     list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
 
     try {
-        const response = await apiCall('/lab', 'GET');
+        const response = await apiCall('/clinics/lab', 'GET');
         
         if (response?.labs) {
             labs = response.labs;
@@ -755,7 +755,7 @@ async function loadLabs() {
     list.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
 
     try {
-        const response = await apiCall('/lab', 'GET');
+        const response = await apiCall('/clinics/lab', 'GET');
         
         if (response?.labs) {
             labs = response.labs;
@@ -857,7 +857,7 @@ async function addLab() {
     try {
         console.log('📤 إضافة معمل جديد:', { name, phone, address });
         
-        const response = await apiCall('/lab', 'POST', {
+        const response = await apiCall('/clinics/lab', 'POST', {
             name: name.trim(),
             phone: phone.trim(),
             address: address || ''
@@ -887,7 +887,7 @@ async function deleteLab(id, name) {
     if (!confirm(`🗑️ هل أنت متأكد من حذف المعمل "${name}"؟`)) return;
 
     try {
-        const response = await apiCall(`/lab/${id}`, 'DELETE');
+        const response = await apiCall(`/clinics/lab/${id}`, 'DELETE');
 
         if (response?.success) {
             alert('✅ تم حذف المعمل بنجاح');
