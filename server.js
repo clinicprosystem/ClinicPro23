@@ -74,8 +74,6 @@ const treatmentRoutes = require('./routes/treatments');
 const patientRoutes = require('./routes/patients');
 const reportRoutes = require('./routes/reports');
 const masterRoutes = require('./routes/master');
-const labRoutes = require('./routes/lab');
-console.log('✅ تم تحميل مسارات المعمل');
 const notificationRoutes = require('./routes/notifications');
 const subscriptionRoutes = require('./routes/subscription');
 
@@ -85,7 +83,6 @@ app.use('/api/treatments', treatmentRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/master', masterRoutes);
-app.use('/api/lab', labRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
