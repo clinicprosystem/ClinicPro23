@@ -628,7 +628,6 @@
 // ✅ الإعدادات الأساسية
 // ============================================
 const API_BASE = 'https://clinicprosystem.koyeb.app/api';
-let token = localStorage.getItem('token') || '';
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
 let labs = [];
 let isUniversityStudent = false;
@@ -638,11 +637,22 @@ let isLoading = false;
 // ✅ دوال API
 // ============================================
 async function apiCall(endpoint, method = 'GET', body = null) {
+    // ✅ ✅ ✅ اقرأ التوكن في كل طلب (وليس مرة واحدة)
+    const token = localStorage.getItem('token');
+    
+    console.log('🔑 التوكن في الطلب:', token ? '✅ موجود' : '❌ غير موجود');
+    if (token) {
+        console.log('🔑 أول 20 حرف:', token.substring(0, 20) + '...');
+    }
+    
     const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 Authorization Header:', headers['Authorization'].substring(0, 30) + '...');
+    }
 
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
@@ -673,7 +683,21 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 // ============================================
 // ✅ تحميل المعامل
 // ============================================
-async function loadLabs() {
+async function addLab() {
+    // ✅ التحقق من باقة طالب جامعي
+    if (isUniversityStudent) {
+        alert('⚠️ المعمل غير متاح في باقة طالب جامعي');
+        return;
+    }
+
+    // ✅ التحقق من وجود التوكن قبل الإضافة
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('⚠️ يرجى تسجيل الدخول أولاً');
+        window.location.href = 'index.html';
+        return;
+    }
+
     if (isLoading) return;
     isLoading = true;
 
