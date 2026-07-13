@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Clinic = require('../models/Clinic');
-const { authMiddleware, clinicOwnerOnly } = require('../middleware/auth');
+const { authMiddleware, clinicOwnerOnly, secretaryOrOwner } = require('../middleware/auth');
 const router = express.Router();
 
 
