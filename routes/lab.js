@@ -8,7 +8,7 @@ const router = express.Router();
 // ============= إدارة المعامل =============
 
 // ✅ جلب كل المعامل - يسمح للجميع (سكرتير، صاحب عيادة)
-router.get('/labs', authMiddleware, async (req, res) => {
+router.get('/lab', authMiddleware, async (req, res) => {
     try {
         const labs = await Lab.find({ clinicId: req.clinicId });
         res.json({ success: true, labs });
@@ -19,7 +19,7 @@ router.get('/labs', authMiddleware, async (req, res) => {
 });
 
 // ✅ إضافة معمل جديد
-router.post('/labs', authMiddleware, secretaryOrOwner, async (req, res) => {
+router.post('/lab', authMiddleware, secretaryOrOwner, async (req, res) => {
     try {
         console.log('═══════════════════════════════════════════');
         console.log('📥 POST /labs - بدء الطلب');
