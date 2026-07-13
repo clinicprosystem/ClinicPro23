@@ -628,6 +628,7 @@
 // ✅ الإعدادات الأساسية
 // ============================================
 const API_BASE = 'https://clinicprosystem.koyeb.app/api';
+let token = localStorage.getItem('token') || '';  // ✅ أضف هذا
 let userData = JSON.parse(localStorage.getItem('user') || '{}');
 let labs = [];
 let isUniversityStudent = false;
