@@ -517,7 +517,47 @@ router.put('/doctors/:id/percentage', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+// ✅ جلب بيانات العيادة بالكامل (للسكرتير)
+router.get('/my-clinic', async (req, res) => {
+  try {
+    const clinic = await Clinic.findById(req.clinicId);
+    if (!clinic) {
+      return res.status(404).json({ error: 'عيادة غير موجودة' });
+    }
+    
+    // ✅ جلب جميع المستخدمين التابعين للعيادة
+    const users = await User.find({ clinicId: req.clinicId }).select('-password');
+    
+    res.json({
+      success: true,
+      clinic: {
+        id: clinic._id,
+        name: clinic.name,
+        phone: clinic.phone,
+        ownerName: clinic.ownerName,
+        doctors: clinic.doctors || [],
+        mainServices: clinic.mainServices || [],
+        subServices: clinic.subServices || [],
+        labs: clinic.labs || [],
+        subscriptionType: clinic.subscriptionType,
+        subscriptionStatus: clinic.subscriptionStatus,
+        trialEndDate: clinic.trialEndDate,
+        subscriptionEndDate: clinic.subscriptionEndDate,
+      },
+      users: users.map(u => ({
+        id: u._id,
+        name: u.name,
+        phone: u.phone,
+        role: u.role,
+        isActive: u.isActive
+      }))
+    });
+    
+  } catch (error) {
+    console.error('❌ Error getting clinic data:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // ============= السكرتيرات =============
 
 // جلب السكرتيرات
