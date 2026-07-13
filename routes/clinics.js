@@ -8,8 +8,7 @@ const Clinic = require('../models/Clinic');
 const { authMiddleware, clinicOwnerOnly } = require('../middleware/auth');
 const router = express.Router();
 
-router.use(authMiddleware);
-router.use(clinicOwnerOnly);
+
 
 
 // ✅ دالة للتحقق من صلاحية الإضافة (للمرضى والمعالجات)
@@ -176,7 +175,7 @@ async function updateAllUsersSubscription(clinicId, subscriptionType, subscripti
 // ============= الأطباء =============
 
 // جلب الأطباء - فقط لصاحب العيادة
-router.get('/doctors', async (req, res) => {
+router.get('/doctors', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     if (user.role !== 'clinic_owner') {
@@ -191,7 +190,7 @@ router.get('/doctors', async (req, res) => {
 
 // جلب الخدمات - للجميع (السكرتير يحتاجها لإضافة معالجة)
 // ⚠️ مسار الخدمات القديم (للتوافق مع الإصدارات السابقة)
-router.get('/services', async (req, res) => {
+router.get('/services', authMiddleware, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     // دمج الخدمات القديمة والجديدة للتوافق
@@ -208,7 +207,7 @@ router.get('/services', async (req, res) => {
 
 // إضافة طبيب
 // إضافة طبيب
-router.post('/add-doctor', async (req, res) => {
+router.post('/add-doctor', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { name, phone, percentage } = req.body;
     
@@ -264,7 +263,7 @@ router.post('/add-doctor', async (req, res) => {
 
 
 // إضافة خدمة (تدعم الرئيسية والفرعية)
-router.post('/add-service', async (req, res) => {
+router.post('/add-service', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { name, price, category, parentId } = req.body;
     console.log('📥 استلام:', { name, price, category, parentId });
@@ -303,7 +302,7 @@ router.post('/add-service', async (req, res) => {
 });
 
 // تعديل سعر خدمة
-router.put('/services/:id/price', async (req, res) => {
+router.put('/services/:id/price', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { price } = req.body;
     const clinic = await Clinic.findById(req.clinicId);
@@ -319,7 +318,7 @@ router.put('/services/:id/price', async (req, res) => {
 });
 
 // حذف خدمة
-router.delete('/services/:id', async (req, res) => {
+router.delete('/services/:id', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     clinic.services = clinic.services.filter(s => s._id.toString() !== req.params.id);
@@ -332,7 +331,7 @@ router.delete('/services/:id', async (req, res) => {
 // ============= الخدمات الرئيسية (جديد) =============
 
 // جلب الخدمات الرئيسية
-router.get('/main-services', async (req, res) => {
+router.get('/main-services', authMiddleware, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     res.json({ success: true, services: clinic.mainServices || [] });
@@ -342,7 +341,7 @@ router.get('/main-services', async (req, res) => {
 });
 
 // إضافة خدمة رئيسية
-router.post('/main-services', async (req, res) => {
+router.post('/main-services', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { name, category } = req.body;
     console.log('📥 إضافة خدمة رئيسية:', { name, category });
@@ -373,7 +372,7 @@ router.post('/main-services', async (req, res) => {
 });
 
 // حذف خدمة رئيسية (مع حذف معالجاتها الفرعية)
-router.delete('/main-services/:id', async (req, res) => {
+router.delete('/main-services/:id', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     
@@ -396,7 +395,7 @@ router.delete('/main-services/:id', async (req, res) => {
 // ============= المعالجات الفرعية =============
 
 // إضافة معالجة فرعية
-router.post('/sub-services', async (req, res) => {
+router.post('/sub-services', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { name, price, mainServiceId } = req.body;
     console.log('📥 إضافة معالجة فرعية:', { name, price, mainServiceId });
@@ -451,7 +450,7 @@ router.post('/sub-services', async (req, res) => {
 });
 
 // جلب المعالجات الفرعية
-router.get('/sub-services', async (req, res) => {
+router.get('/sub-services', authMiddleware, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     res.json({ success: true, services: clinic.subServices || [] });
@@ -460,7 +459,7 @@ router.get('/sub-services', async (req, res) => {
   }
 });
 // تعديل سعر معالجة فرعية
-router.put('/sub-services/:id/price', async (req, res) => {
+router.put('/sub-services/:id/price', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { price } = req.body;
     const clinic = await Clinic.findById(req.clinicId);
@@ -476,7 +475,7 @@ router.put('/sub-services/:id/price', async (req, res) => {
 });
 
 // حذف معالجة فرعية
-router.delete('/sub-services/:id', async (req, res) => {
+router.delete('/sub-services/:id', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     clinic.subServices = clinic.subServices.filter(s => s._id.toString() !== req.params.id);
@@ -487,7 +486,7 @@ router.delete('/sub-services/:id', async (req, res) => {
   }
 });
 // حذف طبيب
-router.delete('/doctors/:id', async (req, res) => {
+router.delete('/doctors/:id', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     clinic.doctors = clinic.doctors.filter(d => d.doctorId.toString() !== req.params.id);
@@ -503,7 +502,7 @@ router.delete('/doctors/:id', async (req, res) => {
 });
 
 // تعديل نسبة الطبيب
-router.put('/doctors/:id/percentage', async (req, res) => {
+router.put('/doctors/:id/percentage', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { percentage } = req.body;
     const clinic = await Clinic.findById(req.clinicId);
@@ -518,7 +517,7 @@ router.put('/doctors/:id/percentage', async (req, res) => {
   }
 });
 // ✅ جلب بيانات العيادة بالكامل (للسكرتير)
-router.get('/my-clinic', async (req, res) => {
+router.get('/my-clinic', authMiddleware, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     if (!clinic) {
@@ -561,7 +560,7 @@ router.get('/my-clinic', async (req, res) => {
 // ============= السكرتيرات =============
 
 // جلب السكرتيرات
-router.get('/secretaries', async (req, res) => {
+router.get('/secretaries', authMiddleware, async (req, res) => {
   try {
     const users = await User.find({ clinicId: req.clinicId, role: 'secretary' }).select('-password');
     res.json({ success: true, secretaries: users });
@@ -571,7 +570,7 @@ router.get('/secretaries', async (req, res) => {
 });
 
 // ✅ إضافة سكرتير (مع بيانات الاشتراك)
-router.post('/add-secretary', async (req, res) => {
+router.post('/add-secretary', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     const { name, phone, password, clinicId, subscriptionType, subscriptionStatus } = req.body;
     
@@ -658,7 +657,7 @@ router.delete('/secretaries/:id', async (req, res) => {
 // ============= بيانات العيادة =============
 
 // جلب بيانات العيادة كاملة
-router.get('/my-clinic', async (req, res) => {
+router.get('/my-clinic', authMiddleware, async (req, res) => {
   try {
     const clinic = await Clinic.findById(req.clinicId);
     const users = await User.find({ clinicId: req.clinicId }).select('-password');
@@ -750,9 +749,6 @@ router.get('/subscription/status', authMiddleware, async (req, res) => {
     }
 });
 
-// ثم بعد ذلك
-router.use(authMiddleware);
-router.use(clinicOwnerOnly);
 
 // ===================== دوال الإحصائيات والحدود =====================
 
@@ -861,7 +857,7 @@ router.get('/treatments/:id', async (req, res) => {
 });
 
 // ✅ 7. تحديث حالة الاشتراك (مفصل)
-router.get('/subscription/status', async (req, res) => {
+router.get('/subscription/status', authMiddleware, async (req, res) => {
     try {
         const clinic = await Clinic.findById(req.clinicId);
         if (!clinic) {
