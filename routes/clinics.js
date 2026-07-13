@@ -635,7 +635,8 @@ router.post('/add-secretary', authMiddleware, clinicOwnerOnly, async (req, res) 
 });
         
 // حذف سكرتير
-router.delete('/secretaries/:id', async (req, res) => {
+// حذف سكرتير - فقط صاحب العيادة
+router.delete('/secretaries/:id', authMiddleware, clinicOwnerOnly, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     
@@ -651,7 +652,6 @@ router.delete('/secretaries/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 
 // ============= بيانات العيادة =============
