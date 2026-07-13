@@ -75,6 +75,7 @@ const patientRoutes = require('./routes/patients');
 const reportRoutes = require('./routes/reports');
 const masterRoutes = require('./routes/master');
 const labRoutes = require('./routes/lab');
+console.log('✅ تم تحميل مسارات المعمل');
 const notificationRoutes = require('./routes/notifications');
 const subscriptionRoutes = require('./routes/subscription');
 
@@ -100,7 +101,7 @@ app.get('/api/version', (req, res) => {
     } catch (e) {
         res.json({
             success: true,
-            version: '1.0.0',
+            version: '1.0.3',
             releaseNotes: 'الإصدار الأول',
             forceUpdate: false,
             lastUpdated: new Date().toISOString()
