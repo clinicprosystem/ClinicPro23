@@ -25,6 +25,7 @@
             margin: 0 auto;
         }
 
+        /* ===== Header ===== */
         .header {
             background: linear-gradient(135deg, #1A5F7A 0%, #2D8FAB 100%);
             border-radius: 20px;
@@ -76,6 +77,32 @@
             gap: 6px;
         }
 
+        .badge-readonly {
+            background: #2196F3;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .country-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .country-badge .flag {
+            font-size: 18px;
+        }
+
+        /* ===== Stats ===== */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -110,6 +137,7 @@
             margin-bottom: 4px;
         }
 
+        /* ===== Filters ===== */
         .filters {
             background: white;
             border-radius: 14px;
@@ -182,24 +210,20 @@
             color: #999;
         }
 
+        /* ===== Patients List ===== */
         .patients-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
 
         .patient-card {
             background: white;
-            border-radius: 14px;
-            padding: 18px 20px;
+            border-radius: 16px;
+            padding: 20px 24px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
             border-right: 4px solid #1A5F7A;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
         }
 
         .patient-card:hover {
@@ -209,20 +233,34 @@
 
         .patient-card.booked {
             border-right-color: #4CAF50;
-            background: #f0faf0;
+            background: #f8fff8;
         }
 
-        .patient-card .info {
+        .patient-card.hidden {
+            border-right-color: #9E9E9E;
+            background: #f8f8f8;
+            opacity: 0.85;
+        }
+
+        /* ===== Card Header ===== */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .patient-info {
             display: flex;
             align-items: center;
             gap: 14px;
-            flex: 1;
-            min-width: 200px;
         }
 
-        .patient-card .avatar {
-            width: 44px;
-            height: 44px;
+        .patient-avatar {
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: #e8f0f5;
             display: flex;
@@ -234,18 +272,28 @@
             flex-shrink: 0;
         }
 
-        .patient-card .avatar.booked-avatar {
+        .patient-avatar.booked-avatar {
             background: #4CAF50;
             color: white;
         }
 
-        .patient-card .details .name {
-            font-size: 16px;
+        .patient-avatar.hidden-avatar {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .patient-name {
+            font-size: 18px;
             font-weight: 700;
             color: #1a202c;
         }
 
-        .patient-card .details .meta {
+        .patient-name.hidden-name {
+            color: #9E9E9E;
+            font-style: italic;
+        }
+
+        .patient-meta {
             font-size: 13px;
             color: #666;
             display: flex;
@@ -254,89 +302,165 @@
             margin-top: 2px;
         }
 
-        .patient-card .details .meta span {
+        .patient-meta span {
             display: inline-flex;
             align-items: center;
             gap: 4px;
         }
 
-        .patient-card .details .description {
-            font-size: 13px;
-            color: #555;
-            margin-top: 4px;
-            background: #f8f9fa;
-            padding: 4px 10px;
-            border-radius: 8px;
-            display: inline-block;
-            max-width: 100%;
-        }
-
-        .patient-card .status {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .patient-card .status .booked-badge {
+        .status-badge {
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 700;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
-        .patient-card .status .booked-badge.yes {
+        .status-badge.booked {
             background: #e8f5e9;
             color: #2e7d32;
         }
 
-        .patient-card .status .booked-badge.no {
+        .status-badge.pending {
             background: #fff3e0;
             color: #e65100;
         }
 
-        .patient-card .status .date {
+        .status-badge.hidden {
+            background: #e0e0e0;
+            color: #616161;
+        }
+
+        /* ===== Card Body ===== */
+        .card-body {
+            padding-top: 12px;
+            border-top: 1px solid #f0f4f8;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px 24px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .detail-item .label {
+            color: #888;
+            font-size: 13px;
+            font-weight: 500;
+            min-width: 70px;
+            flex-shrink: 0;
+        }
+
+        .detail-item .value {
+            color: #1a202c;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .detail-item .value.hidden-value {
+            color: #bdbdbd;
+            font-style: italic;
+        }
+
+        .description-full {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            border-right: 3px solid #1A5F7A;
+        }
+
+        .description-full.hidden-desc {
+            background: #eeeeee;
+            color: #9E9E9E;
+            border-right-color: #9E9E9E;
+        }
+
+        .description-full .desc-label {
+            font-weight: 600;
+            color: #1A5F7A;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .description-full .desc-label i {
+            margin-left: 6px;
+        }
+
+        /* ===== Card Footer ===== */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f4f8;
+        }
+
+        .card-footer .date {
             font-size: 12px;
             color: #999;
         }
 
-        .btn-book {
+        .card-footer .date i {
+            margin-left: 4px;
+        }
+
+        /* ===== WhatsApp Button ===== */
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 8px 20px;
+            background: #25D366;
+            color: white;
             border: none;
             border-radius: 10px;
-            cursor: pointer;
             font-family: 'Tajawal', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            text-decoration: none;
         }
 
-        .btn-book.book {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .btn-book.book:hover {
-            background: #388E3C;
+        .btn-whatsapp:hover {
+            background: #1DA851;
             transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
         }
 
-        .btn-book.booked {
-            background: #e8f5e9;
-            color: #2e7d32;
-            cursor: default;
+        .btn-whatsapp i {
+            font-size: 18px;
         }
 
-        .btn-book.booked i {
-            color: #4CAF50;
+        .btn-whatsapp:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
+        .btn-whatsapp .country-flag {
+            font-size: 16px;
+        }
+
+        /* ===== Empty State ===== */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -359,6 +483,7 @@
             color: #999;
         }
 
+        /* ===== Loading ===== */
         .loading {
             text-align: center;
             padding: 40px;
@@ -380,6 +505,7 @@
             }
         }
 
+        /* ===== Toast ===== */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -412,19 +538,17 @@
         .toast.success {
             background: #4CAF50;
         }
-
         .toast.error {
             background: #e74c3c;
         }
-
         .toast.info {
             background: #2196F3;
         }
-
         .toast.show {
             display: block;
         }
 
+        /* ===== Responsive ===== */
         @media (max-width: 600px) {
             .header {
                 padding: 18px 20px;
@@ -433,16 +557,6 @@
             }
             .header-left h1 {
                 font-size: 18px;
-            }
-            .patient-card {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .patient-card .info {
-                min-width: unset;
-            }
-            .patient-card .status {
-                justify-content: space-between;
             }
             .stats {
                 grid-template-columns: repeat(2, 1fr);
@@ -454,6 +568,47 @@
             .search-box {
                 min-width: unset;
             }
+            .patient-card {
+                padding: 16px;
+            }
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            .card-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-whatsapp {
+                justify-content: center;
+            }
+        }
+
+        /* ===== Animation ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .patient-card {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .hidden-badge {
+            font-size: 11px;
+            background: #e0e0e0;
+            color: #616161;
+            padding: 2px 10px;
+            border-radius: 12px;
         }
     </style>
 </head>
@@ -462,6 +617,7 @@
     <div id="toast" class="toast"></div>
 
     <div class="container">
+        <!-- Header -->
         <div class="header">
             <div class="header-left">
                 <div class="icon">
@@ -472,14 +628,23 @@
                     <p>جميع المرضى المسجلين عبر البوابة العامة</p>
                 </div>
             </div>
-            <div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <span class="country-badge">
+                    <span class="flag">🇾🇪</span>
+                    اليمن
+                </span>
                 <span class="badge-university">
                     <i class="fas fa-graduation-cap"></i>
                     باقة طالب جامعي
                 </span>
+                <span class="badge-readonly">
+                    <i class="fas fa-eye"></i>
+                    عرض فقط
+                </span>
             </div>
         </div>
 
+        <!-- Stats -->
         <div class="stats">
             <div class="stat-card">
                 <div class="icon-stat"><i class="fas fa-users"></i></div>
@@ -503,6 +668,7 @@
             </div>
         </div>
 
+        <!-- Filters -->
         <div class="filters">
             <span class="filter-label"><i class="fas fa-filter"></i> تصفية:</span>
             <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">الكل</button>
@@ -522,6 +688,7 @@
             </div>
         </div>
 
+        <!-- Patients List -->
         <div class="patients-list" id="patientsList">
             <div class="loading" id="loadingState">
                 <div class="spinner"></div>
@@ -536,6 +703,28 @@
         let filteredPatients = [];
         let currentFilter = 'all';
         let searchQuery = '';
+
+        // ================ Yemen Phone Validation ================
+        // رقم يمني: يبدأ بـ 7 ويتكون من 9 أرقام
+        function isValidYemeniPhone(phone) {
+            if (!phone) return false;
+            const clean = phone.replace(/\D/g, '');
+            return clean.length === 9 && clean.startsWith('7');
+        }
+
+        function cleanPhone(phone) {
+            if (!phone) return '';
+            return phone.replace(/\D/g, '');
+        }
+
+        function formatPhoneForWhatsApp(phone) {
+            const clean = cleanPhone(phone);
+            // إضافة رمز اليمن +967
+            if (clean.startsWith('7') && clean.length === 9) {
+                return '967' + clean;
+            }
+            return clean;
+        }
 
         // ================ Toast ================
         function showToast(message, type = 'success') {
@@ -563,6 +752,22 @@
             }
         }
 
+        function formatDateFull(dateStr) {
+            if (!dateStr) return 'غير محدد';
+            try {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
         function isToday(dateStr) {
             if (!dateStr) return false;
             try {
@@ -576,10 +781,10 @@
             }
         }
 
-        // ================ API Calls ================
+        // ================ Fetch Patients ================
         async function fetchPatients() {
             try {
-                const response = await fetch('https://clinicprosystem.koyeb.app/api/public/patients');
+                const response = await fetch('/api/public/patients');
                 const result = await response.json();
 
                 if (result.success && result.patients) {
@@ -599,33 +804,6 @@
             }
         }
 
-        async function toggleBooking(patientId, currentStatus) {
-            const newStatus = !currentStatus;
-
-            try {
-                const response = await fetch(`https://clinicprosystem.koyeb.app/api/public/patients/${patientId}/book`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isBooked: newStatus }),
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast(
-                        newStatus ? '✅ تم تأكيد حجز المريض' : '❌ تم إلغاء الحجز',
-                        newStatus ? 'success' : 'info'
-                    );
-                    fetchPatients(); // Refresh
-                } else {
-                    showToast('❌ فشل في تحديث الحجز', 'error');
-                }
-            } catch (error) {
-                console.error('❌ Error:', error);
-                showToast('❌ فشل الاتصال بالخادم', 'error');
-            }
-        }
-
         // ================ Apply Filters ================
         function applyFilters() {
             let filtered = [...allPatients];
@@ -635,7 +813,7 @@
             } else if (currentFilter === 'pending') {
                 filtered = filtered.filter(p => p.isBooked !== true);
             } else if (currentFilter === 'today') {
-                filtered = filtered.filter(p => isToday(p.registeredAt));
+                filtered = filtered.filter(p => isToday(p.createdAt));
             }
 
             if (searchQuery.trim()) {
@@ -656,12 +834,42 @@
             const total = allPatients.length;
             const booked = allPatients.filter(p => p.isBooked === true).length;
             const pending = total - booked;
-            const today = allPatients.filter(p => isToday(p.registeredAt)).length;
+            const today = allPatients.filter(p => isToday(p.createdAt)).length;
 
             document.getElementById('totalCount').textContent = total;
             document.getElementById('bookedCount').textContent = booked;
             document.getElementById('pendingCount').textContent = pending;
             document.getElementById('todayCount').textContent = today;
+        }
+
+        // ================ WhatsApp ================
+        function openWhatsApp(phone, patientName) {
+            if (!phone) {
+                showToast('⚠️ رقم الجوال غير متوفر', 'error');
+                return;
+            }
+
+            // تحقق من صحة الرقم اليمني
+            if (!isValidYemeniPhone(phone)) {
+                showToast('⚠️ الرقم غير صحيح (يجب أن يبدأ بـ 7 ويتكون من 9 أرقام)', 'error');
+                return;
+            }
+
+            const whatsappNumber = formatPhoneForWhatsApp(phone);
+            
+            const message = `
+مرحباً ${patientName || 'مريض'}،
+
+نحن من عيادة الأسنان.
+نود التواصل معك بخصوص موعدك.
+نرجو الرد على هذه الرسالة لتأكيد الحجز.
+
+شكراً لك.
+`;
+
+            const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            
+            window.open(url, '_blank');
         }
 
         // ================ Render Patients ================
@@ -681,31 +889,99 @@
 
             list.innerHTML = filteredPatients.map((p, index) => {
                 const isBooked = p.isBooked === true;
+                const isHidden = p.isHidden === true;
+                const statusText = isHidden ? 'مخفي' : (isBooked ? 'تم الحجز' : 'في انتظار الحجز');
+                const statusClass = isHidden ? 'hidden' : (isBooked ? 'booked' : 'pending');
+                const statusIcon = isHidden ? 'fa-eye-slash' : (isBooked ? 'fa-check-circle' : 'fa-clock');
+
+                const cardClass = isHidden ? 'patient-card hidden' : (isBooked ? 'patient-card booked' : 'patient-card');
+
+                const phone = p.phone || '';
+                const isPhoneValid = isValidYemeniPhone(phone);
+
                 return `
-                    <div class="patient-card ${isBooked ? 'booked' : ''}" style="animation: fadeIn 0.3s ease-out ${index * 0.05}s both;">
-                        <div class="info">
-                            <div class="avatar ${isBooked ? 'booked-avatar' : ''}">
-                                ${isBooked ? '<i class="fas fa-check"></i>' : (p.name ? p.name.charAt(0).toUpperCase() : '?')}
-                            </div>
-                            <div class="details">
-                                <div class="name">${p.name || 'غير معروف'}</div>
-                                <div class="meta">
-                                    <span><i class="fas fa-phone"></i> ${p.phone || 'غير متوفر'}</span>
-                                    <span><i class="fas fa-venus-mars"></i> ${p.gender || 'غير محدد'}</span>
-                                    ${p.address ? `<span><i class="fas fa-map-marker-alt"></i> ${p.address}</span>` : ''}
+                    <div class="${cardClass}" style="animation-delay: ${index * 0.05}s;">
+                        <!-- Card Header -->
+                        <div class="card-header">
+                            <div class="patient-info">
+                                <div class="patient-avatar ${isHidden ? 'hidden-avatar' : (isBooked ? 'booked-avatar' : '')}">
+                                    ${isHidden ? '<i class="fas fa-eye-slash"></i>' : (isBooked ? '<i class="fas fa-check"></i>' : (p.name ? p.name.charAt(0).toUpperCase() : '?'))}
                                 </div>
-                                ${p.description ? `<div class="description"><i class="fas fa-notes-medical"></i> ${p.description}</div>` : ''}
+                                <div>
+                                    <div class="patient-name ${isHidden ? 'hidden-name' : ''}">
+                                        ${isHidden ? 'مريض محجوز' : (p.name || 'غير معروف')}
+                                        ${isHidden ? ' <span class="hidden-badge">مخفي</span>' : ''}
+                                        ${!isHidden && isPhoneValid ? ' <span style="font-size:11px;color:#4CAF50;">🇾🇪</span>' : ''}
+                                    </div>
+                                    <div class="patient-meta ${isHidden ? 'hidden-meta' : ''}">
+                                        <span><i class="fas fa-phone"></i> ${isHidden ? 'مخفي' : (phone || 'غير متوفر')}</span>
+                                        <span><i class="fas fa-venus-mars"></i> ${isHidden ? 'مخفي' : (p.gender || 'غير محدد')}</span>
+                                        ${p.address && !isHidden ? `<span><i class="fas fa-map-marker-alt"></i> ${p.address}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="status-badge ${statusClass}">
+                                    <i class="fas ${statusIcon}"></i> ${statusText}
+                                </span>
                             </div>
                         </div>
-                        <div class="status">
-                            <span class="booked-badge ${isBooked ? 'yes' : 'no'}">
-                                ${isBooked ? '<i class="fas fa-check-circle"></i> تم الحجز' : '<i class="fas fa-clock"></i> في انتظار الحجز'}
+
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="label">📞 الجوال</span>
+                                    <span class="value ${isHidden ? 'hidden-value' : ''}">
+                                        ${isHidden ? 'مخفي' : (phone || 'غير متوفر')}
+                                        ${!isHidden && phone ? (isPhoneValid ? ' 🇾🇪' : ' ⚠️') : ''}
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">⚥ الجنس</span>
+                                    <span class="value ${isHidden ? 'hidden-value' : ''}">${isHidden ? 'مخفي' : (p.gender || 'غير محدد')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">📍 السكن</span>
+                                    <span class="value ${isHidden ? 'hidden-value' : ''}">${isHidden ? 'مخفي' : (p.address || 'غير متوفر')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">💰 الدفع</span>
+                                    <span class="value ${isHidden ? 'hidden-value' : ''}">${isHidden ? 'مخفي' : (p.willPay ? 'سيدفع' : 'مجاني')}</span>
+                                </div>
+                                <div class="detail-item" style="grid-column: 1 / -1;">
+                                    <span class="label">📅 التسجيل</span>
+                                    <span class="value">${formatDateFull(p.createdAt)}</span>
+                                </div>
+                            </div>
+
+                            <!-- Description Full -->
+                            ${p.description ? `
+                            <div class="description-full ${isHidden ? 'hidden-desc' : ''}">
+                                <span class="desc-label"><i class="fas fa-notes-medical"></i> الوصف الطبي:</span>
+                                ${isHidden ? 'مخفي' : p.description}
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer">
+                            <span class="date">
+                                <i class="fas fa-calendar-alt"></i>
+                                ${formatDate(p.createdAt)}
                             </span>
-                            <span class="date"><i class="fas fa-calendar-alt"></i> ${formatDate(p.registeredAt)}</span>
-                            <button class="btn-book ${isBooked ? 'booked' : 'book'}" 
-                                    onclick="toggleBooking('${p.id || p._id}', ${isBooked})">
-                                ${isBooked ? '<i class="fas fa-check"></i> تم الحجز' : '<i class="fas fa-calendar-plus"></i> تأكيد الحجز'}
+                            ${!isHidden && phone ? `
+                            <button class="btn-whatsapp" onclick="openWhatsApp('${phone}', '${p.name || 'مريض'}')" ${!isPhoneValid ? 'disabled' : ''}>
+                                <i class="fab fa-whatsapp"></i>
+                                ${isPhoneValid ? 'تواصل واتساب' : 'رقم غير صحيح'}
+                                ${isPhoneValid ? '<span class="country-flag">🇾🇪</span>' : ''}
                             </button>
+                            ` : `
+                            <button class="btn-whatsapp" disabled style="opacity:0.4;cursor:not-allowed;">
+                                <i class="fab fa-whatsapp"></i>
+                                ${isHidden ? 'رقم مخفي' : 'رقم غير متوفر'}
+                            </button>
+                            `}
                         </div>
                     </div>
                 `;
@@ -727,20 +1003,17 @@
             applyFilters();
         }
 
-        // ================ CSS Animation ================
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        `;
-        document.head.appendChild(style);
+        // ================ Auto Refresh ================
+        let refreshInterval;
+
+        function startAutoRefresh() {
+            refreshInterval = setInterval(fetchPatients, 30000);
+        }
 
         // ================ Init ================
         document.addEventListener('DOMContentLoaded', function() {
             fetchPatients();
-            setInterval(fetchPatients, 30000);
+            startAutoRefresh();
         });
     </script>
 
