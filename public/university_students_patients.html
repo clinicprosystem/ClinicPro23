@@ -715,41 +715,46 @@
         const API_BASE = 'https://clinicprosystem.koyeb.app/api';
         let token = localStorage.getItem('token') || '';
 
-        async function checkSubscription() {
-            try {
-                const response = await fetch(`${API_BASE}/subscription/status`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.status === 401) {
-                    // التوكن غير صالح، نعتبره غير مصرح
-                    showAccessDenied('جلسة منتهية، يرجى تسجيل الدخول مرة أخرى');
-                    return;
-                }
-
-                const result = await response.json();
-                console.log('📡 Subscription status:', result);
-
-                const subscriptionType = result?.subscriptionType || 'trial';
-
-                // ✅ فقط طالب جامعي يمكنه الدخول
-                if (subscriptionType === 'university_student') {
-                    // عرض المحتوى
-                    document.getElementById('mainContent').style.display = 'block';
-                    fetchPatients();
-                    startAutoRefresh();
-                } else {
-                    showAccessDenied(`نوع اشتراكك الحالي: <strong>${subscriptionType}</strong><br>هذه الصفحة مخصصة فقط لباقة <strong style="color:#FF6B35;">طالب جامعي</strong>`);
-                }
-
-            } catch (error) {
-                console.error('❌ Error checking subscription:', error);
-                showAccessDenied('فشل في التحقق من الاشتراك. يرجى المحاولة لاحقاً.');
+        // ============================================
+// ✅ التحقق من الاشتراك من السيرفر (نفس مسار لوحة التحكم)
+// ============================================
+async function checkSubscription() {
+    try {
+        const response = await fetch(`${API_BASE}/clinics/subscription/status`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
+        });
+
+        if (response.status === 401) {
+            showAccessDenied('جلسة منتهية، يرجى تسجيل الدخول مرة أخرى');
+            return;
         }
+
+        const result = await response.json();
+        console.log('📡 Subscription status from /clinics/subscription/status:', result);
+
+        // ✅ نفس الطريقة التي تستخدمها لوحة التحكم
+        const subscriptionType = result?.subscriptionType || 'trial';
+
+        if (subscriptionType === 'university_student') {
+            document.getElementById('mainContent').style.display = 'block';
+            fetchPatients();
+            startAutoRefresh();
+        } else {
+            showAccessDenied(`
+                هذه الصفحة مخصصة فقط لباقة <strong style="color:#FF6B35;">طالب جامعي</strong>
+                <br><br>
+                نوع اشتراكك الحالي: <strong>${subscriptionType}</strong>
+            `);
+        }
+
+    } catch (error) {
+        console.error('❌ Error checking subscription:', error);
+        showAccessDenied('فشل في التحقق من الاشتراك. يرجى المحاولة لاحقاً.');
+    }
+}
 
         function showAccessDenied(message) {
             document.getElementById('mainContent').innerHTML = `
