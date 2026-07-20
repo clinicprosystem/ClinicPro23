@@ -9,7 +9,6 @@ const app = express();
 
 // ✅ استيراد المودلات
 const Patient = require('./models/Patient');
-const Clinic = require('./models/Clinic');
 
 // ✅ تهيئة Firebase Admin SDK
 try {
@@ -107,8 +106,11 @@ app.post('/api/public/patient-register', async (req, res) => {
             });
         }
         
-        // ✅ التحقق من عدم تكرار رقم الجوال
-        const existingPatient = await Patient.findOne({ phone });
+        // ✅ التحقق من عدم تكرار رقم الجوال (للمرضى العامين فقط)
+        const existingPatient = await Patient.findOne({ 
+            phone: phone.trim(),
+            isPublic: true 
+        });
         if (existingPatient) {
             return res.status(400).json({
                 success: false,
@@ -116,7 +118,7 @@ app.post('/api/public/patient-register', async (req, res) => {
             });
         }
         
-        // ✅ إنشاء مريض جديد باستخدام المودل
+        // ✅ إنشاء مريض عام جديد باستخدام المودل
         const patient = new Patient({
             name: name.trim(),
             phone: phone.trim(),
@@ -125,7 +127,9 @@ app.post('/api/public/patient-register', async (req, res) => {
             description: description || '',
             willPay: willPay !== undefined ? willPay : true,
             isBooked: false,
-            registeredBy: 'public'
+            isPublic: true,
+            registeredBy: 'public',
+            clinicId: null
         });
         
         await patient.save();
@@ -144,12 +148,12 @@ app.post('/api/public/patient-register', async (req, res) => {
     }
 });
 
-// ✅ 2. جلب جميع المرضى (بدون توكن)
+// ✅ 2. جلب جميع المرضى العامين (بدون توكن)
 app.get('/api/public/patients', async (req, res) => {
     try {
-        const patients = await Patient.find()
-            .sort({ registeredAt: -1 })
-            .select('-__v');
+        const patients = await Patient.find({ isPublic: true })
+            .sort({ createdAt: -1 })
+            .select('-__v -medicalHistory -notes -clinicId');
         
         res.json({ 
             success: true, 
@@ -170,8 +174,12 @@ app.put('/api/public/patients/:id/book', async (req, res) => {
         const { id } = req.params;
         const { isBooked } = req.body;
         
-        // ✅ البحث عن المريض
-        const patient = await Patient.findById(id);
+        // ✅ البحث عن المريض العام
+        const patient = await Patient.findOne({ 
+            _id: id,
+            isPublic: true 
+        });
+        
         if (!patient) {
             return res.status(404).json({ 
                 success: false, 
@@ -198,11 +206,14 @@ app.put('/api/public/patients/:id/book', async (req, res) => {
     }
 });
 
-// ✅ 4. حذف مريض (بدون توكن - اختياري)
+// ✅ 4. حذف مريض عام (بدون توكن)
 app.delete('/api/public/patients/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const patient = await Patient.findByIdAndDelete(id);
+        const patient = await Patient.findOneAndDelete({ 
+            _id: id,
+            isPublic: true 
+        });
         
         if (!patient) {
             return res.status(404).json({
@@ -224,12 +235,12 @@ app.delete('/api/public/patients/:id', async (req, res) => {
     }
 });
 
-// ✅ 5. إحصائيات المرضى (بدون توكن)
+// ✅ 5. إحصائيات المرضى العامين (بدون توكن)
 app.get('/api/public/patients/stats', async (req, res) => {
     try {
-        const total = await Patient.countDocuments();
-        const booked = await Patient.countDocuments({ isBooked: true });
-        const pending = await Patient.countDocuments({ isBooked: false });
+        const total = await Patient.countDocuments({ isPublic: true });
+        const booked = await Patient.countDocuments({ isPublic: true, isBooked: true });
+        const pending = await Patient.countDocuments({ isPublic: true, isBooked: false });
         
         // اليوم
         const today = new Date();
@@ -238,7 +249,8 @@ app.get('/api/public/patients/stats', async (req, res) => {
         tomorrow.setDate(tomorrow.getDate() + 1);
         
         const todayCount = await Patient.countDocuments({
-            registeredAt: {
+            isPublic: true,
+            createdAt: {
                 $gte: today,
                 $lt: tomorrow
             }
@@ -286,12 +298,12 @@ app.get('*', (req, res) => {
     });
 });
 
-// ============= الاتصال بقاعدة البيانات =============
+// الاتصال بقاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ تم الاتصال بـ MongoDB'))
     .catch(err => console.error('❌ خطأ في الاتصال:', err));
 
-// ============= تشغيل السيرفر =============
+// تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 السيرفر يعمل على http://localhost:${PORT}`);
