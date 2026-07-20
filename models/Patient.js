@@ -5,7 +5,7 @@ const patientSchema = new mongoose.Schema({
     clinicId: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Clinic', 
-        required: false  // ✅ أصبح غير مطلوب للمرضى العامين
+        required: false
     },
     name: { 
         type: String, 
@@ -14,12 +14,12 @@ const patientSchema = new mongoose.Schema({
     phone: { 
         type: String, 
         required: true,
-        unique: false // ✅ يمكن أن يتكرر الرقم بين عيادات مختلفة
+        unique: false
     },
     age: Number,
     gender: { 
         type: String, 
-        enum: ['ذكر', 'أنثى', 'غير محدد'], // ✅ أضفنا 'غير محدد'
+        enum: ['ذكر', 'أنثى', 'غير محدد'],
         default: 'غير محدد'
     },
     medicalHistory: String,
@@ -49,6 +49,10 @@ const patientSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isHidden: {                    // ✅ حقل جديد: إخفاء البيانات
+        type: Boolean,
+        default: false
+    },
     registeredBy: {
         type: String,
         enum: ['public', 'university_student', 'clinic_owner', 'secretary', 'doctor'],
@@ -65,12 +69,13 @@ const patientSchema = new mongoose.Schema({
         default: false
     }
 }, {
-    timestamps: true // يضيف createdAt و updatedAt تلقائياً
+    timestamps: true
 });
 
 // ✅ إضافة فهارس للبحث السريع
 patientSchema.index({ clinicId: 1, phone: 1 });
 patientSchema.index({ isBooked: 1 });
+patientSchema.index({ isHidden: 1 });      // ✅ فهرس جديد
 patientSchema.index({ isPublic: 1 });
 patientSchema.index({ createdAt: -1 });
 
@@ -78,7 +83,7 @@ patientSchema.index({ createdAt: -1 });
 patientSchema.statics.getClinicPatients = function(clinicId) {
     return this.find({ 
         clinicId: clinicId,
-        isPublic: { $ne: true } // ✅ استبعاد المرضى العامين
+        isPublic: { $ne: true }
     }).sort({ createdAt: -1 });
 };
 
@@ -93,6 +98,12 @@ patientSchema.statics.getPublicPatients = function() {
 patientSchema.methods.toggleBooking = function() {
     this.isBooked = !this.isBooked;
     this.bookingUpdatedAt = new Date();
+    return this.save();
+};
+
+// ✅ دالة لتحديث حالة الإخفاء
+patientSchema.methods.toggleHide = function() {
+    this.isHidden = !this.isHidden;
     return this.save();
 };
 
@@ -114,7 +125,7 @@ patientSchema.statics.getBookedPatients = function(clinicId = null) {
 patientSchema.statics.getStats = async function(clinicId = null) {
     const query = clinicId ? { clinicId } : {};
     
-    const [total, booked, pending, today] = await Promise.all([
+    const [total, booked, pending, today, hidden] = await Promise.all([
         this.countDocuments(query),
         this.countDocuments({ ...query, isBooked: true }),
         this.countDocuments({ ...query, isBooked: false }),
@@ -124,10 +135,11 @@ patientSchema.statics.getStats = async function(clinicId = null) {
                 $gte: new Date(new Date().setHours(0, 0, 0, 0)),
                 $lt: new Date(new Date().setHours(23, 59, 59, 999))
             }
-        })
+        }),
+        this.countDocuments({ ...query, isHidden: true })  // ✅ إحصائيات المخفيين
     ]);
     
-    return { total, booked, pending, today };
+    return { total, booked, pending, today, hidden };
 };
 
 module.exports = mongoose.model('Patient', patientSchema);
