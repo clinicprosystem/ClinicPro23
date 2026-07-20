@@ -93,6 +93,17 @@
             font-weight: 300;
         }
 
+        .country-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
         .body {
             padding: 24px;
         }
@@ -228,11 +239,6 @@
             box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
         }
 
-        .form-control:disabled {
-            background: #f0f0f0;
-            cursor: not-allowed;
-        }
-
         textarea.form-control {
             resize: vertical;
             min-height: 80px;
@@ -249,6 +255,57 @@
             display: block;
         }
 
+        /* ===== Radio Group ===== */
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            padding-top: 4px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .radio-label:hover {
+            border-color: #1A5F7A;
+            background: #f0f7fa;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: #1A5F7A;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-label.active {
+            border-color: #1A5F7A;
+            background: #e8f0f5;
+        }
+
+        .radio-label .radio-icon {
+            font-size: 20px;
+        }
+
+        .radio-label .radio-icon.pay {
+            color: #4CAF50;
+        }
+
+        .radio-label .radio-icon.free {
+            color: #FF9800;
+        }
+
+        /* ===== Buttons ===== */
         .btn-submit {
             width: 100%;
             padding: 16px;
@@ -293,147 +350,67 @@
             }
         }
 
-        .btn-danger {
-            width: 100%;
-            padding: 16px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-danger:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(231, 76, 60, 0.35);
-            background: #c0392b;
-        }
-
-        .btn-danger:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-success {
-            width: 100%;
-            padding: 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-success:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(76, 175, 80, 0.35);
-            background: #388E3C;
-        }
-
-        .btn-success:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-outline {
-            width: 100%;
-            padding: 16px;
-            background: transparent;
-            color: #1A5F7A;
-            border: 2px solid #1A5F7A;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-outline:hover:not(:disabled) {
+        .btn-reset {
             background: #1A5F7A;
             color: white;
-        }
-
-        /* ===== Search Result ===== */
-        .search-result {
-            background: #f8f9fa;
+            border: none;
+            padding: 12px 32px;
             border-radius: 12px;
-            padding: 16px;
-            margin-top: 16px;
-            border-right: 4px solid #1A5F7A;
+            font-size: 16px;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .search-result .result-row {
+        .btn-reset:hover {
+            background: #0d3f52;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 95, 122, 0.3);
+        }
+
+        /* ===== Success State ===== */
+        .success-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-state .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid #e8edf5;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: white;
+            animation: popIn 0.5s ease-out;
         }
 
-        .search-result .result-row:last-child {
-            border-bottom: none;
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+            80% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
-        .search-result .result-label {
+        .success-state h2 {
+            color: #2E7D32;
+            margin-bottom: 8px;
+        }
+
+        .success-state p {
             color: #666;
-            font-weight: 500;
+            margin-bottom: 24px;
         }
 
-        .search-result .result-value {
-            color: #1a202c;
-            font-weight: 600;
-        }
-
-        .search-result .result-value.hidden {
-            color: #9E9E9E;
-            font-style: italic;
-        }
-
-        .search-result .result-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .search-result .result-status.booked {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .search-result .result-status.pending {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
-        .search-result .result-status.hidden {
-            background: #e0e0e0;
-            color: #616161;
-        }
-
+        /* ===== Toast ===== */
         .toast {
             position: fixed;
             top: 20px;
@@ -466,19 +443,17 @@
         .toast.success {
             background: #4CAF50;
         }
-
         .toast.error {
             background: #e74c3c;
         }
-
         .toast.info {
             background: #2196F3;
         }
-
         .toast.show {
             display: block;
         }
 
+        /* ===== Footer ===== */
         .footer {
             text-align: center;
             padding: 16px 24px 20px;
@@ -496,6 +471,7 @@
             text-decoration: underline;
         }
 
+        /* ===== Phone Input ===== */
         .phone-input-wrapper {
             position: relative;
         }
@@ -518,54 +494,7 @@
             padding-left: 70px;
         }
 
-        .search-row {
-            display: flex;
-            gap: 12px;
-        }
-
-        .search-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .search-row .btn-search {
-            padding: 14px 24px;
-            background: #1A5F7A;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: 'Tajawal', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-            height: 56px;
-        }
-
-        .search-row .btn-search:hover {
-            background: #0d3f52;
-            transform: translateY(-1px);
-        }
-
-        .search-row .btn-search:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .hidden-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            background: #e0e0e0;
-            color: #616161;
-        }
-
+        /* ===== Responsive ===== */
         @media (max-width: 480px) {
             .header {
                 padding: 20px 16px;
@@ -579,16 +508,21 @@
             .container {
                 border-radius: 16px;
             }
-            .search-row {
+            .radio-group {
                 flex-direction: column;
-            }
-            .search-row .btn-search {
-                width: 100%;
-                justify-content: center;
+                gap: 8px;
             }
             .tabs {
                 flex-direction: column;
             }
+        }
+
+        .hidden-badge {
+            font-size: 11px;
+            background: #e0e0e0;
+            color: #616161;
+            padding: 2px 10px;
+            border-radius: 12px;
         }
     </style>
 </head>
@@ -605,6 +539,9 @@
                 <div class="header-text">
                     <h1>تسجيل مريض جديد</h1>
                     <p>مرحباً بك في عيادة الأسنان</p>
+                    <div class="country-badge">
+                        <span>🇾🇪</span> اليمن
+                    </div>
                 </div>
             </div>
         </div>
@@ -622,13 +559,11 @@
 
             <!-- ===== Tab 1: Register ===== -->
             <div class="tab-content active" id="tab-register">
-                <div id="successState" class="success-state" style="display: none; text-align: center; padding: 40px 20px;">
-                    <div style="width:80px;height:80px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:40px;color:white;animation:popIn 0.5s ease-out;">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <h2 style="color:#2E7D32;margin-bottom:8px;">تم التسجيل بنجاح!</h2>
-                    <p style="color:#666;margin-bottom:24px;">شكراً لك، سيتم التواصل معك قريباً</p>
-                    <button class="btn-reset" onclick="resetForm()" style="background:#1A5F7A;color:white;border:none;padding:12px 32px;border-radius:12px;font-size:16px;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.3s ease;">
+                <div id="successState" class="success-state" style="display: none;">
+                    <div class="success-icon"><i class="fas fa-check"></i></div>
+                    <h2>تم التسجيل بنجاح!</h2>
+                    <p>شكراً لك، سيتم التواصل معك قريباً</p>
+                    <button class="btn-reset" onclick="resetForm()">
                         <i class="fas fa-plus"></i> تسجيل مريض آخر
                     </button>
                 </div>
@@ -682,6 +617,28 @@
                         <textarea class="form-control" id="description" placeholder="اكتب وصفاً موجزاً للمشكلة أو الأعراض..."></textarea>
                     </div>
 
+                    <!-- ===== ✅ NEW: Payment Option ===== -->
+                    <div class="section-header" style="margin-top: 8px;">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <h2>خيارات الدفع</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">هل ستدفع؟</label>
+                        <div class="radio-group">
+                            <label class="radio-label active" id="payLabel" onclick="selectPayOption(true)">
+                                <input type="radio" name="willPay" value="1" checked>
+                                <span class="radio-icon pay">💰</span>
+                                سأدفع
+                            </label>
+                            <label class="radio-label" id="freeLabel" onclick="selectPayOption(false)">
+                                <input type="radio" name="willPay" value="0">
+                                <span class="radio-icon free">🆓</span>
+                                مجاني
+                            </label>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn-submit" id="submitBtn">
                         <i class="fas fa-save"></i>
                         تسجيل المريض
@@ -701,28 +658,23 @@
                         <span class="required">*</span> رقم الجوال
                         <span class="hint">(يبدأ بـ 7 - 9 أرقام)</span>
                     </label>
-                    <div class="search-row">
+                    <div style="display:flex;gap:12px;">
                         <div class="phone-input-wrapper" style="flex:1;">
                             <span class="phone-prefix">📱 7</span>
                             <input type="tel" class="form-control" id="searchPhone" placeholder="12345678" maxlength="9">
                         </div>
-                        <button class="btn-search" id="searchBtn" onclick="searchPatient()">
+                        <button class="btn-submit" id="searchBtn" onclick="searchPatient()" style="flex:0 0 auto;padding:14px 24px;font-size:16px;width:auto;">
                             <i class="fas fa-search"></i> بحث
                         </button>
                     </div>
                     <div class="error-text" id="searchPhoneError">رقم الجوال يجب أن يبدأ بـ 7 ويتكون من 9 أرقام</div>
                 </div>
 
-                <!-- ===== Search Result ===== -->
                 <div id="searchResult" style="display:none;"></div>
-
-                <!-- ===== Loading ===== -->
                 <div id="searchLoading" style="display:none;text-align:center;padding:20px;">
                     <div class="spinner" style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#1A5F7A;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
                     <p style="color:#999;">جاري البحث...</p>
                 </div>
-
-                <!-- ===== Not Found ===== -->
                 <div id="searchNotFound" style="display:none;text-align:center;padding:30px 20px;background:#f8f9fa;border-radius:12px;">
                     <i class="fas fa-user-slash" style="font-size:48px;color:#cbd5e0;margin-bottom:12px;"></i>
                     <h3 style="color:#555;margin-bottom:4px;">لم يتم العثور على مريض</h3>
@@ -736,26 +688,27 @@
         </div>
     </div>
 
-    <style>
-        @keyframes popIn {
-            0% { transform: scale(0); }
-            80% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .success-state {
-            display: none;
-        }
-        .btn-reset:hover {
-            background: #0d3f52;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(26, 95, 122, 0.3);
-        }
-    </style>
-
     <script>
+        // ================ State ================
+        let willPay = true;
+
+        // ================ Select Pay Option ================
+        function selectPayOption(pay) {
+            willPay = pay;
+            const payLabel = document.getElementById('payLabel');
+            const freeLabel = document.getElementById('freeLabel');
+
+            if (pay) {
+                payLabel.classList.add('active');
+                freeLabel.classList.remove('active');
+                document.querySelector('input[name="willPay"][value="1"]').checked = true;
+            } else {
+                freeLabel.classList.add('active');
+                payLabel.classList.remove('active');
+                document.querySelector('input[name="willPay"][value="0"]').checked = true;
+            }
+        }
+
         // ================ Toast ================
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -774,7 +727,6 @@
             document.getElementById(`tab-${tab}`).classList.add('active');
             document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
             
-            // Reset search results when switching to search tab
             if (tab === 'search') {
                 document.getElementById('searchResult').style.display = 'none';
                 document.getElementById('searchNotFound').style.display = 'none';
@@ -802,6 +754,10 @@
             document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> تسجيل المريض';
             document.querySelectorAll('.error-text').forEach(el => el.classList.remove('show'));
             document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
+            
+            // Reset payment option
+            selectPayOption(true);
+            
             showToast('تم إعادة تعيين النموذج', 'success');
         }
 
@@ -855,8 +811,10 @@
                 gender: gender.value,
                 address: address.value.trim(),
                 description: description.value.trim(),
-                willPay: true
+                willPay: willPay  // ✅ إرسال قيمة الدفع
             };
+
+            console.log('📤 Sending data:', data);
 
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
@@ -870,6 +828,7 @@
                 });
 
                 const result = await response.json();
+                console.log('📡 Response:', result);
 
                 if (response.ok && result.success === true) {
                     showToast('✅ تم تسجيل المريض بنجاح!', 'success');
@@ -900,7 +859,6 @@
 
             const phone = cleanPhone(phoneInput.value.trim());
 
-            // Validate
             if (!phone) {
                 errorDiv.textContent = 'الرجاء إدخال رقم الجوال';
                 errorDiv.classList.add('show');
@@ -918,7 +876,6 @@
             errorDiv.classList.remove('show');
             phoneInput.classList.remove('error');
 
-            // Show loading
             resultDiv.style.display = 'none';
             notFoundDiv.style.display = 'none';
             loadingDiv.style.display = 'block';
@@ -934,7 +891,6 @@
                 searchBtn.innerHTML = '<i class="fas fa-search"></i> بحث';
 
                 if (result.success && result.patients && result.patients.length > 0) {
-                    // Find exact match
                     const patient = result.patients.find(p => p.phone === phone);
                     
                     if (patient) {
@@ -959,63 +915,74 @@
             const resultDiv = document.getElementById('searchResult');
             const isBooked = patient.isBooked === true;
             const isHidden = patient.isHidden === true;
+            const willPay = patient.willPay === true;
 
             let statusText = isHidden ? 'مخفي' : (isBooked ? 'تم الحجز' : 'في انتظار الحجز');
             let statusClass = isHidden ? 'hidden' : (isBooked ? 'booked' : 'pending');
             let statusIcon = isHidden ? 'fa-eye-slash' : (isBooked ? 'fa-check-circle' : 'fa-clock');
 
             resultDiv.innerHTML = `
-                <div class="search-result">
-                    <div class="result-row">
-                        <span class="result-label"><i class="fas fa-user"></i> الاسم</span>
-                        <span class="result-value ${isHidden ? 'hidden' : ''}">${isHidden ? 'مريض محجوز' : patient.name}</span>
+                <div style="background:#f8f9fa;border-radius:12px;padding:16px;margin-top:16px;border-right:4px solid #1A5F7A;">
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-user"></i> الاسم</span>
+                        <span style="color:#1a202c;font-weight:600;">${isHidden ? 'مريض محجوز' : patient.name}</span>
                     </div>
-                    <div class="result-row">
-                        <span class="result-label"><i class="fas fa-phone"></i> رقم الجوال</span>
-                        <span class="result-value ${isHidden ? 'hidden' : ''}">${isHidden ? 'مخفي' : patient.phone}</span>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-phone"></i> رقم الجوال</span>
+                        <span style="color:#1a202c;font-weight:600;">${isHidden ? 'مخفي' : patient.phone}</span>
                     </div>
-                    <div class="result-row">
-                        <span class="result-label"><i class="fas fa-venus-mars"></i> الجنس</span>
-                        <span class="result-value ${isHidden ? 'hidden' : ''}">${isHidden ? 'مخفي' : (patient.gender || 'غير محدد')}</span>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-venus-mars"></i> الجنس</span>
+                        <span style="color:#1a202c;font-weight:600;">${isHidden ? 'مخفي' : (patient.gender || 'غير محدد')}</span>
                     </div>
-                    ${patient.description ? `
-                    <div class="result-row">
-                        <span class="result-label"><i class="fas fa-notes-medical"></i> الوصف</span>
-                        <span class="result-value ${isHidden ? 'hidden' : ''}">${isHidden ? 'مخفي' : patient.description}</span>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-money-bill-wave"></i> الدفع</span>
+                        <span style="color:#1a202c;font-weight:600;">${isHidden ? 'مخفي' : (willPay ? '💰 سيدفع' : '🆓 مجاني')}</span>
+                    </div>
+                    ${patient.address ? `
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-map-marker-alt"></i> السكن</span>
+                        <span style="color:#1a202c;font-weight:600;">${isHidden ? 'مخفي' : patient.address}</span>
                     </div>
                     ` : ''}
-                    <div class="result-row">
-                        <span class="result-label"><i class="fas fa-calendar-alt"></i> تاريخ التسجيل</span>
-                        <span class="result-value">${formatDate(patient.createdAt)}</span>
+                    ${patient.description ? `
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-notes-medical"></i> الوصف</span>
+                        <span style="color:#1a202c;font-weight:600;">${isHidden ? 'مخفي' : patient.description}</span>
                     </div>
-                    <div class="result-row">
-                        <span class="result-label"><i class="fas fa-info-circle"></i> الحالة</span>
-                        <span class="result-status ${statusClass}">
+                    ` : ''}
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8edf5;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-calendar-alt"></i> تاريخ التسجيل</span>
+                        <span style="color:#1a202c;font-weight:600;">${formatDate(patient.createdAt)}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;">
+                        <span style="color:#666;font-weight:500;"><i class="fas fa-info-circle"></i> الحالة</span>
+                        <span class="status-badge ${statusClass}">
                             <i class="fas ${statusIcon}"></i> ${statusText}
                         </span>
                     </div>
                     ${isHidden ? `
                     <div style="margin-top:12px;padding:12px;background:#fff3e0;border-radius:8px;text-align:center;color:#e65100;">
-                        <i class="fas fa-eye-slash"></i>
-                        هذا المريض قام بإيقاف الإعلان عن بياناته
+                        <i class="fas fa-eye-slash"></i> هذا المريض قام بإيقاف الإعلان عن بياناته
                     </div>
                     ` : ''}
                     <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
-                        ${!isBooked ? `
-                        <button class="btn-success" onclick="updateBooking('${patient._id}', true)" style="flex:1;padding:12px;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:#4CAF50;color:white;">
+                        ${!isBooked && !isHidden ? `
+                        <button onclick="updateBooking('${patient._id}', true)" style="flex:1;padding:12px;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:#4CAF50;color:white;">
                             <i class="fas fa-check"></i> تأكيد الحجز
                         </button>
-                        ` : `
-                        <button class="btn-outline" onclick="updateBooking('${patient._id}', false)" style="flex:1;padding:12px;border:2px solid #e74c3c;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:transparent;color:#e74c3c;">
+                        ` : ''}
+                        ${isBooked && !isHidden ? `
+                        <button onclick="updateBooking('${patient._id}', false)" style="flex:1;padding:12px;border:2px solid #e74c3c;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:transparent;color:#e74c3c;">
                             <i class="fas fa-times"></i> إلغاء الحجز
                         </button>
-                        `}
+                        ` : ''}
                         ${!isHidden ? `
-                        <button class="btn-danger" onclick="toggleHide('${patient._id}', true)" style="flex:1;padding:12px;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:#e74c3c;color:white;">
+                        <button onclick="toggleHide('${patient._id}', true)" style="flex:1;padding:12px;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:#e74c3c;color:white;">
                             <i class="fas fa-eye-slash"></i> إيقاف الإعلان
                         </button>
                         ` : `
-                        <button class="btn-success" onclick="toggleHide('${patient._id}', false)" style="flex:1;padding:12px;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:#4CAF50;color:white;">
+                        <button onclick="toggleHide('${patient._id}', false)" style="flex:1;padding:12px;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:#4CAF50;color:white;">
                             <i class="fas fa-eye"></i> إظهار البيانات
                         </button>
                         `}
@@ -1054,7 +1021,6 @@
 
                 if (result.success) {
                     showToast(isBooked ? '✅ تم تأكيد الحجز بنجاح' : '❌ تم إلغاء الحجز', isBooked ? 'success' : 'info');
-                    // Refresh search
                     searchPatient();
                 } else {
                     showToast('❌ فشل في تحديث الحجز', 'error');
@@ -1078,7 +1044,6 @@
 
                 if (result.success) {
                     showToast(isHidden ? '✅ تم إيقاف الإعلان عن بياناتك' : '✅ تم إظهار بياناتك', 'success');
-                    // Refresh search
                     searchPatient();
                 } else {
                     showToast('❌ فشل في تحديث الإعدادات', 'error');
