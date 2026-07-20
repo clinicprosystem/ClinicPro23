@@ -84,6 +84,98 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/notifications', notificationRoutes);
+// ========== 1. تسجيل مريض عام (بدون توكن) ==========
+app.post('/api/public/patient-register', async (req, res) => {
+    try {
+        const { name, phone, gender, address, description, willPay } = req.body;
+        
+        // التحقق من وجود البيانات المطلوبة
+        if (!name || !phone) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'الاسم ورقم الجوال مطلوبان' 
+            });
+        }
+        
+        // إنشاء مريض جديد
+        const patient = {
+            id: generateId(),
+            name,
+            phone,
+            gender: gender || 'غير محدد',
+            address: address || '',
+            description: description || '',
+            willPay: willPay !== undefined ? willPay : true,
+            isBooked: false,
+            registeredAt: new Date().toISOString(),
+        };
+        
+        // حفظ في قاعدة البيانات
+        await savePatient(patient);
+        
+        res.json({ 
+            success: true, 
+            patient,
+            message: 'تم تسجيل المريض بنجاح' 
+        });
+    } catch (error) {
+        console.error('❌ Error in register:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'فشل في تسجيل المريض' 
+        });
+    }
+});
+
+// ========== 2. جلب جميع المرضى (بدون توكن) ==========
+app.get('/api/public/patients', async (req, res) => {
+    try {
+        const patients = await getAllPatients();
+        res.json({ 
+            success: true, 
+            patients 
+        });
+    } catch (error) {
+        console.error('❌ Error fetching patients:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'فشل في جلب المرضى' 
+        });
+    }
+});
+
+// ========== 3. تحديث حالة الحجز (بدون توكن) ==========
+app.put('/api/public/patients/:id/book', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isBooked } = req.body;
+        
+        const patient = await getPatientById(id);
+        if (!patient) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'المريض غير موجود' 
+            });
+        }
+        
+        // تحديث حالة الحجز
+        patient.isBooked = isBooked;
+        await updatePatient(patient);
+        
+        res.json({ 
+            success: true, 
+            patient,
+            message: isBooked ? 'تم تأكيد الحجز' : 'تم إلغاء الحجز'
+        });
+    } catch (error) {
+        console.error('❌ Error updating booking:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'فشل في تحديث الحجز' 
+        });
+    }
+});
+
 app.use('/api/subscription', subscriptionRoutes);
 
 
