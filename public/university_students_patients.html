@@ -102,6 +102,51 @@
             font-size: 18px;
         }
 
+        /* ===== Access Denied ===== */
+        .access-denied {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .access-denied .icon {
+            font-size: 80px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .access-denied h2 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .access-denied p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .access-denied .btn-back {
+            padding: 12px 32px;
+            background: #1A5F7A;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .access-denied .btn-back:hover {
+            background: #0d3f52;
+            transform: translateY(-2px);
+        }
+
         /* ===== Stats ===== */
         .stats {
             display: grid;
@@ -644,68 +689,122 @@
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="icon-stat"><i class="fas fa-users"></i></div>
-                <div class="number" id="totalCount">0</div>
-                <div class="label">إجمالي المرضى</div>
+        <!-- ===== MAIN CONTENT ===== -->
+        <div id="mainContent">
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="icon-stat"><i class="fas fa-users"></i></div>
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">إجمالي المرضى</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-stat"><i class="fas fa-check-circle"></i></div>
+                    <div class="number" id="bookedCount">0</div>
+                    <div class="label">تم الحجز</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-stat"><i class="fas fa-clock"></i></div>
+                    <div class="number" id="pendingCount">0</div>
+                    <div class="label">في انتظار الحجز</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-stat"><i class="fas fa-calendar-day"></i></div>
+                    <div class="number" id="todayCount">0</div>
+                    <div class="label">اليوم</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="icon-stat"><i class="fas fa-check-circle"></i></div>
-                <div class="number" id="bookedCount">0</div>
-                <div class="label">تم الحجز</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon-stat"><i class="fas fa-clock"></i></div>
-                <div class="number" id="pendingCount">0</div>
-                <div class="label">في انتظار الحجز</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon-stat"><i class="fas fa-calendar-day"></i></div>
-                <div class="number" id="todayCount">0</div>
-                <div class="label">اليوم</div>
-            </div>
-        </div>
 
-        <!-- Filters -->
-        <div class="filters">
-            <span class="filter-label"><i class="fas fa-filter"></i> تصفية:</span>
-            <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">الكل</button>
-            <button class="filter-btn" data-filter="booked" onclick="setFilter('booked')">
-                <i class="fas fa-check-circle" style="color:#4CAF50;"></i> تم الحجز
-            </button>
-            <button class="filter-btn" data-filter="pending" onclick="setFilter('pending')">
-                <i class="fas fa-clock" style="color:#FF9800;"></i> في انتظار الحجز
-            </button>
-            <button class="filter-btn" data-filter="today" onclick="setFilter('today')">
-                <i class="fas fa-calendar-day"></i> اليوم
-            </button>
+            <!-- Filters -->
+            <div class="filters">
+                <span class="filter-label"><i class="fas fa-filter"></i> تصفية:</span>
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">الكل</button>
+                <button class="filter-btn" data-filter="booked" onclick="setFilter('booked')">
+                    <i class="fas fa-check-circle" style="color:#4CAF50;"></i> تم الحجز
+                </button>
+                <button class="filter-btn" data-filter="pending" onclick="setFilter('pending')">
+                    <i class="fas fa-clock" style="color:#FF9800;"></i> في انتظار الحجز
+                </button>
+                <button class="filter-btn" data-filter="today" onclick="setFilter('today')">
+                    <i class="fas fa-calendar-day"></i> اليوم
+                </button>
 
-            <div class="search-box">
-                <span class="search-icon"><i class="fas fa-search"></i></span>
-                <input type="text" id="searchInput" placeholder="بحث بالاسم أو رقم الجوال..." oninput="searchPatients()">
+                <div class="search-box">
+                    <span class="search-icon"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchInput" placeholder="بحث بالاسم أو رقم الجوال..." oninput="searchPatients()">
+                </div>
             </div>
-        </div>
 
-        <!-- Patients List -->
-        <div class="patients-list" id="patientsList">
-            <div class="loading" id="loadingState">
-                <div class="spinner"></div>
-                <p style="color:#999;">جاري تحميل البيانات...</p>
+            <!-- Patients List -->
+            <div class="patients-list" id="patientsList">
+                <div class="loading" id="loadingState">
+                    <div class="spinner"></div>
+                    <p style="color:#999;">جاري تحميل البيانات...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ================ Check Subscription ================
+        // ✅ التحقق من نوع الاشتراك من API
+        async function checkSubscription() {
+            try {
+                const response = await fetch('/api/subscription/status');
+                const result = await response.json();
+                
+                console.log('📡 Subscription status:', result);
+                
+                if (result.type === 'university_student') {
+                    // ✅ طالب جامعي - عرض المحتوى
+                    document.getElementById('mainContent').style.display = 'block';
+                    fetchPatients();
+                    startAutoRefresh();
+                } else {
+                    // ❌ ليس طالب جامعي - عرض رسالة منع الوصول
+                    document.getElementById('mainContent').innerHTML = `
+                        <div class="access-denied">
+                            <div class="icon"><i class="fas fa-lock"></i></div>
+                            <h2>🚫 غير مصرح بالوصول</h2>
+                            <p>
+                                هذه الصفحة مخصصة فقط لحملة باقة 
+                                <strong style="color:#FF6B35;">طالب جامعي</strong>.
+                            </p>
+                            <p style="font-size:14px;color:#999;">
+                                نوع اشتراكك الحالي: <strong>${result.type || 'غير معروف'}</strong>
+                            </p>
+                            <br>
+                            <a href="/" class="btn-back">
+                                <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error checking subscription:', error);
+                // عرض رسالة خطأ
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="access-denied">
+                        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h2>⚠️ حدث خطأ</h2>
+                        <p>فشل في التحقق من صلاحية الاشتراك. يرجى المحاولة لاحقاً.</p>
+                        <br>
+                        <a href="/" class="btn-back">
+                            <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
         // ================ State ================
         let allPatients = [];
         let filteredPatients = [];
         let currentFilter = 'all';
         let searchQuery = '';
+        let refreshInterval = null;
 
         // ================ Yemen Phone Validation ================
-        // رقم يمني: يبدأ بـ 7 ويتكون من 9 أرقام
         function isValidYemeniPhone(phone) {
             if (!phone) return false;
             const clean = phone.replace(/\D/g, '');
@@ -719,7 +818,6 @@
 
         function formatPhoneForWhatsApp(phone) {
             const clean = cleanPhone(phone);
-            // إضافة رمز اليمن +967
             if (clean.startsWith('7') && clean.length === 9) {
                 return '967' + clean;
             }
@@ -849,7 +947,6 @@
                 return;
             }
 
-            // تحقق من صحة الرقم اليمني
             if (!isValidYemeniPhone(phone)) {
                 showToast('⚠️ الرقم غير صحيح (يجب أن يبدأ بـ 7 ويتكون من 9 أرقام)', 'error');
                 return;
@@ -1004,16 +1101,22 @@
         }
 
         // ================ Auto Refresh ================
-        let refreshInterval;
-
         function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
             refreshInterval = setInterval(fetchPatients, 30000);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
         }
 
         // ================ Init ================
         document.addEventListener('DOMContentLoaded', function() {
-            fetchPatients();
-            startAutoRefresh();
+            // ✅ التحقق من الاشتراك أولاً
+            checkSubscription();
         });
     </script>
 
