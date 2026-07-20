@@ -122,6 +122,40 @@ router.put('/public/patients/:id/book', async (req, res) => {
         });
     }
 });
+// ✅ 4. إخفاء/إظهار بيانات المريض (بدون توكن)
+router.put('/public/patients/:id/hide', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isHidden } = req.body;
+        
+        const patient = await Patient.findOne({ 
+            _id: id,
+            isPublic: true 
+        });
+        
+        if (!patient) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'المريض غير موجود' 
+            });
+        }
+        
+        patient.isHidden = isHidden !== undefined ? isHidden : !patient.isHidden;
+        await patient.save();
+        
+        res.json({ 
+            success: true, 
+            patient,
+            message: patient.isHidden ? 'تم إخفاء البيانات' : 'تم إظهار البيانات'
+        });
+    } catch (error) {
+        console.error('❌ Error toggling hide:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'فشل في تحديث الإعدادات' 
+        });
+    }
+});
 
 // ✅ 4. حذف مريض عام (بدون توكن)
 router.delete('/public/patients/:id', async (req, res) => {
