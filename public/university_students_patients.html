@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قائمة المرضى - الطلاب الجامعيين</title>
+    <title>قائمة المرضى العامين</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -25,7 +25,6 @@
             margin: 0 auto;
         }
 
-        /* ===== Header ===== */
         .header {
             background: linear-gradient(135deg, #1A5F7A 0%, #2D8FAB 100%);
             border-radius: 20px;
@@ -66,7 +65,7 @@
             opacity: 0.85;
         }
 
-        .badge-university {
+        .badge-public {
             background: #FF6B35;
             padding: 6px 16px;
             border-radius: 20px;
@@ -287,7 +286,6 @@
             opacity: 0.85;
         }
 
-        /* ===== Card Header ===== */
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -379,7 +377,6 @@
             color: #616161;
         }
 
-        /* ===== Card Body ===== */
         .card-body {
             padding-top: 12px;
             border-top: 1px solid #f0f4f8;
@@ -442,11 +439,6 @@
             font-size: 13px;
         }
 
-        .description-full .desc-label i {
-            margin-left: 6px;
-        }
-
-        /* ===== Card Footer ===== */
         .card-footer {
             display: flex;
             justify-content: space-between;
@@ -463,11 +455,6 @@
             color: #999;
         }
 
-        .card-footer .date i {
-            margin-left: 4px;
-        }
-
-        /* ===== WhatsApp Button ===== */
         .btn-whatsapp {
             display: inline-flex;
             align-items: center;
@@ -491,21 +478,12 @@
             box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
         }
 
-        .btn-whatsapp i {
-            font-size: 18px;
-        }
-
         .btn-whatsapp:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
-        .btn-whatsapp .country-flag {
-            font-size: 16px;
-        }
-
-        /* ===== Empty State ===== */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -528,7 +506,6 @@
             color: #999;
         }
 
-        /* ===== Loading ===== */
         .loading {
             text-align: center;
             padding: 40px;
@@ -545,12 +522,9 @@
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
 
-        /* ===== Toast ===== */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -580,20 +554,19 @@
             }
         }
 
-        .toast.success {
-            background: #4CAF50;
-        }
-        .toast.error {
-            background: #e74c3c;
-        }
-        .toast.info {
-            background: #2196F3;
-        }
-        .toast.show {
-            display: block;
+        .toast.success { background: #4CAF50; }
+        .toast.error { background: #e74c3c; }
+        .toast.info { background: #2196F3; }
+        .toast.show { display: block; }
+
+        .hidden-badge {
+            font-size: 11px;
+            background: #e0e0e0;
+            color: #616161;
+            padding: 2px 10px;
+            border-radius: 12px;
         }
 
-        /* ===== Responsive ===== */
         @media (max-width: 600px) {
             .header {
                 padding: 18px 20px;
@@ -632,7 +605,6 @@
             }
         }
 
-        /* ===== Animation ===== */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -643,17 +615,8 @@
                 transform: translateY(0);
             }
         }
-
         .patient-card {
             animation: fadeIn 0.3s ease-out;
-        }
-
-        .hidden-badge {
-            font-size: 11px;
-            background: #e0e0e0;
-            color: #616161;
-            padding: 2px 10px;
-            border-radius: 12px;
         }
     </style>
 </head>
@@ -669,7 +632,7 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <div>
-                    <h1>قائمة المرضى</h1>
+                    <h1>قائمة المرضى العامين</h1>
                     <p>جميع المرضى المسجلين عبر البوابة العامة</p>
                 </div>
             </div>
@@ -678,9 +641,9 @@
                     <span class="flag">🇾🇪</span>
                     اليمن
                 </span>
-                <span class="badge-university">
-                    <i class="fas fa-graduation-cap"></i>
-                    باقة طالب جامعي
+                <span class="badge-public">
+                    <i class="fas fa-globe"></i>
+                    عام
                 </span>
                 <span class="badge-readonly">
                     <i class="fas fa-eye"></i>
@@ -746,65 +709,105 @@
     </div>
 
     <script>
-        // ================ Check Subscription ================
-        // ✅ التحقق من نوع الاشتراك من API
+        // ============================================
+        // ✅ التحقق من الاشتراك من السيرفر
+        // ============================================
+        const API_BASE = 'https://clinicprosystem.koyeb.app/api';
+        let token = localStorage.getItem('token') || '';
+
         async function checkSubscription() {
             try {
-                const response = await fetch('/api/subscription/status');
+                const response = await fetch(`${API_BASE}/subscription/status`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    // التوكن غير صالح، نعتبره غير مصرح
+                    showAccessDenied('جلسة منتهية، يرجى تسجيل الدخول مرة أخرى');
+                    return;
+                }
+
                 const result = await response.json();
-                
                 console.log('📡 Subscription status:', result);
-                
-                if (result.type === 'university_student') {
-                    // ✅ طالب جامعي - عرض المحتوى
+
+                const subscriptionType = result?.subscriptionType || 'trial';
+
+                // ✅ فقط طالب جامعي يمكنه الدخول
+                if (subscriptionType === 'university_student') {
+                    // عرض المحتوى
                     document.getElementById('mainContent').style.display = 'block';
                     fetchPatients();
                     startAutoRefresh();
                 } else {
-                    // ❌ ليس طالب جامعي - عرض رسالة منع الوصول
-                    document.getElementById('mainContent').innerHTML = `
-                        <div class="access-denied">
-                            <div class="icon"><i class="fas fa-lock"></i></div>
-                            <h2>🚫 غير مصرح بالوصول</h2>
-                            <p>
-                                هذه الصفحة مخصصة فقط لحملة باقة 
-                                <strong style="color:#FF6B35;">طالب جامعي</strong>.
-                            </p>
-                            <p style="font-size:14px;color:#999;">
-                                نوع اشتراكك الحالي: <strong>${result.type || 'غير معروف'}</strong>
-                            </p>
-                            <br>
-                            <a href="/" class="btn-back">
-                                <i class="fas fa-arrow-right"></i> العودة للرئيسية
-                            </a>
-                        </div>
-                    `;
+                    showAccessDenied(`نوع اشتراكك الحالي: <strong>${subscriptionType}</strong><br>هذه الصفحة مخصصة فقط لباقة <strong style="color:#FF6B35;">طالب جامعي</strong>`);
                 }
+
             } catch (error) {
                 console.error('❌ Error checking subscription:', error);
-                // عرض رسالة خطأ
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="access-denied">
-                        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-                        <h2>⚠️ حدث خطأ</h2>
-                        <p>فشل في التحقق من صلاحية الاشتراك. يرجى المحاولة لاحقاً.</p>
-                        <br>
-                        <a href="/" class="btn-back">
-                            <i class="fas fa-arrow-right"></i> العودة للرئيسية
-                        </a>
-                    </div>
-                `;
+                showAccessDenied('فشل في التحقق من الاشتراك. يرجى المحاولة لاحقاً.');
             }
         }
 
-        // ================ State ================
+        function showAccessDenied(message) {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="access-denied">
+                    <div class="icon"><i class="fas fa-lock"></i></div>
+                    <h2>🚫 غير مصرح بالوصول</h2>
+                    <p>${message}</p>
+                    <br>
+                    <a href="index.html" class="btn-back">
+                        <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                    </a>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // ✅ المتغيرات والإعدادات
+        // ============================================
         let allPatients = [];
         let filteredPatients = [];
         let currentFilter = 'all';
         let searchQuery = '';
         let refreshInterval = null;
 
-        // ================ Yemen Phone Validation ================
+        // ============================================
+        // ✅ دوال API مع التوكن
+        // ============================================
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const options = { method, headers };
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                if (response.status === 401) {
+                    console.warn('⚠️ Token expired or invalid');
+                    showAccessDenied('جلسة منتهية، يرجى تسجيل الدخول مرة أخرى');
+                    return null;
+                }
+                const data = await response.json();
+                if (!response.ok) {
+                    console.warn('⚠️ API Warning:', data);
+                }
+                return data;
+            } catch (e) {
+                console.error('❌ API Error:', e);
+                return null;
+            }
+        }
+
+        // ============================================
+        // ✅ التحقق من رقم الجوال اليمني
+        // ============================================
         function isValidYemeniPhone(phone) {
             if (!phone) return false;
             const clean = phone.replace(/\D/g, '');
@@ -824,7 +827,9 @@
             return clean;
         }
 
-        // ================ Toast ================
+        // ============================================
+        // ✅ Toast
+        // ============================================
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -835,7 +840,9 @@
             }, 4000);
         }
 
-        // ================ Format Date ================
+        // ============================================
+        // ✅ دوال التاريخ
+        // ============================================
         function formatDate(dateStr) {
             if (!dateStr) return 'غير محدد';
             try {
@@ -879,13 +886,14 @@
             }
         }
 
-        // ================ Fetch Patients ================
+        // ============================================
+        // ✅ جلب المرضى
+        // ============================================
         async function fetchPatients() {
             try {
-                const response = await fetch('/api/public/patients');
-                const result = await response.json();
+                const result = await apiCall('/public/patients');
 
-                if (result.success && result.patients) {
+                if (result && result.success && result.patients) {
                     allPatients = result.patients;
                     console.log('✅ تم جلب', allPatients.length, 'مريض');
                     applyFilters();
@@ -902,7 +910,9 @@
             }
         }
 
-        // ================ Apply Filters ================
+        // ============================================
+        // ✅ التصفية
+        // ============================================
         function applyFilters() {
             let filtered = [...allPatients];
 
@@ -927,7 +937,9 @@
             updateStats();
         }
 
-        // ================ Update Stats ================
+        // ============================================
+        // ✅ تحديث الإحصائيات
+        // ============================================
         function updateStats() {
             const total = allPatients.length;
             const booked = allPatients.filter(p => p.isBooked === true).length;
@@ -940,7 +952,9 @@
             document.getElementById('todayCount').textContent = today;
         }
 
-        // ================ WhatsApp ================
+        // ============================================
+        // ✅ واتساب
+        // ============================================
         function openWhatsApp(phone, patientName) {
             if (!phone) {
                 showToast('⚠️ رقم الجوال غير متوفر', 'error');
@@ -969,7 +983,9 @@
             window.open(url, '_blank');
         }
 
-        // ================ Render Patients ================
+        // ============================================
+        // ✅ عرض المرضى
+        // ============================================
         function renderPatients() {
             const list = document.getElementById('patientsList');
 
@@ -998,7 +1014,6 @@
 
                 return `
                     <div class="${cardClass}" style="animation-delay: ${index * 0.05}s;">
-                        <!-- Card Header -->
                         <div class="card-header">
                             <div class="patient-info">
                                 <div class="patient-avatar ${isHidden ? 'hidden-avatar' : (isBooked ? 'booked-avatar' : '')}">
@@ -1024,7 +1039,6 @@
                             </div>
                         </div>
 
-                        <!-- Card Body -->
                         <div class="card-body">
                             <div class="detail-grid">
                                 <div class="detail-item">
@@ -1052,7 +1066,6 @@
                                 </div>
                             </div>
 
-                            <!-- Description Full -->
                             ${p.description ? `
                             <div class="description-full ${isHidden ? 'hidden-desc' : ''}">
                                 <span class="desc-label"><i class="fas fa-notes-medical"></i> الوصف الطبي:</span>
@@ -1061,7 +1074,6 @@
                             ` : ''}
                         </div>
 
-                        <!-- Card Footer -->
                         <div class="card-footer">
                             <span class="date">
                                 <i class="fas fa-calendar-alt"></i>
@@ -1085,7 +1097,9 @@
             }).join('');
         }
 
-        // ================ Set Filter ================
+        // ============================================
+        // ✅ التصفية والبحث
+        // ============================================
         function setFilter(filter) {
             currentFilter = filter;
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1094,13 +1108,14 @@
             applyFilters();
         }
 
-        // ================ Search ================
         function searchPatients() {
             searchQuery = document.getElementById('searchInput').value;
             applyFilters();
         }
 
-        // ================ Auto Refresh ================
+        // ============================================
+        // ✅ التحديث التلقائي
+        // ============================================
         function startAutoRefresh() {
             if (refreshInterval) clearInterval(refreshInterval);
             refreshInterval = setInterval(fetchPatients, 30000);
@@ -1113,7 +1128,9 @@
             }
         }
 
-        // ================ Init ================
+        // ============================================
+        // ✅ بدء التشغيل
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             // ✅ التحقق من الاشتراك أولاً
             checkSubscription();
