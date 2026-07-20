@@ -44,7 +44,6 @@
             }
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #1A5F7A 0%, #2D8FAB 100%);
             padding: 30px 24px;
@@ -96,12 +95,136 @@
             font-weight: 300;
         }
 
-        /* Body */
         .body {
             padding: 24px;
         }
 
-        /* Success State */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8edf5;
+        }
+
+        .section-header i {
+            color: #1A5F7A;
+            font-size: 20px;
+            width: 30px;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A5F7A;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .form-label .required {
+            color: #e74c3c;
+            margin-right: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+            color: #1a202c;
+            text-align: right;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1A5F7A;
+            box-shadow: 0 0 0 4px rgba(26, 95, 122, 0.1);
+            background: #ffffff;
+        }
+
+        .form-control.error {
+            border-color: #e74c3c;
+        }
+
+        .form-control.error:focus {
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .error-text {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1A5F7A 0%, #2D8FAB 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(26, 95, 122, 0.35);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-submit .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .success-state {
             text-align: center;
             padding: 40px 20px;
@@ -161,216 +284,6 @@
             box-shadow: 0 8px 25px rgba(26, 95, 122, 0.3);
         }
 
-        /* Form */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 6px;
-        }
-
-        .form-label .required {
-            color: #e74c3c;
-            margin-right: 4px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-            background: #fafbfc;
-            color: #1a202c;
-            text-align: right;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #1A5F7A;
-            box-shadow: 0 0 0 4px rgba(26, 95, 122, 0.1);
-            background: #ffffff;
-        }
-
-        .form-control.error {
-            border-color: #e74c3c;
-        }
-
-        .form-control.error:focus {
-            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
-        }
-
-        .form-control::placeholder {
-            color: #a0aec0;
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a5568' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 16px center;
-            padding-left: 40px;
-        }
-
-        .error-text {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 4px;
-            display: none;
-        }
-
-        .error-text.show {
-            display: block;
-        }
-
-        /* Radio Group */
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            padding-top: 4px;
-        }
-
-        .radio-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            padding: 10px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .radio-label:hover {
-            border-color: #1A5F7A;
-            background: #f0f7fa;
-        }
-
-        .radio-label input[type="radio"] {
-            accent-color: #1A5F7A;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .radio-label.active {
-            border-color: #1A5F7A;
-            background: #e8f0f5;
-        }
-
-        .radio-label .radio-icon {
-            font-size: 18px;
-        }
-
-        .radio-label .radio-icon.pay {
-            color: #4CAF50;
-        }
-
-        .radio-label .radio-icon.free {
-            color: #FF9800;
-        }
-
-        /* Submit Button */
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #1A5F7A 0%, #2D8FAB 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(26, 95, 122, 0.35);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-submit .spinner {
-            width: 22px;
-            height: 22px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Section Header */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e8edf5;
-        }
-
-        .section-header i {
-            color: #1A5F7A;
-            font-size: 20px;
-            width: 30px;
-        }
-
-        .section-header h2 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1A5F7A;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 16px 24px 20px;
-            border-top: 1px solid #e8edf5;
-            color: #a0aec0;
-            font-size: 13px;
-        }
-
-        .footer a {
-            color: #1A5F7A;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -412,43 +325,85 @@
             display: block;
         }
 
-        /* Responsive */
+        .footer {
+            text-align: center;
+            padding: 16px 24px 20px;
+            border-top: 1px solid #e8edf5;
+            color: #a0aec0;
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: #1A5F7A;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            padding-top: 4px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 10px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .radio-label:hover {
+            border-color: #1A5F7A;
+            background: #f0f7fa;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: #1A5F7A;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-label.active {
+            border-color: #1A5F7A;
+            background: #e8f0f5;
+        }
+
         @media (max-width: 480px) {
             .header {
                 padding: 20px 16px;
             }
-
             .header-text h1 {
                 font-size: 20px;
             }
-
             .body {
                 padding: 16px;
             }
-
             .radio-group {
                 flex-direction: column;
                 gap: 8px;
             }
-
             .container {
                 border-radius: 16px;
-            }
-
-            .form-control {
-                font-size: 15px;
-                padding: 12px 14px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="header-content">
                 <div class="header-icon">
@@ -461,13 +416,9 @@
             </div>
         </div>
 
-        <!-- Body -->
         <div class="body" id="formBody">
-            <!-- Success State (hidden by default) -->
             <div id="successState" class="success-state" style="display: none;">
-                <div class="success-icon">
-                    <i class="fas fa-check"></i>
-                </div>
+                <div class="success-icon"><i class="fas fa-check"></i></div>
                 <h2>تم التسجيل بنجاح!</h2>
                 <p>شكراً لك، سيتم التواصل معك قريباً</p>
                 <button class="btn-reset" onclick="resetForm()">
@@ -475,34 +426,26 @@
                 </button>
             </div>
 
-            <!-- Form -->
             <form id="patientForm" onsubmit="submitForm(event)">
-                <!-- البيانات الشخصية -->
                 <div class="section-header">
                     <i class="fas fa-user"></i>
                     <h2>البيانات الشخصية</h2>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <span class="required">*</span> الاسم الكامل
-                    </label>
+                    <label class="form-label"><span class="required">*</span> الاسم الكامل</label>
                     <input type="text" class="form-control" id="name" placeholder="أدخل الاسم الكامل" required>
                     <div class="error-text" id="nameError">الرجاء إدخال الاسم</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <span class="required">*</span> رقم الجوال
-                    </label>
+                    <label class="form-label"><span class="required">*</span> رقم الجوال</label>
                     <input type="tel" class="form-control" id="phone" placeholder="05xxxxxxxx" required>
                     <div class="error-text" id="phoneError">الرجاء إدخال رقم جوال صحيح</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <span class="required">*</span> الجنس
-                    </label>
+                    <label class="form-label"><span class="required">*</span> الجنس</label>
                     <select class="form-control" id="gender" required>
                         <option value="">اختر الجنس</option>
                         <option value="ذكر">ذكر</option>
@@ -516,7 +459,6 @@
                     <input type="text" class="form-control" id="address" placeholder="المدينة - الحي - الشارع">
                 </div>
 
-                <!-- الوصف الطبي -->
                 <div class="section-header" style="margin-top: 8px;">
                     <i class="fas fa-notes-medical"></i>
                     <h2>الوصف الطبي</h2>
@@ -527,29 +469,6 @@
                     <textarea class="form-control" id="description" placeholder="اكتب وصفاً موجزاً للمشكلة أو الأعراض..."></textarea>
                 </div>
 
-                <!-- الدفع -->
-                <div class="section-header" style="margin-top: 8px;">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <h2>خيارات الدفع</h2>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">هل ستدفع؟</label>
-                    <div class="radio-group">
-                        <label class="radio-label active" id="payLabel" onclick="selectPayOption(true)">
-                            <input type="radio" name="willPay" value="1" checked>
-                            <span class="radio-icon pay">💰</span>
-                            سأدفع
-                        </label>
-                        <label class="radio-label" id="freeLabel" onclick="selectPayOption(false)">
-                            <input type="radio" name="willPay" value="0">
-                            <span class="radio-icon free">🆓</span>
-                            مجاني
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Submit -->
                 <button type="submit" class="btn-submit" id="submitBtn">
                     <i class="fas fa-save"></i>
                     تسجيل المريض
@@ -557,41 +476,16 @@
             </form>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
             © 2026 <a href="#">عيادة الأسنان</a> - جميع الحقوق محفوظة
         </div>
     </div>
 
     <script>
-        // ================ State ================
         let willPay = true;
 
-        // ================ DOM Elements ================
-        const form = document.getElementById('patientForm');
-        const formBody = document.getElementById('formBody');
-        const successState = document.getElementById('successState');
-        const submitBtn = document.getElementById('submitBtn');
-        const toast = document.getElementById('toast');
-
-        // ================ Functions ================
-        function selectPayOption(pay) {
-            willPay = pay;
-            const payLabel = document.getElementById('payLabel');
-            const freeLabel = document.getElementById('freeLabel');
-
-            if (pay) {
-                payLabel.classList.add('active');
-                freeLabel.classList.remove('active');
-                document.querySelector('input[name="willPay"][value="1"]').checked = true;
-            } else {
-                freeLabel.classList.add('active');
-                payLabel.classList.remove('active');
-                document.querySelector('input[name="willPay"][value="0"]').checked = true;
-            }
-        }
-
         function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = `toast ${type} show`;
             clearTimeout(toast._timeout);
@@ -601,96 +495,88 @@
         }
 
         function resetForm() {
-            form.reset();
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('gender').value = '';
-            document.getElementById('address').value = '';
-            document.getElementById('description').value = '';
-
-            // Reset radio
-            selectPayOption(true);
-
-            // Hide success, show form
-            successState.style.display = 'none';
-            form.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save"></i> تسجيل المريض';
-
-            // Clear errors
+            document.getElementById('patientForm').reset();
+            document.getElementById('successState').style.display = 'none';
+            document.getElementById('patientForm').style.display = 'block';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> تسجيل المريض';
             document.querySelectorAll('.error-text').forEach(el => el.classList.remove('show'));
             document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
-
             showToast('تم إعادة تعيين النموذج', 'success');
         }
 
-        function validateField(input, errorId, condition) {
-            const errorEl = document.getElementById(errorId);
-            if (!condition) {
-                input.classList.add('error');
-                errorEl.classList.add('show');
-                return false;
-            } else {
-                input.classList.remove('error');
-                errorEl.classList.remove('show');
-                return true;
-            }
-        }
-
-        // ================ Submit ================
         async function submitForm(event) {
             event.preventDefault();
 
-            // ===== Validate =====
             const name = document.getElementById('name');
             const phone = document.getElementById('phone');
             const gender = document.getElementById('gender');
             const address = document.getElementById('address');
             const description = document.getElementById('description');
 
-            const isNameValid = validateField(name, 'nameError', name.value.trim().length >= 2);
-            const isPhoneValid = validateField(phone, 'phoneError', /^[0-9]{10,12}$/.test(phone.value.trim()));
-            const isGenderValid = validateField(gender, 'genderError', gender.value !== '');
+            // Validation
+            let valid = true;
 
-            if (!isNameValid || !isPhoneValid || !isGenderValid) {
+            if (name.value.trim().length < 2) {
+                name.classList.add('error');
+                document.getElementById('nameError').classList.add('show');
+                valid = false;
+            } else {
+                name.classList.remove('error');
+                document.getElementById('nameError').classList.remove('show');
+            }
+
+            if (!/^[0-9]{10,12}$/.test(phone.value.trim())) {
+                phone.classList.add('error');
+                document.getElementById('phoneError').classList.add('show');
+                valid = false;
+            } else {
+                phone.classList.remove('error');
+                document.getElementById('phoneError').classList.remove('show');
+            }
+
+            if (gender.value === '') {
+                gender.classList.add('error');
+                document.getElementById('genderError').classList.add('show');
+                valid = false;
+            } else {
+                gender.classList.remove('error');
+                document.getElementById('genderError').classList.remove('show');
+            }
+
+            if (!valid) {
                 showToast('الرجاء تصحيح الأخطاء في النموذج', 'error');
                 return;
             }
 
-            // ===== Prepare Data =====
             const data = {
                 name: name.value.trim(),
                 phone: phone.value.trim(),
                 gender: gender.value,
                 address: address.value.trim(),
                 description: description.value.trim(),
-                willPay: willPay,
-                registeredAt: new Date().toISOString()
+                willPay: true,
+                registeredAt: new Date().toISOString(),
+                isBooked: false
             };
 
-            console.log('📤 Sending:', data);
-
-            // ===== Loading =====
+            const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> جاري التسجيل...';
 
             try {
                 const response = await fetch('https://clinicprosystem.koyeb.app/api/public/patient-register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
                 });
 
                 const result = await response.json();
-                console.log('📡 Response:', result);
 
                 if (response.ok && result.success === true) {
-                    // ===== Success =====
                     showToast('✅ تم تسجيل المريض بنجاح!', 'success');
-                    form.style.display = 'none';
-                    successState.style.display = 'block';
+                    document.getElementById('patientForm').style.display = 'none';
+                    document.getElementById('successState').style.display = 'block';
                 } else {
                     const errorMsg = result.error || result.message || 'فشل في التسجيل';
                     showToast(`❌ ${errorMsg}`, 'error');
@@ -705,7 +591,6 @@
             }
         }
 
-        // ================ Real-time validation ================
         document.getElementById('name').addEventListener('input', function() {
             if (this.value.trim().length >= 2) {
                 this.classList.remove('error');
@@ -714,8 +599,7 @@
         });
 
         document.getElementById('phone').addEventListener('input', function() {
-            const isValid = /^[0-9]{10,12}$/.test(this.value.trim());
-            if (isValid) {
+            if (/^[0-9]{10,12}$/.test(this.value.trim())) {
                 this.classList.remove('error');
                 document.getElementById('phoneError').classList.remove('show');
             }
