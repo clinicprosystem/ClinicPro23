@@ -423,6 +423,61 @@
             opacity: 0.7;
         }
 
+        /* ===== UNIVERSITY STUDENTS BUTTON ===== */
+        .university-btn {
+            background: linear-gradient(135deg, #1A5F7A, #57C0E8);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(26, 95, 122, 0.25);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .university-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(26, 95, 122, 0.35);
+        }
+
+        .university-btn .content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .university-btn .left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .university-btn .icon-circle {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .university-btn .title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .university-btn .subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .university-btn .arrow {
+            font-size: 20px;
+            opacity: 0.7;
+        }
+
         /* ===== RECENT TREATMENTS ===== */
         .recent-section {
             background: white;
@@ -599,6 +654,9 @@
             .stat-card { padding: 16px 12px; }
             .stat-card .value { font-size: 22px; }
             .header .left h1 { font-size: 18px; }
+            .university-btn .content { flex-direction: column; text-align: center; gap: 12px; }
+            .university-btn .left { flex-direction: column; }
+            .university-btn .arrow { display: none; }
         }
 
         @media (max-width: 480px) {
@@ -628,11 +686,9 @@
         <div class="role" id="userRole">صاحب عيادة</div>
     </div>
     <ul>
-        <!-- ✅ الرئيسية - تبقى في نفس الصفحة -->
         <li class="active" onclick="renderDashboard()">
             <i class="fas fa-chart-pie"></i> الرئيسية
         </li>
-        <!-- ✅ باقي الروابط مباشرة إلى صفحات HTML -->
         <li onclick="window.location.href='patients.html'">
             <i class="fas fa-users"></i> المرضى
             <span class="badge" id="patientsBadge">0</span>
@@ -645,7 +701,6 @@
             <i class="fas fa-list"></i> الخدمات والأسعار
         </li>
 
-        <!-- ✅ قسم الإدارة - يظهر لصاحب العيادة فقط -->
         <li class="section-label" id="adminLabel">الإدارة</li>
         <li onclick="window.location.href='doctors.html'" id="menuDoctors">
             <i class="fas fa-user-md"></i> الأطباء
@@ -671,7 +726,6 @@
             <i class="fas fa-user-circle"></i> الملف الشخصي
         </li>
 
-        <!-- ✅ باقات الاشتراك -->
         <li onclick="window.location.href='subscription-plans.html'">
             <i class="fas fa-crown"></i> باقات الاشتراك
         </li>
@@ -740,14 +794,12 @@ function toggleSidebar() {
     }
 }
 
-// ✅ إغلاق القائمة عند الضغط على الخلفية
 document.getElementById('sidebarOverlay').addEventListener('click', function() {
     if (window.innerWidth <= 768) {
         toggleSidebar();
     }
 });
 
-// ✅ إغلاق القائمة عند الضغط على ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const sidebar = document.getElementById('sidebar');
@@ -757,7 +809,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// ✅ إغلاق القائمة عند اختيار عنصر منها في الشاشات الصغيرة
 document.querySelectorAll('.sidebar ul li').forEach(item => {
     item.addEventListener('click', function() {
         if (window.innerWidth <= 768) {
@@ -790,6 +841,32 @@ function updateSidebarVisibility() {
     if (labItem) {
         labItem.style.display = isUniversityStudent ? 'none' : 'flex';
     }
+}
+
+// ============================================
+// ✅ عرض زر المرضى العامين (لطلاب الجامعة فقط)
+// ============================================
+function renderUniversityButton() {
+    if (!isUniversityStudent) return '';
+    
+    return `
+        <div class="university-btn" onclick="window.location.href='university_students_patients.html'">
+            <div class="content">
+                <div class="left">
+                    <div class="icon-circle">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <div class="title">👨‍🎓 عرض المرضى العامين</div>
+                        <div class="subtitle">جميع المرضى المسجلين عبر البوابة العامة</div>
+                    </div>
+                </div>
+                <div class="arrow">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ============================================
@@ -866,6 +943,9 @@ async function renderDashboard() {
         }
 
         const userName = userData?.name || 'طبيب الأسنان';
+        
+        // ✅ زر المرضى العامين - يظهر فقط لطلاب الجامعة
+        const universityBtnHtml = renderUniversityButton();
 
         container.innerHTML = `
             <div class="welcome-card">
@@ -876,6 +956,7 @@ async function renderDashboard() {
                 </div>
             </div>
             ${subscriptionHtml}
+            ${universityBtnHtml}
             <div class="stats-grid">
                 <div class="stat-card" onclick="window.location.href='patients.html'">
                     <div class="icon blue"><i class="fas fa-users"></i></div>
@@ -996,7 +1077,6 @@ if (userData?.name) {
 updateSidebarVisibility();
 renderDashboard();
 
-// ✅ إغلاق القائمة عند تغيير حجم النافذة
 window.addEventListener('resize', function() {
     if (window.innerWidth > 768) {
         const sidebar = document.getElementById('sidebar');
@@ -1010,6 +1090,7 @@ window.addEventListener('resize', function() {
 console.log('✅ ClinicPro Dashboard - Flutter to HTML Converted Successfully!');
 console.log('👤 User:', userData?.name, '| Role:', userRole);
 console.log('🏥 Clinic ID:', clinicId);
+console.log('🎓 Is University Student:', isUniversityStudent);
 </script>
 
 </body>
