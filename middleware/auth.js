@@ -5,76 +5,146 @@ const Clinic = require('../models/Clinic');  // ✅ أضف هذا
 const authMiddleware = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
-        
+
         if (!token) {
-            return res.status(401).json({ error: 'الرجاء تسجيل الدخول أولاً' });
+            return res.status(401).json({
+                error: 'الرجاء تسجيل الدخول أولاً'
+            });
         }
-        
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
         const user = await User.findById(decoded.userId);
-        
+
         if (!user || !user.isActive) {
-            return res.status(401).json({ error: 'حساب غير صالح' });
+            return res.status(401).json({
+                error: 'حساب غير صالح'
+            });
         }
-        
+
+        // ==============================
+        // بيانات المستخدم
+        // ==============================
         req.userId = user._id;
         req.userRole = user.role;
         req.clinicId = user.clinicId;
-        
-        // ✅ التحقق من صلاحية الاشتراك للمستخدمين التابعين (سكرتير، طبيب)
-        if (user.role === 'secretary' || user.role === 'doctor') {
+
+        // ==============================
+        // جلب بيانات العيادة
+        // ==============================
+        if (user.clinicId) {
             const clinic = await Clinic.findById(user.clinicId);
+
             if (!clinic) {
-                return res.status(403).json({ error: 'عيادة غير موجودة' });
-            }
-            
-            const now = new Date();
-            let isSubscriptionActive = false;
-            
-            // ✅ تحقق من صلاحية العيادة
-            if (clinic.subscriptionType === 'university_student') {
-                isSubscriptionActive = true;
-            }
-            else if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < new Date(clinic.trialEndDate)) {
-                isSubscriptionActive = true;
-            }
-            else if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < new Date(clinic.subscriptionEndDate)) {
-                isSubscriptionActive = true;
-            }
-            
-            if (!isSubscriptionActive) {
-                return res.status(403).json({ 
-                    error: 'انتهت صلاحية اشتراك العيادة. يرجى التواصل مع صاحب العيادة للتجديد.',
-                    code: 'SUBSCRIPTION_EXPIRED'
+                return res.status(403).json({
+                    error: 'عيادة غير موجودة'
                 });
             }
-            
-            // ✅ تحديث حالة المستخدم التابع لتتطابق مع العيادة
-            await User.findByIdAndUpdate(user._id, {
-                subscriptionStatus: isSubscriptionActive ? (clinic.subscriptionStatus === 'trial' ? 'trial' : 'active') : 'expired',
-                subscriptionType: clinic.subscriptionType
-            });
-            
-            // ✅ ✅ ✅ أضف هذه الأسطر لجلب بيانات العيادة في الطلب
-            req.subscriptionType = clinic.subscriptionType;
-            req.subscriptionStatus = isSubscriptionActive ? (clinic.subscriptionStatus === 'trial' ? 'trial' : 'active') : 'expired';
-            req.clinicData = clinic; // ✅ جلب بيانات العيادة كاملة
-        }
-        
-        // ✅ ✅ ✅ إذا كان المستخدم صاحب عيادة، جلب بيانات العيادة أيضاً
-        if (user.role === 'clinic_owner' || user.role === 'university_student') {
-            const clinic = await Clinic.findById(user.clinicId);
-            if (clinic) {
-                req.clinicData = clinic;
-                req.subscriptionType = clinic.subscriptionType;
-                req.subscriptionStatus = clinic.subscriptionStatus;
+
+            // تحديث الاشتراك بشكل ديناميكي
+            const now = new Date();
+
+            let subscriptionStatus =
+                clinic.subscriptionStatus || 'trial';
+
+            const subscriptionType =
+                clinic.subscriptionType || 'trial';
+
+            let isSubscriptionActive = false;
+
+            // ==============================
+            // الطالب الجامعي
+            // ==============================
+            if (subscriptionType === 'university_student') {
+                isSubscriptionActive = true;
+                subscriptionStatus = 'active';
+            }
+
+            // ==============================
+            // الفترة التجريبية
+            // ==============================
+            else if (
+                subscriptionStatus === 'trial' &&
+                clinic.trialEndDate &&
+                now < new Date(clinic.trialEndDate)
+            ) {
+                isSubscriptionActive = true;
+            }
+
+            // ==============================
+            // الاشتراك المدفوع
+            // ==============================
+            else if (
+                subscriptionStatus === 'active' &&
+                clinic.subscriptionEndDate &&
+                now < new Date(clinic.subscriptionEndDate)
+            ) {
+                isSubscriptionActive = true;
+            }
+
+            // ==============================
+            // انتهاء الاشتراك
+            // ==============================
+            else {
+                isSubscriptionActive = false;
+
+                if (
+                    subscriptionStatus === 'trial' ||
+                    subscriptionStatus === 'active'
+                ) {
+                    subscriptionStatus = 'expired';
+                }
+            }
+
+            // ==============================
+            // إذا انتهى الاشتراك
+            // لا نمنع تسجيل الدخول
+            // ==============================
+
+            req.subscriptionType = subscriptionType;
+            req.subscriptionStatus = subscriptionStatus;
+            req.isSubscriptionActive = isSubscriptionActive;
+
+            // بيانات العيادة متاحة لباقي المسارات
+            req.clinicData = clinic;
+
+            // ==============================
+            // تحديث بيانات المستخدم التابع
+            // ==============================
+            if (
+                user.role === 'secretary' ||
+                user.role === 'doctor'
+            ) {
+                await User.findByIdAndUpdate(user._id, {
+                    subscriptionType: subscriptionType,
+                    subscriptionStatus: subscriptionStatus,
+                    subscriptionEndDate:
+                        clinic.subscriptionEndDate || null,
+                    trialEndDate:
+                        clinic.trialEndDate || null
+                });
+            }
+
+            // ==============================
+            // تحديث حالة العيادة في قاعدة البيانات
+            // ==============================
+            if (
+                clinic.subscriptionStatus !== subscriptionStatus &&
+                subscriptionType !== 'university_student'
+            ) {
+                clinic.subscriptionStatus = subscriptionStatus;
+                await clinic.save();
             }
         }
-        
+
         next();
+
     } catch (error) {
         console.error('Auth error:', error);
-        res.status(401).json({ error: 'توكن غير صالح' });
+
+        return res.status(401).json({
+            error: 'توكن غير صالح'
+        });
     }
 };
 
