@@ -69,11 +69,19 @@ const requireActiveSubscription = async (req, res, next) => {
         }
 
         // الاشتراك منتهي
-        return res.status(403).json({
-            success: false,
-            code: 'SUBSCRIPTION_EXPIRED',
-            error: 'انتهت صلاحية الاشتراك. يرجى تجديد الاشتراك.'
-        });
+if (
+    clinic.subscriptionStatus === 'trial' ||
+    clinic.subscriptionStatus === 'active'
+) {
+    clinic.subscriptionStatus = 'expired';
+    await clinic.save();
+}
+
+return res.status(403).json({
+    success: false,
+    code: 'SUBSCRIPTION_EXPIRED',
+    error: 'انتهت صلاحية الاشتراك. يرجى تجديد الاشتراك.'
+});
 
     } catch (error) {
         console.error('Subscription middleware error:', error);
