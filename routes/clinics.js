@@ -732,9 +732,7 @@ router.get('/subscription/status', authMiddleware, async (req, res) => {
                 error: 'عيادة غير موجودة'
             });
         }
-        if (!clinic) {
-            return res.status(404).json({ error: 'عيادة غير موجودة' });
-        }
+        
         
         const now = new Date();
         let subscriptionType = clinic.subscriptionType || 'trial';
