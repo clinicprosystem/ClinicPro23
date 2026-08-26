@@ -5,6 +5,7 @@ const Treatment = require('../models/Treatment');
 const Patient = require('../models/Patient');
 const Clinic = require('../models/Clinic');
 const { authMiddleware, secretaryOrOwner } = require('../middleware/auth');
+const { requireActiveSubscription } = require('../middleware/subscription');
 const router = express.Router();
 
 router.use(authMiddleware);
@@ -44,7 +45,7 @@ async function canAddTreatment(clinicId) {
 }
 
 // إضافة معالجة جديدة
-router.post('/', async (req, res) => {
+router.post('/', requireActiveSubscription, async (req, res) => {
     try {
         // ✅ التحقق من حدود الفترة التجريبية
         const canAdd = await canAddTreatment(req.clinicId);
