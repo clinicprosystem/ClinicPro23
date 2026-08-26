@@ -2,6 +2,7 @@ const express = require('express');
 const Patient = require('../models/Patient');
 const User = require('../models/User');
 const { authMiddleware, secretaryOrOwner } = require('../middleware/auth');
+const { requireActiveSubscription } = require('../middleware/subscription');
 const router = express.Router();
 
 // ============================================================
@@ -243,7 +244,7 @@ router.get('/', async (req, res) => {
 });
 
 // إضافة مريض جديد (للعيادة)
-router.post('/', async (req, res) => {
+router.post('/', requireActiveSubscription, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     
@@ -274,7 +275,7 @@ router.post('/', async (req, res) => {
 });
 
 // حذف مريض
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireActiveSubscription, async (req, res) => {
   try {
     await Patient.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -285,7 +286,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // تعديل بيانات مريض
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireActiveSubscription, async (req, res) => {
   try {
     const patient = await Patient.findByIdAndUpdate(
       req.params.id,
