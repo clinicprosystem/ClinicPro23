@@ -784,6 +784,7 @@ router.get('/subscription/status', authMiddleware, async (req, res) => {
             canAddData: canAddData,
             endDate: endDate,
             daysLeft: daysLeft,
+            serverTime: new Date().toISOString(),
             message: message
         });
     } catch (error) {
