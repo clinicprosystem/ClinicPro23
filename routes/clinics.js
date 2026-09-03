@@ -13,143 +13,247 @@ const router = express.Router();
 
 
 // ✅ دالة للتحقق من صلاحية الإضافة (للمرضى والمعالجات)
+
 async function canAddData(clinicId) {
-    // تحديث حالة الاشتراك أولاً
     await updateSubscriptionStatus(clinicId);
-    
+
     const clinic = await Clinic.findById(clinicId);
     if (!clinic) return false;
-    
+
     const now = new Date();
-    
-    // إذا كان الحساب موقوف
-    if (clinic.isFrozen) return false;
-    
-    // إذا كانت فترة تجريبية ولم تنته
-    if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < new Date(clinic.trialEndDate)) {
+
+    // الحساب المجمد
+    if (clinic.isFrozen) {
+        return false;
+    }
+
+    // طالب جامعي
+    if (clinic.subscriptionType === 'university_student') {
         return true;
     }
-    
-    // إذا كان اشتراك نشط ولم ينته
-    if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < new Date(clinic.subscriptionEndDate)) {
+
+    // فترة تجريبية
+    if (
+        clinic.subscriptionStatus === 'trial' &&
+        clinic.trialEndDate &&
+        now < new Date(clinic.trialEndDate)
+    ) {
         return true;
     }
-    
+
+    // اشتراك مدفوع
+    if (
+        clinic.subscriptionStatus === 'active' &&
+        clinic.subscriptionEndDate &&
+        now < new Date(clinic.subscriptionEndDate)
+    ) {
+        return true;
+    }
+
     return false;
 }
+
 // ✅ دالة للتحقق من عدد الأطباء في الفترة التجريبية (حد أقصى 2)
 async function canAddDoctorInTrial(clinicId) {
     await updateSubscriptionStatus(clinicId);
-    
+
     const clinic = await Clinic.findById(clinicId);
-    if (clinic.subscriptionStatus !== 'trial') return true;
-    
-    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+
+    if (!clinic) return false;
+
+    // خارج الفترة التجريبية لا يوجد هذا الحد
+    if (clinic.subscriptionStatus !== 'trial') {
+        return true;
+    }
+
+    const now = new Date();
+
+    // انتهت التجربة
+    if (
+        !clinic.trialEndDate ||
+        now >= new Date(clinic.trialEndDate)
+    ) {
         return false;
     }
-    
+
     const doctorsCount = clinic.doctors?.length || 0;
-    return doctorsCount < 2;  // حد أقصى 2 أطباء
+
+    return doctorsCount < 2;
 }
 
 // ✅ دالة للتحقق من عدد السكرتيرات في الفترة التجريبية (حد أقصى 1)
 async function canAddSecretaryInTrial(clinicId) {
     await updateSubscriptionStatus(clinicId);
-    
+
     const clinic = await Clinic.findById(clinicId);
-    if (clinic.subscriptionStatus !== 'trial') return true;
-    
-    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+
+    if (!clinic) return false;
+
+    if (clinic.subscriptionStatus !== 'trial') {
+        return true;
+    }
+
+    const now = new Date();
+
+    if (
+        !clinic.trialEndDate ||
+        now >= new Date(clinic.trialEndDate)
+    ) {
         return false;
     }
-    
-    const secretariesCount = clinic.secretaries?.length || 0;
-    return secretariesCount < 1;  // حد أقصى 1 سكرتير
+
+    const secretariesCount = await User.countDocuments({
+        clinicId: clinicId,
+        role: 'secretary'
+    });
+
+    return secretariesCount < 1;
 }
 
 // ✅ دالة للتحقق من عدد الخدمات الرئيسية في الفترة التجريبية (حد أقصى 2)
 async function canAddMainServiceInTrial(clinicId) {
     await updateSubscriptionStatus(clinicId);
-    
+
     const clinic = await Clinic.findById(clinicId);
-    if (clinic.subscriptionStatus !== 'trial') return true;
-    
-    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+
+    if (!clinic) return false;
+
+    if (clinic.subscriptionStatus !== 'trial') {
+        return true;
+    }
+
+    const now = new Date();
+
+    if (
+        !clinic.trialEndDate ||
+        now >= new Date(clinic.trialEndDate)
+    ) {
         return false;
     }
-    
+
     const servicesCount = clinic.mainServices?.length || 0;
-    return servicesCount < 2;  // حد أقصى 2 خدمات رئيسية
+
+    return servicesCount < 2;
 }
 
 // ✅ دالة للتحقق من عدد المعالجات في الفترة التجريبية
 async function canAddTreatmentInTrial(clinicId) {
-    // تحديث حالة الاشتراك أولاً
     await updateSubscriptionStatus(clinicId);
-    
+
     const clinic = await Clinic.findById(clinicId);
-    if (clinic.subscriptionStatus !== 'trial') return true;
-    
-    // التحقق من تاريخ انتهاء التجربة
-    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+
+    if (!clinic) return false;
+
+    if (clinic.subscriptionStatus !== 'trial') {
+        return true;
+    }
+
+    const now = new Date();
+
+    if (
+        !clinic.trialEndDate ||
+        now >= new Date(clinic.trialEndDate)
+    ) {
         return false;
     }
-    
-    // حساب عدد المعالجات
-    const Treatment = require('../models/Treatment');
-    const treatmentsCount = await Treatment.countDocuments({ clinicId: clinicId });
-    
-    return treatmentsCount < 3;  // حد أقصى 3 معالجات
+
+    const treatmentsCount = await Treatment.countDocuments({
+        clinicId: clinicId
+    });
+
+    return treatmentsCount < 3;
 }
 
 // ✅ دالة للتحقق من عدد المرضى في الفترة التجريبية
 async function canAddPatientInTrial(clinicId) {
     await updateSubscriptionStatus(clinicId);
-    
+
     const clinic = await Clinic.findById(clinicId);
-    if (clinic.subscriptionStatus !== 'trial') return true;
-    
-    if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
+
+    if (!clinic) return false;
+
+    if (clinic.subscriptionStatus !== 'trial') {
+        return true;
+    }
+
+    const now = new Date();
+
+    if (
+        !clinic.trialEndDate ||
+        now >= new Date(clinic.trialEndDate)
+    ) {
         return false;
     }
-    
-    const patientsCount = await Patient.countDocuments({ clinicId: clinicId });
-    return patientsCount < 3;  // حد أقصى 3 مرضى
+
+    const patientsCount = await Patient.countDocuments({
+        clinicId: clinicId
+    });
+
+    return patientsCount < 3;
 }
 
 // ✅ دالة لتحديث حالة الاشتراك تلقائياً
 async function updateSubscriptionStatus(clinicId) {
     const clinic = await Clinic.findById(clinicId);
-    if (!clinic) return;
-    
+
+    if (!clinic) return null;
+
     const now = new Date();
     let newStatus = clinic.subscriptionStatus;
-    let newSubscriptionType = clinic.subscriptionType;
-    
-    // ✅ التحقق من انتهاء الفترة التجريبية
-    if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now > new Date(clinic.trialEndDate)) {
-        newStatus = 'expired';
-        console.log(`⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`);
+
+    // الحساب المجمد لا نغير اشتراكه إلى expired
+    // لأن isFrozen حالة مستقلة عن انتهاء الاشتراك
+
+    // طالب جامعي
+    if (clinic.subscriptionType === 'university_student') {
+        newStatus = 'active';
     }
-    
-    // ✅ التحقق من انتهاء الاشتراك المدفوع
-    if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now > new Date(clinic.subscriptionEndDate)) {
+
+    // الفترة التجريبية
+    else if (
+        clinic.subscriptionStatus === 'trial' &&
+        clinic.trialEndDate &&
+        now >= new Date(clinic.trialEndDate)
+    ) {
         newStatus = 'expired';
-        console.log(`⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`);
+
+        console.log(
+            `⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`
+        );
     }
-    
-    // ✅ إذا تغيرت الحالة، قم بتحديث العيادة وجميع المستخدمين التابعين
+
+    // الاشتراك المدفوع
+    else if (
+        clinic.subscriptionStatus === 'active' &&
+        clinic.subscriptionEndDate &&
+        now >= new Date(clinic.subscriptionEndDate)
+    ) {
+        newStatus = 'expired';
+
+        console.log(
+            `⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`
+        );
+    }
+
+    // إذا تغيرت الحالة
     if (newStatus !== clinic.subscriptionStatus) {
+
         clinic.subscriptionStatus = newStatus;
+
         await clinic.save();
-        
-        // ✅ تحديث جميع السكرتيرات والأطباء التابعين إلى expired
-        await updateAllUsersSubscription(clinicId, clinic.subscriptionType, newStatus);
-        
-        console.log(`✅ تم تحديث ${newStatus} للعيادة وجميع المستخدمين التابعين`);
+
+        await updateAllUsersSubscription(
+            clinicId,
+            clinic.subscriptionType,
+            newStatus
+        );
+
+        console.log(
+            `✅ تم تحديث اشتراك العيادة ${clinic.name} إلى ${newStatus}`
+        );
     }
-    
-    return clinic.subscriptionStatus;
+
+    return newStatus;
 }
 // ✅ دالة لتحديث اشتراك جميع المستخدمين التابعين للعيادة
 async function updateAllUsersSubscription(clinicId, subscriptionType, subscriptionStatus) {
@@ -221,6 +325,17 @@ router.post(
     if (!clinic) {
       return res.status(404).json({ error: 'عيادة غير موجودة' });
     }
+      if (clinic.subscriptionStatus === 'trial') {
+    const allowed = await canAddDoctorInTrial(req.clinicId);
+
+    if (!allowed) {
+        return res.status(403).json({
+            success: false,
+            code: 'TRIAL_DOCTOR_LIMIT',
+            error: 'في الفترة التجريبية، يمكنك إضافة طبيبين فقط'
+        });
+    }
+      }
     
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
@@ -235,8 +350,10 @@ router.post(
       password: hashedPassword,
       role: 'doctor',
       clinicId: req.clinicId,
-      subscriptionType: clinic.subscriptionType || 'trial',  // ✅ نفس نوع اشتراك العيادة
-      subscriptionStatus: clinic.subscriptionStatus || 'trial',  // ✅ نفس حالة الاشتراك
+      subscriptionType: clinic.subscriptionType,
+subscriptionStatus: clinic.subscriptionStatus,
+subscriptionEndDate: clinic.subscriptionEndDate || null,
+trialEndDate: clinic.trialEndDate || null,
     });
     await doctorUser.save();
     
@@ -628,8 +745,7 @@ router.post(
     requireActiveSubscription,
     async (req, res) => {
   try {
-    const { name, phone, password, clinicId, subscriptionType, subscriptionStatus } = req.body;
-    
+    const { name, phone, password } = req.body;
     // ✅ التحقق من وجود العيادة
     const clinic = await Clinic.findById(req.clinicId);
     if (!clinic) {
@@ -644,29 +760,34 @@ router.post(
     
     // ✅ التحقق من حد 1 سكرتير في الفترة التجريبية
     if (clinic.subscriptionStatus === 'trial') {
-      const secretaryCount = await User.countDocuments({ 
-        clinicId: clinicId || req.clinicId, 
-        role: 'secretary' 
-      });
-      if (secretaryCount >= 1) {
-        return res.status(403).json({ error: 'في الفترة التجريبية، يمكنك إضافة سكرتير واحد فقط' });
-      }
+    const allowed = await canAddSecretaryInTrial(req.clinicId);
+
+    if (!allowed) {
+        return res.status(403).json({
+            success: false,
+            code: 'TRIAL_SECRETARY_LIMIT',
+            error: 'في الفترة التجريبية، يمكنك إضافة سكرتير واحد فقط'
+        });
+    }
     }
     
     // ✅ إنشاء حساب السكرتير مع نفس بيانات الاشتراك
     const hashedPassword = await bcrypt.hash(password, 10);
     const secretary = new User({
-      name,
-      phone,
-      password: hashedPassword,
-      role: 'secretary',
-      clinicId: req.clinicId,
-      subscriptionType: subscriptionType || clinic.subscriptionType || 'trial',  // ✅ نفس نوع الاشتراك
-      subscriptionStatus: subscriptionStatus || clinic.subscriptionStatus || 'trial',  // ✅ نفس حالة الاشتراك
-      subscriptionEndDate: clinic.subscriptionEndDate || null,
-      trialEndDate: clinic.trialEndDate || null,
-      isActive: true,
-    });
+    name,
+    phone,
+    password: hashedPassword,
+    role: 'secretary',
+    clinicId: req.clinicId,
+
+    subscriptionType: clinic.subscriptionType,
+    subscriptionStatus: clinic.subscriptionStatus,
+
+    subscriptionEndDate: clinic.subscriptionEndDate || null,
+    trialEndDate: clinic.trialEndDate || null,
+
+    isActive: true,
+});
     
     await secretary.save();
     
@@ -767,26 +888,36 @@ router.get('/subscription/status', authMiddleware, async (req, res) => {
         
         // ✅ إذا كان نوع الاشتراك university_student، فهو فعال
         if (subscriptionType === 'university_student') {
-            canAddData = true;
-            subscriptionStatus = 'active';
-            message = 'باقة طالب جامعي - مفعلة';
-        }
-        
-        if (clinic.isFrozen) {
-            canAddData = false;
-            message = 'الحساب موقوف مؤقتاً';
-        }
+    canAddData = true;
+    subscriptionStatus = 'active';
+    message = 'باقة طالب جامعي - مفعلة';
+}
+
+if (clinic.isFrozen) {
+    canAddData = false;
+    message = 'الحساب موقوف مؤقتاً';
+}
         
         res.json({
-            success: true,
-            subscriptionType: subscriptionType,
-            subscriptionStatus: subscriptionStatus,
-            canAddData: canAddData,
-            endDate: endDate,
-            daysLeft: daysLeft,
-            serverTime: new Date().toISOString(),
-            message: message
-        });
+    success: true,
+
+    subscriptionType: subscriptionType,
+    subscriptionStatus: subscriptionStatus,
+
+    canAddData: canAddData,
+
+    trialEndDate: clinic.trialEndDate || null,
+    subscriptionEndDate: clinic.subscriptionEndDate || null,
+
+    endDate: endDate,
+    daysLeft: daysLeft,
+
+    isFrozen: clinic.isFrozen || false,
+
+    serverTime: new Date().toISOString(),
+
+    message: message
+});
     } catch (error) {
         console.error('Error getting subscription status:', error);
         res.status(500).json({ error: error.message });
@@ -1045,7 +1176,10 @@ router.post(
 });
 
 // ✅ 8. التحقق من إمكانية إضافة بيانات
-router.get('/subscription/can-add', async (req, res) => {
+router.get(
+    '/subscription/can-add',
+    authMiddleware,
+    async (req, res) => {
     try {
         const clinic = await Clinic.findById(req.clinicId);
         if (!clinic) {
@@ -1055,12 +1189,23 @@ router.get('/subscription/can-add', async (req, res) => {
         const now = new Date();
         let canAdd = false;
         
-        if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now < new Date(clinic.trialEndDate)) {
-            canAdd = true;
-        }
-        else if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now < new Date(clinic.subscriptionEndDate)) {
-            canAdd = true;
-        }
+        if (clinic.subscriptionType === 'university_student') {
+    canAdd = true;
+}
+else if (
+    clinic.subscriptionStatus === 'trial' &&
+    clinic.trialEndDate &&
+    now < new Date(clinic.trialEndDate)
+) {
+    canAdd = true;
+}
+else if (
+    clinic.subscriptionStatus === 'active' &&
+    clinic.subscriptionEndDate &&
+    now < new Date(clinic.subscriptionEndDate)
+) {
+    canAdd = true;
+}
         
         if (clinic.isFrozen) {
             canAdd = false;
@@ -1074,7 +1219,10 @@ router.get('/subscription/can-add', async (req, res) => {
 });
 
 // ✅ 9. الحصول على نوع الاشتراك الحالي
-router.get('/subscription/type', async (req, res) => {
+router.get(
+    '/subscription/type',
+    authMiddleware,
+    async (req, res) => {
     try {
         const clinic = await Clinic.findById(req.clinicId);
         const subscriptionType = clinic?.subscriptionType || 'trial';
