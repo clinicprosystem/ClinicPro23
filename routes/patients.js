@@ -277,26 +277,78 @@ router.post('/', requireActiveSubscription, async (req, res) => {
 // حذف مريض
 router.delete('/:id', requireActiveSubscription, async (req, res) => {
   try {
-    await Patient.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
+    const patient = await Patient.findOneAndDelete({
+      _id: req.params.id,
+      clinicId: req.clinicId,
+      isPublic: { $ne: true }
+    });
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        error: 'المريض غير موجود'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'تم حذف المريض بنجاح'
+    });
+
   } catch (error) {
     console.error('Error deleting patient:', error);
-    res.status(500).json({ error: error.message });
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
 // تعديل بيانات مريض
 router.put('/:id', requireActiveSubscription, async (req, res) => {
   try {
-    const patient = await Patient.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body },
-      { new: true }
+    const patient = await Patient.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        clinicId: req.clinicId,
+        isPublic: { $ne: true }
+      },
+      {
+        $set: {
+          name: req.body.name,
+          phone: req.body.phone,
+          age: req.body.age ?? null,
+          gender: req.body.gender ?? null,
+          medicalHistory: req.body.medicalHistory ?? '',
+          notes: req.body.notes ?? ''
+        }
+      },
+      {
+        new: true,
+        runValidators: true
+      }
     );
-    res.json({ success: true, patient });
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        error: 'المريض غير موجود'
+      });
+    }
+
+    res.json({
+      success: true,
+      patient
+    });
+
   } catch (error) {
     console.error('Error updating patient:', error);
-    res.status(500).json({ error: error.message });
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
@@ -305,29 +357,68 @@ async function canAddPatient(clinicId) {
     try {
         const Clinic = require('../models/Clinic');
         const clinic = await Clinic.findById(clinicId);
-        
-        if (clinic.subscriptionStatus !== 'trial') {
-            return { allowed: true };
-        }
-        
-        if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
-            return { allowed: false, reason: 'انتهت الفترة التجريبية. يرجى ترقية اشتراكك.' };
-        }
-        
-        const patientsCount = await Patient.countDocuments({ clinicId: clinicId });
-        const maxPatients = 3;
-        
-        if (patientsCount >= maxPatients) {
-            return { 
-                allowed: false, 
-                reason: `لقد تجاوزت الحد المسموح في الفترة التجريبية (${maxPatients} مرضى). يرجى ترقية اشتراكك لإضافة المزيد.` 
+
+        if (!clinic) {
+            return {
+                allowed: false,
+                reason: 'العيادة غير موجودة'
             };
         }
-        
+
+        // الطالب الجامعي: بدون حد
+        if (clinic.subscriptionType === 'university_student') {
+            return { allowed: true };
+        }
+
+        // الاشتراك المدفوع الفعال: بدون حد
+        if (clinic.subscriptionStatus === 'active') {
+            return { allowed: true };
+        }
+
+        // أي حالة غير التجربة = ممنوع
+        if (clinic.subscriptionStatus !== 'trial') {
+            return {
+                allowed: false,
+                reason: 'الاشتراك غير فعال'
+            };
+        }
+
+        // انتهاء التجربة
+        if (
+            clinic.trialEndDate &&
+            new Date() >= new Date(clinic.trialEndDate)
+        ) {
+            return {
+                allowed: false,
+                reason: 'انتهت الفترة التجريبية. يرجى ترقية اشتراكك.'
+            };
+        }
+
+        // حساب عدد المرضى
+        const patientsCount = await Patient.countDocuments({
+            clinicId: clinicId,
+            isPublic: { $ne: true }
+        });
+
+        const maxPatients = 3;
+
+        if (patientsCount >= maxPatients) {
+            return {
+                allowed: false,
+                reason: `لقد وصلت إلى الحد المسموح في الفترة التجريبية (${maxPatients} مرضى). يرجى ترقية اشتراكك لإضافة المزيد.`
+            };
+        }
+
         return { allowed: true };
+
     } catch (error) {
         console.error('Error in canAddPatient:', error);
-        return { allowed: true };
+
+        // مهم جدًا: عند حدوث خطأ نمنع العملية
+        return {
+            allowed: false,
+            reason: 'تعذر التحقق من حدود الفترة التجريبية'
+        };
     }
 }
 
