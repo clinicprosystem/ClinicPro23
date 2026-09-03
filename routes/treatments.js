@@ -12,35 +12,111 @@ router.use(authMiddleware);
 router.use(secretaryOrOwner);
 
 // ✅ دالة للتحقق من عدد المعالجات في الفترة التجريبية
+
 async function canAddTreatment(clinicId) {
     try {
-        const clinic = await Clinic.findById(clinicId);
-        
-        // إذا لم يكن في فترة تجريبية، يسمح
-        if (clinic.subscriptionStatus !== 'trial') {
-            return { allowed: true };
-        }
-        
-        // التحقق من تاريخ انتهاء التجربة
-        if (clinic.trialEndDate && new Date() > new Date(clinic.trialEndDate)) {
-            return { allowed: false, reason: 'انتهت الفترة التجريبية' };
-        }
-        
-        // حساب عدد المعالجات
-        const treatmentsCount = await Treatment.countDocuments({ clinicId: clinicId });
-        const maxTreatments = 3;
-        
-        if (treatmentsCount >= maxTreatments) {
-            return { 
-                allowed: false, 
-                reason: `لقد تجاوزت الحد المسموح في الفترة التجريبية (${maxTreatments} معالجات). يرجى ترقية اشتراكك.` 
+        const clinic =
+            await Clinic.findById(clinicId);
+
+        if (!clinic) {
+            return {
+                allowed: false,
+                reason: 'العيادة غير موجودة'
             };
         }
-        
-        return { allowed: true };
+
+        // ==========================================
+        // الطالب الجامعي
+        // ==========================================
+
+        if (
+            clinic.subscriptionType ===
+            'university_student'
+        ) {
+            return {
+                allowed: true
+            };
+        }
+
+        // ==========================================
+        // الاشتراك المدفوع
+        // ==========================================
+
+        if (
+            clinic.subscriptionStatus ===
+            'active'
+        ) {
+            return {
+                allowed: true
+            };
+        }
+
+        // ==========================================
+        // Trial
+        // ==========================================
+
+        if (
+            clinic.subscriptionStatus !==
+            'trial'
+        ) {
+            return {
+                allowed: false,
+                reason:
+                    'الاشتراك غير فعال'
+            };
+        }
+
+        // انتهت التجربة
+        if (
+            clinic.trialEndDate &&
+            new Date() >=
+                new Date(clinic.trialEndDate)
+        ) {
+            return {
+                allowed: false,
+                reason:
+                    'انتهت الفترة التجريبية'
+            };
+        }
+
+        // ==========================================
+        // حد التجربة = 3 معالجات
+        // ==========================================
+
+        const treatmentsCount =
+            await Treatment.countDocuments({
+                clinicId: clinicId
+            });
+
+        const maxTreatments = 3;
+
+        if (
+            treatmentsCount >=
+            maxTreatments
+        ) {
+            return {
+                allowed: false,
+                reason:
+                    `لقد وصلت إلى الحد المسموح في الفترة التجريبية (${maxTreatments} معالجات). يرجى ترقية اشتراكك.`
+            };
+        }
+
+        return {
+            allowed: true
+        };
+
     } catch (error) {
-        console.error('Error in canAddTreatment:', error);
-        return { allowed: true }; // في حالة الخطأ، نسمح مؤقتاً
+
+        console.error(
+            'Error in canAddTreatment:',
+            error
+        );
+
+        return {
+            allowed: false,
+            reason:
+                'تعذر التحقق من حدود الفترة التجريبية'
+        };
     }
 }
 
@@ -278,7 +354,10 @@ router.get('/', async (req, res) => {
 });
 
 // مشاركة معالجة عبر الواتساب
-router.post('/:id/share', async (req, res) => {
+router.post(
+    '/:id/share',
+    requireActiveSubscription,
+    async (req, res) => {
     try {
         const treatment = await Treatment.findOne({
             _id: req.params.id,
@@ -319,7 +398,10 @@ router.post('/:id/share', async (req, res) => {
 
 
 // ✅ إضافة دفعة أو عودة لمعالجة
-router.post('/:id/payment', async (req, res) => {
+router.post(
+    '/:id/payment',
+    requireActiveSubscription,
+    async (req, res) => {
     try {
         const { amount, type, note } = req.body;
         
