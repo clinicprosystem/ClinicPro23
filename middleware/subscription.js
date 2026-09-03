@@ -22,7 +22,10 @@ const requireActiveSubscription = async (req, res, next) => {
             });
         }
 
+        // ==========================================
         // الحساب المجمد
+        // ==========================================
+
         if (clinic.isFrozen) {
             return res.status(403).json({
                 success: false,
@@ -33,63 +36,90 @@ const requireActiveSubscription = async (req, res, next) => {
 
         const now = new Date();
 
-        // طالب جامعي
-        if (clinic.subscriptionType === 'university_student') {
+        // ==========================================
+        // الطالب الجامعي
+        // لا يحتاج تاريخ انتهاء
+        // ==========================================
+
+        if (
+            clinic.subscriptionType ===
+            'university_student'
+        ) {
             req.clinicData = clinic;
-            req.subscriptionType = 'university_student';
+            req.subscriptionType =
+                'university_student';
             req.subscriptionStatus = 'active';
 
             return next();
         }
 
-        // فترة تجريبية
+        // ==========================================
+        // الفترة التجريبية
+        // ==========================================
+
         if (
             clinic.subscriptionStatus === 'trial' &&
             clinic.trialEndDate &&
             now < new Date(clinic.trialEndDate)
         ) {
             req.clinicData = clinic;
-            req.subscriptionType = clinic.subscriptionType;
+            req.subscriptionType =
+                clinic.subscriptionType || 'trial';
             req.subscriptionStatus = 'trial';
 
             return next();
         }
 
-        // اشتراك مدفوع
+        // ==========================================
+        // الاشتراك المدفوع
+        // ==========================================
+
         if (
             clinic.subscriptionStatus === 'active' &&
             clinic.subscriptionEndDate &&
-            now < new Date(clinic.subscriptionEndDate)
+            now < new Date(
+                clinic.subscriptionEndDate
+            )
         ) {
             req.clinicData = clinic;
-            req.subscriptionType = clinic.subscriptionType;
+            req.subscriptionType =
+                clinic.subscriptionType;
             req.subscriptionStatus = 'active';
 
             return next();
         }
 
+        // ==========================================
         // الاشتراك منتهي
-if (
-    clinic.subscriptionStatus === 'trial' ||
-    clinic.subscriptionStatus === 'active'
-) {
-    clinic.subscriptionStatus = 'expired';
-    await clinic.save();
-}
+        // ==========================================
 
-return res.status(403).json({
-    success: false,
-    code: 'SUBSCRIPTION_EXPIRED',
-    error: 'انتهت صلاحية الاشتراك. يرجى تجديد الاشتراك.'
-});
+        if (
+            clinic.subscriptionStatus === 'trial' ||
+            clinic.subscriptionStatus === 'active'
+        ) {
+            clinic.subscriptionStatus = 'expired';
+            await clinic.save();
+        }
+
+        return res.status(403).json({
+            success: false,
+            code: 'SUBSCRIPTION_EXPIRED',
+            error:
+                'انتهت صلاحية الاشتراك. يرجى تجديد الاشتراك.'
+        });
 
     } catch (error) {
-        console.error('Subscription middleware error:', error);
+
+        console.error(
+            'Subscription middleware error:',
+            error
+        );
 
         return res.status(500).json({
             success: false,
             code: 'SUBSCRIPTION_CHECK_ERROR',
-            error: 'تعذر التحقق من حالة الاشتراك'
+            error:
+                'تعذر التحقق من حالة الاشتراك'
         });
     }
 };
