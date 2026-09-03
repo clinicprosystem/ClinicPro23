@@ -11,30 +11,74 @@ const router = express.Router();
 // ✅ دالة لتحديث حالة الاشتراك تلقائياً
 async function updateSubscriptionStatus(clinicId) {
     const clinic = await Clinic.findById(clinicId);
-    if (!clinic) return;
-    
+
+    if (!clinic) return null;
+
+    // الطالب الجامعي اشتراكه فعال بدون تاريخ انتهاء
+    if (clinic.subscriptionType === 'university_student') {
+        if (
+            clinic.subscriptionStatus !== 'active' ||
+            clinic.subscriptionEndDate !== null
+        ) {
+            clinic.subscriptionStatus = 'active';
+            clinic.subscriptionEndDate = null;
+            clinic.isActive = true;
+            clinic.isFrozen = false;
+
+            await clinic.save();
+
+            await updateAllUsersSubscription(
+                clinicId,
+                'university_student',
+                'active'
+            );
+        }
+
+        return clinic;
+    }
+
     const now = new Date();
     let newStatus = clinic.subscriptionStatus;
-    
-    if (clinic.subscriptionStatus === 'trial' && clinic.trialEndDate && now > new Date(clinic.trialEndDate)) {
+
+    // انتهاء التجربة
+    if (
+        clinic.subscriptionStatus === 'trial' &&
+        clinic.trialEndDate &&
+        now >= new Date(clinic.trialEndDate)
+    ) {
         newStatus = 'expired';
-        console.log(`⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`);
+
+        console.log(
+            `⚠️ انتهت الفترة التجريبية للعيادة: ${clinic.name}`
+        );
     }
-    
-    if (clinic.subscriptionStatus === 'active' && clinic.subscriptionEndDate && now > new Date(clinic.subscriptionEndDate)) {
+
+    // انتهاء الاشتراك المدفوع
+    if (
+        clinic.subscriptionStatus === 'active' &&
+        clinic.subscriptionEndDate &&
+        now >= new Date(clinic.subscriptionEndDate)
+    ) {
         newStatus = 'expired';
-        console.log(`⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`);
+
+        console.log(
+            `⚠️ انتهى الاشتراك للعيادة: ${clinic.name}`
+        );
     }
-    
+
     if (newStatus !== clinic.subscriptionStatus) {
         clinic.subscriptionStatus = newStatus;
+
         await clinic.save();
-        
-        // ✅ تحديث جميع المستخدمين التابعين
-        await updateAllUsersSubscription(clinicId, clinic.subscriptionType, newStatus);
+
+        await updateAllUsersSubscription(
+            clinicId,
+            clinic.subscriptionType,
+            newStatus
+        );
     }
-    
-    return clinic.subscriptionStatus;
+
+    return clinic;
 }
 
 // ✅ دالة لتحديث اشتراك جميع المستخدمين التابعين للعيادة
@@ -68,6 +112,23 @@ router.use(masterAuth);
 
 // 1. جلب جميع العيادات
 router.get('/clinics', async (req, res) => {
+    try {
+        console.log(
+            '📋 Master Admin طلب قائمة العيادات'
+        );
+
+        console.log(
+            '👤 userId:',
+            req.userId
+        );
+
+        const clinics =
+            await Clinic.find()
+                .sort({ createdAt: -1 });
+
+        console.log(
+            `🏥 عدد العيادات: ${clinics.length}`
+        );
     try {
         const clinics = await Clinic.find().sort({ createdAt: -1 });
         
@@ -114,21 +175,19 @@ router.post('/clinic/:id/renew', async (req, res) => {
         clinic.isActive = true;
         clinic.isFrozen = false;
         await clinic.save();
+        await User.updateMany(
+    { clinicId: clinic._id },
+    {
+        $set: {
+            subscriptionType: type,
+            subscriptionStatus: 'active'
+        }
+    }
+);
         
         // ✅ تحديث جميع السكرتيرات والأطباء التابعين
         await updateAllUsersSubscription(clinic._id, type, 'active');
         
-        // ✅ تغيير role صاحب العيادة (إذا كان طالب جامعي)
-        const clinicOwner = await User.findOne({ 
-            clinicId: clinic._id, 
-            role: 'university_student'
-        });
-        
-        if (clinicOwner) {
-            clinicOwner.role = 'clinic_owner';
-            await clinicOwner.save();
-            console.log(`✅ تم تغيير دور صاحب العيادة من university_student إلى clinic_owner`);
-        }
         
         res.json({ 
             success: true, 
@@ -186,10 +245,26 @@ router.get('/stats', async (req, res) => {
         const trialClinics = await Clinic.countDocuments({ 
             trialEndDate: { $gt: new Date() } 
         });
-        const expiredClinics = await Clinic.countDocuments({
-            subscriptionEndDate: { $lt: new Date() },
-            isActive: true
-        });
+        const now = new Date();
+
+const expiredClinics = await Clinic.countDocuments({
+    $or: [
+        {
+            subscriptionStatus: 'expired'
+        },
+        {
+            subscriptionStatus: 'trial',
+            trialEndDate: { $lte: now }
+        },
+        {
+            subscriptionStatus: 'active',
+            subscriptionEndDate: { $lte: now }
+        }
+    ],
+    subscriptionType: {
+        $ne: 'university_student'
+    }
+});
         
         res.json({
             success: true,
@@ -207,53 +282,87 @@ router.get('/stats', async (req, res) => {
 router.post('/clinic/:id/university-plan', async (req, res) => {
     try {
         const clinic = await Clinic.findById(req.params.id);
-        
+
         if (!clinic) {
-            return res.status(404).json({ error: 'عيادة غير موجودة' });
+            return res.status(404).json({
+                success: false,
+                error: 'عيادة غير موجودة'
+            });
         }
-        
-        // ✅ 1. تحديث العيادة
+
+        // ==========================================
+        // تفعيل باقة الطالب الجامعي
+        // ==========================================
+
         clinic.subscriptionType = 'university_student';
         clinic.subscriptionStatus = 'active';
-        
-        const newEndDate = new Date();
-        newEndDate.setDate(newEndDate.getDate() + 30);
-        clinic.subscriptionEndDate = newEndDate;
+
+        // لا يوجد تاريخ انتهاء للطالب الجامعي
+        clinic.subscriptionEndDate = null;
+        clinic.trialEndDate = null;
+
         clinic.isActive = true;
         clinic.isFrozen = false;
-        
+
         await clinic.save();
-        
-        // ✅ 2. تحديث جميع السكرتيرات والأطباء التابعين
-        await updateAllUsersSubscription(clinic._id, 'university_student', 'active');
-        
-        // ✅ 3. تحديث دور صاحب العيادة
-        const clinicOwner = await User.findOne({ 
-            clinicId: clinic._id, 
-            role: 'clinic_owner' 
+
+        // تحديث مستخدمي العيادة
+        await updateAllUsersSubscription(
+            clinic._id,
+            'university_student',
+            'active'
+        );
+
+        // صاحب العيادة يبقى clinic_owner
+        const clinicOwner = await User.findOne({
+            clinicId: clinic._id,
+            role: 'clinic_owner'
         });
-        
+
         if (clinicOwner) {
-            clinicOwner.role = 'university_student';
+            clinicOwner.subscriptionType =
+                'university_student';
+
+            clinicOwner.subscriptionStatus =
+                'active';
+
             await clinicOwner.save();
-            console.log(`✅ تم تحديث دور صاحب العيادة من clinic_owner إلى university_student`);
         }
-        
-        console.log(`✅ تم تفعيل باقة طالب جامعي للعيادة: ${clinic.name}`);
-        
-        res.json({ 
-            success: true, 
-            message: 'تم تفعيل باقة طالب جامعي بنجاح',
+
+        console.log(
+            `✅ تم تفعيل باقة طالب جامعي للعيادة: ${clinic.name}`
+        );
+
+        res.json({
+            success: true,
+
+            message:
+                'تم تفعيل باقة طالب جامعي بنجاح',
+
             clinic: {
                 id: clinic._id,
                 name: clinic.name,
-                subscriptionType: clinic.subscriptionType,
-                subscriptionEndDate: clinic.subscriptionEndDate
+                subscriptionType:
+                    clinic.subscriptionType,
+
+                subscriptionStatus:
+                    clinic.subscriptionStatus,
+
+                subscriptionEndDate:
+                    null
             }
         });
+
     } catch (error) {
-        console.error('❌ خطأ في تفعيل باقة طالب جامعي:', error);
-        res.status(500).json({ error: error.message });
+        console.error(
+            '❌ خطأ في تفعيل باقة طالب جامعي:',
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 });
 
