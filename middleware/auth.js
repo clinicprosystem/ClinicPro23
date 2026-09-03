@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Clinic = require('../models/Clinic');  // ✅ أضف هذا
+const Clinic = require('../models/Clinic');
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -8,61 +8,88 @@ const authMiddleware = async (req, res, next) => {
 
         if (!token) {
             return res.status(401).json({
+                success: false,
+                code: 'AUTH_REQUIRED',
                 error: 'الرجاء تسجيل الدخول أولاً'
             });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
 
         const user = await User.findById(decoded.userId);
 
         if (!user || !user.isActive) {
             return res.status(401).json({
+                success: false,
+                code: 'INVALID_ACCOUNT',
                 error: 'حساب غير صالح'
             });
         }
 
-        // ==============================
+        // ==========================================
         // بيانات المستخدم
-        // ==============================
+        // ==========================================
+
         req.userId = user._id;
         req.userRole = user.role;
         req.clinicId = user.clinicId;
+        req.userData = user;
 
-        // ==============================
-        // جلب بيانات العيادة
-        // ==============================
+        // ==========================================
+        // Master Admin
+        // ==========================================
+
+        if (user.isMasterAdmin) {
+            req.isMasterAdmin = true;
+            return next();
+        }
+
+        // ==========================================
+        // المستخدم التابع لعيادة
+        // ==========================================
+
         if (user.clinicId) {
-            const clinic = await Clinic.findById(user.clinicId);
+
+            const clinic =
+                await Clinic.findById(user.clinicId);
 
             if (!clinic) {
                 return res.status(403).json({
+                    success: false,
+                    code: 'CLINIC_NOT_FOUND',
                     error: 'عيادة غير موجودة'
                 });
             }
 
-            // تحديث الاشتراك بشكل ديناميكي
             const now = new Date();
-
-            let subscriptionStatus =
-                clinic.subscriptionStatus || 'trial';
 
             const subscriptionType =
                 clinic.subscriptionType || 'trial';
 
+            let subscriptionStatus =
+                clinic.subscriptionStatus || 'trial';
+
             let isSubscriptionActive = false;
 
-            // ==============================
-            // الطالب الجامعي
-            // ==============================
-            if (subscriptionType === 'university_student') {
-                isSubscriptionActive = true;
+            // ==========================================
+            // طالب جامعي
+            // ==========================================
+
+            if (
+                subscriptionType ===
+                'university_student'
+            ) {
                 subscriptionStatus = 'active';
+                isSubscriptionActive = true;
             }
 
-            // ==============================
-            // الفترة التجريبية
-            // ==============================
+            // ==========================================
+            // Trial
+            // ==========================================
+
             else if (
                 subscriptionStatus === 'trial' &&
                 clinic.trialEndDate &&
@@ -71,21 +98,26 @@ const authMiddleware = async (req, res, next) => {
                 isSubscriptionActive = true;
             }
 
-            // ==============================
-            // الاشتراك المدفوع
-            // ==============================
+            // ==========================================
+            // اشتراك مدفوع
+            // ==========================================
+
             else if (
                 subscriptionStatus === 'active' &&
                 clinic.subscriptionEndDate &&
-                now < new Date(clinic.subscriptionEndDate)
+                now < new Date(
+                    clinic.subscriptionEndDate
+                )
             ) {
                 isSubscriptionActive = true;
             }
 
-            // ==============================
-            // انتهاء الاشتراك
-            // ==============================
+            // ==========================================
+            // منتهي
+            // ==========================================
+
             else {
+
                 isSubscriptionActive = false;
 
                 if (
@@ -96,72 +128,102 @@ const authMiddleware = async (req, res, next) => {
                 }
             }
 
-            // ==============================
-            // إذا انتهى الاشتراك
-            // لا نمنع تسجيل الدخول
-            // ==============================
+            // ==========================================
+            // تجميد الحساب
+            // ==========================================
 
-            req.subscriptionType = subscriptionType;
-            req.subscriptionStatus = subscriptionStatus;
-            req.isSubscriptionActive = isSubscriptionActive;
+            if (clinic.isFrozen) {
+                subscriptionStatus = 'frozen';
+                isSubscriptionActive = false;
+            }
 
-            // بيانات العيادة متاحة لباقي المسارات
+            // ==========================================
+            // البيانات التي تحتاجها باقي الـ Routes
+            // ==========================================
+
             req.clinicData = clinic;
 
-            // ==============================
-            // تحديث بيانات المستخدم التابع
-            // ==============================
-            if (
-                user.role === 'secretary' ||
-                user.role === 'doctor'
-            ) {
-                await User.findByIdAndUpdate(user._id, {
-                    subscriptionType: subscriptionType,
-                    subscriptionStatus: subscriptionStatus,
-                    subscriptionEndDate:
-                        clinic.subscriptionEndDate || null,
-                    trialEndDate:
-                        clinic.trialEndDate || null
-                });
-            }
+            req.subscriptionType =
+                subscriptionType;
 
-            // ==============================
-            // تحديث حالة العيادة في قاعدة البيانات
-            // ==============================
-            if (
-                clinic.subscriptionStatus !== subscriptionStatus &&
-                subscriptionType !== 'university_student'
-            ) {
-                clinic.subscriptionStatus = subscriptionStatus;
-                await clinic.save();
-            }
+            req.subscriptionStatus =
+                subscriptionStatus;
+
+            req.isSubscriptionActive =
+                isSubscriptionActive;
         }
+
+        // ==========================================
+        // لا نمنع الدخول بسبب انتهاء الاشتراك
+        // ==========================================
 
         next();
 
     } catch (error) {
-        console.error('Auth error:', error);
+
+        console.error(
+            'Auth error:',
+            error
+        );
 
         return res.status(401).json({
-            error: 'توكن غير صالح'
+            success: false,
+            code: 'INVALID_TOKEN',
+            error: 'توكن غير صالح أو منتهي'
         });
     }
 };
 
-// ✅ صلاحيات صاحب العيادة (مع دعم university_student)
+
+// ==========================================
+// صاحب العيادة
+// ==========================================
+
 const clinicOwnerOnly = (req, res, next) => {
-    if (req.userRole === 'clinic_owner' || req.userRole === 'university_student') {
+
+    if (
+        req.userRole === 'clinic_owner' ||
+        req.userRole === 'university_student'
+    ) {
         return next();
     }
-    return res.status(403).json({ error: 'غير مصرح لك. هذا الإجراء مخصص لأصحاب العيادات فقط' });
+
+    return res.status(403).json({
+        success: false,
+        code: 'OWNER_ONLY',
+        error:
+            'غير مصرح لك. هذا الإجراء مخصص لأصحاب العيادات فقط'
+    });
 };
 
-// ✅ صلاحيات السكرتير أو صاحب العيادة
+
+// ==========================================
+// السكرتير أو صاحب العيادة أو الطبيب
+// ==========================================
+
 const secretaryOrOwner = (req, res, next) => {
-    if (['clinic_owner', 'secretary', 'university_student', 'doctor'].includes(req.userRole)) {
+
+    if (
+        [
+            'clinic_owner',
+            'secretary',
+            'university_student',
+            'doctor'
+        ].includes(req.userRole)
+    ) {
         return next();
     }
-    return res.status(403).json({ error: 'غير مصرح لك' });
+
+    return res.status(403).json({
+        success: false,
+        code: 'ROLE_NOT_ALLOWED',
+        error: 'غير مصرح لك'
+    });
 };
 
-module.exports = { authMiddleware, clinicOwnerOnly, secretaryOrOwner };
+
+module.exports = {
+    authMiddleware,
+    clinicOwnerOnly,
+    secretaryOrOwner
+};
